@@ -2,7 +2,8 @@
 ## tk-color-convert.py
 A utility to help choose colors in tkinter GUIs.
 Draws a tkinter table of all named colors from X11 rgb.txt.
-Command line options will simulate colorblind equivalent colors of the native color table.
+Command line options will simulate colorblind equivalent colors or 
+grayscale equivalents of native named colors.
 ```
 $ ./tk-color-convert.py --help
 usage: tk-color-convert.py [-h] [--about] [--d] [--p] [--t] [--gray]
