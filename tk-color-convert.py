@@ -10,7 +10,7 @@ option is used. Option --gray generates a grayscale equivalent table.
 __author__ = 'cecht'
 __copyright__ = 'Copyright (C) 2021 C. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 __program_name__ = 'tk-color-convert.py'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
@@ -23,7 +23,6 @@ import sys
 try:
     import tkinter as tk
     from tkinter import messagebox, ttk
-    from tkinter.scrolledtext import ScrolledText
 except (ImportError, ModuleNotFoundError) as error:
     print('Requires tkinter, which is included with \n'
           'Python 3.7+distributions.\n'
@@ -46,16 +45,16 @@ if sys.version_info < (3, 6):
 # X11_RGB_NAMES list is derived from /usr/share/X11/rgb.txt in Ubuntu Linux 5.4,
 #   but with 'DebianRed' deleted because that name throws an error in tkinter.
 X11_RGB_NAMES = ['white', 'black', 'snow', 'ghost white', 'GhostWhite', 'white smoke',
-                     'WhiteSmoke', 'gainsboro', 'floral white', 'FloralWhite', 'old lace',
-                     'OldLace', 'linen', 'antique white', 'AntiqueWhite', 'papaya whip',
-                     'PapayaWhip', 'blanched almond', 'BlanchedAlmond', 'bisque', 'peach puff',
-                     'PeachPuff', 'navajo white', 'NavajoWhite', 'moccasin', 'cornsilk',
-                     'ivory', 'lemon chiffon', 'LemonChiffon', 'seashell', 'honeydew',
-                     'mint cream', 'MintCream', 'azure', 'alice blue', 'AliceBlue',
-                     'lavender', 'lavender blush', 'LavenderBlush', 'misty rose',
-                     'MistyRose', 'dark slate gray', 'DarkSlateGray',
-                     'dark slate grey', 'DarkSlateGrey', 'dim gray', 'DimGray',
-                     'dim grey', 'DimGrey', 'slate gray', 'SlateGray', 'slate grey',
+                 'WhiteSmoke', 'gainsboro', 'floral white', 'FloralWhite', 'old lace',
+                 'OldLace', 'linen', 'antique white', 'AntiqueWhite', 'papaya whip',
+                 'PapayaWhip', 'blanched almond', 'BlanchedAlmond', 'bisque', 'peach puff',
+                 'PeachPuff', 'navajo white', 'NavajoWhite', 'moccasin', 'cornsilk',
+                 'ivory', 'lemon chiffon', 'LemonChiffon', 'seashell', 'honeydew',
+                 'mint cream', 'MintCream', 'azure', 'alice blue', 'AliceBlue',
+                 'lavender', 'lavender blush', 'LavenderBlush', 'misty rose',
+                 'MistyRose', 'dark slate gray', 'DarkSlateGray',
+                 'dark slate grey', 'DarkSlateGrey', 'dim gray', 'DimGray',
+                 'dim grey', 'DimGrey', 'slate gray', 'SlateGray', 'slate grey',
                  'SlateGrey', 'light slate gray', 'LightSlateGray', 'light slate grey',
                  'LightSlateGrey', 'gray', 'grey', 'light grey', 'LightGrey', 'light gray',
                  'LightGray', 'dark grey', 'DarkGrey', 'dark gray', 'DarkGray',
@@ -192,13 +191,13 @@ X11_RGB_NAMES = ['white', 'black', 'snow', 'ghost white', 'GhostWhite', 'white s
 # Dark color list where a whitish fg or bg provides a good visual contrast;
 #   is ad_hoc, subjective, etc....
 dark_colors = ['black', 'dark slate gray', 'DarkSlateGray', 'dark slate grey',
-               'DarkSlateGrey', 'blue', 'dark green', 'DarkGreen', 'green', 'brown',
-               'saddle brown', 'SaddleBrown', 'firebrick',
-               'blue1', 'midnight blue', 'MidnightBlue',
-               'navy', 'navy blue', 'NavyBlue', 'medium blue', 'MediumBlue',
-               'dark blue', 'DarkBlue', 'dark slate blue', 'DarkSlateBlue', 'blue2',
-               'blue3', 'blue4', 'RoyalBlue4',
-               'DodgerBlue4', 'SteelBlue4', 'DeepSkyBlue4', 'SkyBlue4',
+               'DarkSlateGrey', 'blue', 'dark green', 'DarkGreen', 'dark olive green',
+               'DarkOliveGreen', 'green', 'forest green', 'ForestGreen',
+               'brown', 'saddle brown', 'SaddleBrown', 'firebrick',
+               'blue1', 'midnight blue', 'MidnightBlue', 'navy', 'navy blue',
+               'NavyBlue', 'medium blue', 'MediumBlue', 'dark blue', 'DarkBlue',
+               'dark slate blue', 'DarkSlateBlue', 'blue2', 'blue3', 'blue4',
+               'RoyalBlue4', 'DodgerBlue4', 'SteelBlue4', 'DeepSkyBlue4', 'SkyBlue4',
                'red', 'deep pink', 'DeepPink', 'red1', 'red2',
                'red3', 'red4', 'dark red', 'DarkRed', 'maroon',
                'medium violet red', 'MediumVioletRed', 'violet red', 'VioletRed',
@@ -227,7 +226,7 @@ my_os = sys.platform[:3]
 
 
 class ColorChart(tk.Frame):
-    MAX_ROWS = 40
+    MAX_ROWS = 41
     if my_os == 'dar':
         FONT_SIZE = 9
     else:
@@ -247,7 +246,7 @@ class ColorChart(tk.Frame):
     def draw_table(self):
         """Make the tkinter color table.
         """
-        row = 1
+        row = 0
         col = 0
         for color in X11_RGB_NAMES:
             label = tk.Label(self, text=color, bg=color,
@@ -269,12 +268,12 @@ class ColorChart(tk.Frame):
 
         # TODO: make label.bind('<Button-1>', def_click) event to display info.
         info = tk.Label(self,
-                        text=('Stub>> color: white; tkinter compatible hexcode: #ffffff'
-                              ' (<- Future option for mouse click selection)'),
+                        text=("Stub>> Selected color: white; tkinter hex code: '#ffffff'"
+                              ' (<- Future click option) Use hex code string in place of color name'),
                         bg='grey90', font=('TkTextFont', 11))
-        info.grid(row=0, column=0, columnspan=col+1, sticky=tk.EW)
+        info.grid(row=self.MAX_ROWS+1, column=0, columnspan=col+1, sticky=tk.EW)
 
-        for _row in range(self.MAX_ROWS):
+        for _row in range(self.MAX_ROWS+1):
             self.rowconfigure(_row, weight=1)
         for _col in range(col+1):
             self.columnconfigure(_col, weight=1)
