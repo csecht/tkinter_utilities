@@ -4,13 +4,13 @@ A utility to help choose colors in tkinter GUIs.
 Draws a tkinter table of all named colors from X11 rgb.txt.
 Command line options will simulate colorblind equivalent colors when the
 --d (deuteranopia), --p (protanopia), or -t (tritanopia)
-option is used. Option --grey generates a grayscale equivalent table.
+option is used. Option --gray generates a grayscale equivalent table.
 """
 # ^^ Text for --about invocation argument and use as __doc__>>
 __author__ = 'cecht'
 __copyright__ = 'Copyright (C) 2021 C. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 __program_name__ = 'tk-color-convert.py'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
@@ -223,32 +223,33 @@ dark_colors = ['black', 'dark slate gray', 'DarkSlateGray', 'dark slate grey',
                'grey31', 'gray31', 'grey32', 'gray32', 'grey33', 'gray33',
                'grey34', 'gray34', 'grey35', 'gray35', 'grey36', 'gray36',
                'grey37', 'gray37', 'grey38', 'gray38', 'grey39', 'gray39']
+# my_os = sys.platform[:3]
 
 
 class ColorChart(tk.Frame):
-    MAX_ROWS = 44
-    FONT_SIZE = 8
+    MAX_ROWS = 40
+    FONT_SIZE = 6
     
     def __init__(self, master):
         tk.Frame.__init__(self, master)
+
         self.draw_table()
-        # Need to color in all of master Frame, and use near-shite border;
-        #    changes to grey for click-drag and not focus.
+        # Need to color in all of master Frame to create near-shite border;
+        #    border changes to grey for click-drag and not focus.
         self.master.configure(highlightthickness=3,
-                              highlightcolor='grey95',
-                              highlightbackground='grey55')
+                              highlightcolor='gray95',
+                              highlightbackground='gray')
+        self.master.minsize(500, 250)
     
     def draw_table(self):
         """Make the tkinter color table.
         """
-        row = 0
+        row = 1
         col = 0
-        # TODO: make label.bind('<Button-3>', def_click) event to display
-        #  color's hexcode; '<Button-2>' for macOS.
         for color in X11_RGB_NAMES:
             label = tk.Label(self, text=color, bg=color,
-                             font=('default', self.FONT_SIZE))
-            label.grid(row=row, column=col, ipady=2, sticky="ew")
+                             font=('TkTextFont', self.FONT_SIZE))
+            label.grid(row=row, column=col, ipady=2, sticky=tk.NSEW)
             row += 1
             if args.d or args.p or args.t or args.gray:
                 _r, _g, _b, = label.winfo_rgb(color)
@@ -258,11 +259,23 @@ class ColorChart(tk.Frame):
                 new_tkhex = self.colorblind_simulate(r, g, b)
                 label.config(bg=new_tkhex)
             if color in dark_colors:
-                label.config(fg='grey90')
+                label.config(fg='grey100')
             if row > self.MAX_ROWS:
                 row = 0
                 col += 1
-        
+
+        # TODO: make label.bind('<Button-1>', def_click) event to display info.
+        info = tk.Label(self,
+                        text=('Stub>> color: white; tkinter compatible hexcode: #ffffff'
+                              ' (<- Future option for mouse click selection)'),
+                        bg='grey90', font=('TkTextFont', 11))
+        info.grid(row=0, column=0, columnspan=col+1, sticky=tk.EW)
+
+        for _row in range(self.MAX_ROWS):
+            self.rowconfigure(_row, weight=1)
+        for _col in range(col+1):
+            self.columnconfigure(_col, weight=1)
+
         self.pack(expand=True, fill="both")
     
     @staticmethod
@@ -291,7 +304,7 @@ class ColorChart(tk.Frame):
             R = round((0.170556992 * r) + (0.829443014 * g) + (0 * b))
             G = round((0.170556991 * r) + (0.829443008 * g) + (0 * b))
             B = round((-0.004517144 * r) + (0.004517144 * g) + (1 * b))
-        # Simulate color blindness; tritanope - blues are greatly reduced (0.003% population)
+        # Simulate color blindness; tritanopia - blues are greatly reduced (0.003% population)
         elif args.t:
             R = round((1 * r) + (0.1273989 * g) + (-0.1273989 * b))
             G = round((0 * r) + (0.8739093 * g) + (0.1260907 * b))
