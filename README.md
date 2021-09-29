@@ -16,3 +16,10 @@ optional arguments:
   --t         Generates tritanopia colorblind equivalents
   --gray      Generates grayscale equivalents of named colors
 ```
+Run as `./tk-color-convert.py`
+![named-colors](images/tkinter_colors.png)
+
+Run as `$ ./tk-color-convert.py --d`
+![deuteranope-sim-colors](images/deuteranopia_sim.png)
+
+
