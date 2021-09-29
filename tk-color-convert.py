@@ -223,12 +223,15 @@ dark_colors = ['black', 'dark slate gray', 'DarkSlateGray', 'dark slate grey',
                'grey31', 'gray31', 'grey32', 'gray32', 'grey33', 'gray33',
                'grey34', 'gray34', 'grey35', 'gray35', 'grey36', 'gray36',
                'grey37', 'gray37', 'grey38', 'gray38', 'grey39', 'gray39']
-# my_os = sys.platform[:3]
+my_os = sys.platform[:3]
 
 
 class ColorChart(tk.Frame):
     MAX_ROWS = 40
-    FONT_SIZE = 6
+    if my_os == 'dar':
+        FONT_SIZE = 9
+    else:
+        FONT_SIZE = 6
     
     def __init__(self, master):
         tk.Frame.__init__(self, master)
@@ -249,7 +252,7 @@ class ColorChart(tk.Frame):
         for color in X11_RGB_NAMES:
             label = tk.Label(self, text=color, bg=color,
                              font=('TkTextFont', self.FONT_SIZE))
-            label.grid(row=row, column=col, ipady=2, sticky=tk.NSEW)
+            label.grid(row=row, column=col, ipady=1, ipadx=1, sticky=tk.NSEW)
             row += 1
             if args.d or args.p or args.t or args.gray:
                 _r, _g, _b, = label.winfo_rgb(color)
