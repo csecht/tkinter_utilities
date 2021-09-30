@@ -336,7 +336,7 @@ class ColorChart(tk.Frame):
                              font=('TkTextFont', FONT_SIZE))
             label.grid(row=row, column=col, ipady=1, ipadx=1, sticky=tk.NSEW)
             # TODO: pass info vars to show_info.  use lambda?
-            label.bind('<Button-1>', self.show_info)
+            label.bind('<Button-1>', self.show_info)  # <- binds all gridded labels
             row += 1
             _r, _g, _b, = label.winfo_rgb(color_name)
             r = _r // 256
@@ -459,7 +459,7 @@ class ColorChart(tk.Frame):
 
     def show_info(self, event):
         # TODO: pass info as arguments to here.. use StringVar()?
-        self.info.configure(text='Button clicked')
+        self.info.configure(text='Stub: Color clicked')
 
 
 if __name__ == "__main__":
