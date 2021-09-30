@@ -23,7 +23,6 @@ import sys
 try:
     import tkinter as tk
     from tkinter import messagebox, ttk
-    from tkinter.scrolledtext import ScrolledText
 except (ImportError, ModuleNotFoundError) as error:
     print('Requires tkinter, which is included with \n'
           'Python 3.7+distributions.\n'
@@ -1027,12 +1026,12 @@ class ColorChart(tk.Frame):
 
         # TODO: make label.bind('<Button-1>', def_click) event to display info.
         info = tk.Label(self,
-                        text=('Stub>> color: white; tkinter compatible hexcode: #ffffff'
-                              ' (<- Future option for mouse click selection)'),
+                        text=("Stub>> Selected color: white; tkinter hex code: '#ffffff'"
+                              ' (<- Future click option) Use hex code string in place of color name'),
                         bg='grey90', font=('TkTextFont', 11))
         info.grid(row=0, column=0, columnspan=col + 1, sticky=tk.EW)
 
-        for _row in range(MAX_ROWS):
+        for _row in range(MAX_ROWS+1):
             self.rowconfigure(_row, weight=1)
         for _col in range(col + 1):
             self.columnconfigure(_col, weight=1)
