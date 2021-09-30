@@ -10,7 +10,7 @@ option is used. Option --gray generates a grayscale equivalent table.
 __author__ = 'cecht'
 __copyright__ = 'Copyright (C) 2021 C. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 __program_name__ = 'tk-color-convert.py'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
@@ -945,7 +945,7 @@ MAC_X11_RGB_NAMES = (
     'grey100')
 # Dark color list where a whitish fg or bg provides a good visual contrast;
 #   is ad_hoc, subjective, etc....
-dark_colors = ['black', 'dark slate gray', 'DarkSlateGray', 'dark slate grey',
+dark_colors = ('black', 'dark slate gray', 'DarkSlateGray', 'dark slate grey',
                'DarkSlateGrey', 'blue', 'dark green', 'DarkGreen', 'green', 'brown',
                'saddle brown', 'SaddleBrown', 'firebrick',
                'blue1', 'midnight blue', 'MidnightBlue', 'indigo',
@@ -976,7 +976,7 @@ dark_colors = ['black', 'dark slate gray', 'DarkSlateGray', 'dark slate grey',
                'grey28', 'gray28', 'grey29', 'gray29', 'grey30', 'gray30',
                'grey31', 'gray31', 'grey32', 'gray32', 'grey33', 'gray33',
                'grey34', 'gray34', 'grey35', 'gray35', 'grey36', 'gray36',
-               'grey37', 'gray37', 'grey38', 'gray38', 'grey39', 'gray39']
+               'grey37', 'gray37', 'grey38', 'gray38', 'grey39', 'gray39')
 my_os = sys.platform[:3]
 MAX_ROWS = 40
 if my_os in 'lin, win':
@@ -1000,7 +1000,7 @@ class ColorChart(tk.Frame):
                               highlightbackground='gray')
         self.master.minsize(500, 250)
 
-    def draw_table(self):
+    def draw_table(self) -> None:
         """Make the tkinter color table.
         """
         row = 1
@@ -1039,7 +1039,7 @@ class ColorChart(tk.Frame):
         self.pack(expand=True, fill="both")
 
     @staticmethod
-    def colorblind_simulate(r, g, b):
+    def colorblind_simulate(r, g, b) -> str:
         """
         Convert listed named color RGB values to values that simulate a
         specified colorblindness or a grayscale simulation.
@@ -1047,6 +1047,8 @@ class ColorChart(tk.Frame):
         :param r: Listed color's R value, in range [0, 255]
         :param g: Listed color's G value, in range [0, 255]
         :param b: Listed color's B value, in range [0, 255]
+
+        :returns: RGB hex code string, formatted for use in tkinter
         """
         R = 0.0
         G = 0.0
