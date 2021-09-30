@@ -10,7 +10,7 @@ option is used. Option --gray generates a grayscale equivalent table.
 __author__ = 'cecht'
 __copyright__ = 'Copyright (C) 2021 C. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.0.4'
+__version__ = '0.0.5'
 __program_name__ = 'tk-color-convert.py'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
@@ -19,6 +19,7 @@ __dev__ = 'Development environment: Python 3.8'
 
 import argparse
 import sys
+from math import sqrt
 
 try:
     import tkinter as tk
@@ -42,7 +43,7 @@ if sys.version_info < (3, 6):
 # NOTE: Many Tcl/Tk of the colors from https://www.tcl.tk/man/tcl8.4/TkCmd/colors.html
 #    throw an error; _tkinter.TclError: unknown color name
 
-# X11_RGB_NAMES list is derived from /usr/share/X11/rgb.txt in Ubuntu Linux 5.4,
+# X11_RGB_NAMES: 752, derived from /usr/share/X11/rgb.txt in Ubuntu Linux 5.4,
 #   but with 'DebianRed' deleted because that name throws an error in tkinter.
 X11_RGB_NAMES = ('white', 'black', 'snow', 'ghost white', 'GhostWhite', 'white smoke',
                  'WhiteSmoke', 'gainsboro', 'floral white', 'FloralWhite', 'old lace',
@@ -188,6 +189,7 @@ X11_RGB_NAMES = ('white', 'black', 'snow', 'ghost white', 'GhostWhite', 'white s
                  'gray92', 'grey92', 'gray93', 'grey93', 'gray94', 'grey94', 'gray95',
                  'grey95', 'gray96', 'grey96', 'gray97', 'grey97', 'gray98', 'grey98',
                  'gray99', 'grey99', 'gray100', 'grey100')
+# MAC_X11_RGB_NAMES: 760, derived from /opt/X11/share/X11/rgb.txt, 22? removed.
 MAC_X11_RGB_NAMES = (
     'white', 'black', 'snow', 'ghost white', 'GhostWhite', 'white smoke', 'WhiteSmoke',
     'gainsboro',
@@ -1011,15 +1013,21 @@ class ColorChart(tk.Frame):
                              font=('TkTextFont', FONT_SIZE))
             label.grid(row=row, column=col, ipady=1, ipadx=1, sticky=tk.NSEW)
             row += 1
+            _r, _g, _b, = label.winfo_rgb(color)
+            r = _r // 256
+            g = _g // 256
+            b = _b // 256
             if args.d or args.p or args.t or args.gray:
-                _r, _g, _b, = label.winfo_rgb(color)
-                r = _r // 256
-                g = _g // 256
-                b = _b // 256
-                new_tkhex = self.colorblind_simulate(r, g, b)
-                label.config(bg=new_tkhex)
-            if color in dark_colors:
-                label.config(fg='grey100')
+                # A simulated color is the background.
+                sim_tkhex_bg = self.colorblind_simulate(r, g, b)[0]
+                sim_r, sim_g, sim_b = self.colorblind_simulate(r, g, b,)[1]
+                contrast_fg = self.black_or_white(sim_r, sim_g, sim_b, 'sim')
+                label.config(bg=sim_tkhex_bg, fg=contrast_fg)
+            else:
+                # The named color is the background.
+                contrast_fg = self.black_or_white(r, g, b, 'raw')
+                label.config(fg=contrast_fg)
+
             if row > MAX_ROWS:
                 row = 1
                 col += 1
@@ -1031,7 +1039,7 @@ class ColorChart(tk.Frame):
                         bg='grey90', font=('TkTextFont', 11))
         info.grid(row=0, column=0, columnspan=col + 1, sticky=tk.EW)
 
-        for _row in range(MAX_ROWS+1):
+        for _row in range(MAX_ROWS + 1):
             self.rowconfigure(_row, weight=1)
         for _col in range(col + 1):
             self.columnconfigure(_col, weight=1)
@@ -1039,23 +1047,23 @@ class ColorChart(tk.Frame):
         self.pack(expand=True, fill="both")
 
     @staticmethod
-    def colorblind_simulate(r, g, b) -> str:
+    def colorblind_simulate(r: int, g: int, b: int) -> tuple:
         """
         Convert listed named color RGB values to values that simulate a
-        specified colorblindness or a grayscale simulation.
+        specified colorblindness or a grayscale simulation. Source:
+        http://mkweb.bcgsc.ca/colorblind/math.mhtml
         
-        :param r: Listed color's R value, in range [0, 255]
-        :param g: Listed color's G value, in range [0, 255]
-        :param b: Listed color's B value, in range [0, 255]
+        :param r: Named color's R value, in range [0, 255]
+        :param g: Named color's G value, in range [0, 255]
+        :param b: Named color's B value, in range [0, 255]
 
-        :returns: RGB hex code string, formatted for use in tkinter
+        :returns: converted color hex code string and its RGB as tuple.
         """
-        R = 0.0
-        G = 0.0
-        B = 0.0
+        R = 0
+        G = 0
+        B = 0
         # All T matrix values from http://mkweb.bcgsc.ca/colorblind/math.mhtml
         #   and are conversion summaries with the LMSD65 XYZ-LMS conversion matrix.
-        # Need to convert float to integer with round() for hexcode translation.
         # Simulate color blindness; deuteranopia- greens are greatly reduced (1% men)
         if args.d:
             R = round((0.33066007 * r) + (0.66933993 * g) + (0 * b))
@@ -1072,28 +1080,55 @@ class ColorChart(tk.Frame):
             G = round((0 * r) + (0.8739093 * g) + (0.1260907 * b))
             B = round((0 * r) + (0.8739093 * g) + (0.1260907 * b))
         elif args.gray:
-            # apply sRGB gamma correction of 2.2 (use 2.4 for effective 2.2?)
-            gray_Y = round(
-                ((.2126 * r ** 2.4) + (.7152 * g ** 2.4) + (.0722 * b ** 2.4)) ** (1 / 2.4))
-            hexcode = f'#{gray_Y:02x}{gray_Y:02x}{gray_Y:02x}'
-            return hexcode
+            # Grayscale RGBs are standard luminance values.
+            Y = int(round((.2126 * r) + (.7152 * g) + (.0722 * b), 0))
+            hexcode = f'#{Y:02x}{Y:02x}{Y:02x}'
+            return hexcode, (Y, Y, Y)
 
-        # Need to trim values to range [0, 255].
-        if R > 255:
-            R = 255
-        if R < 0:
-            R = 0
-        if G > 255:
-            G = 255
-        if G < 0:
-            G = 0
-        if B > 255:
-            B = 255
-        if B < 0:
-            B = 0
+        # Need to trim RGB values to integers in range [0, 255].
+        # source: https://stackoverflow.com/questions/5996881/
+        #   how-to-limit-a-number-to-be-within-a-specified-range-python
+        def clip(_c):
+            return max(min(255, _c), 0)
+        R = clip(R)
+        G = clip(G)
+        B = clip(B)
 
         hexcode = f'#{R:02x}{G:02x}{B:02x}'
-        return hexcode
+        return hexcode, (R, G, B)
+
+    def black_or_white(self, r: int, g: int, b: int, conv: str) -> str:
+        """Calculate different luminosity values for use in determining
+        whether a white or black font foreground color should be used on
+        the input RGB background color.
+
+        :param r: Named color's R value, in range [0, 255]
+        :param g: Named color's G value, in range [0, 255]
+        :param b: Named color's B value, in range [0, 255]
+        :param conv: Whether RBG is 'sim' (simulated) or 'raw'
+
+        :returns: recommended foreground color for given background RGB
+        """
+        _R = 0,
+        _G = 0,
+        _B = 0
+        if conv == 'sim':
+            _R, _G, _B = self.colorblind_simulate(r, g, b)[1]
+        if conv == 'raw':
+            _R = r
+            _G = g
+            _B = b
+        # https://www.nbdtech.com /Blog/archive/2008/04/27/
+        #    Calculating-the-Perceived-Brightness-of-a-Color.aspx
+        _pB = sqrt((.241 * (_R ** 2)) + (.691 * (_G ** 2)) + (.068 * (_B ** 2)))
+        # _Y = 0.2126 * _R + 0.7152 * _G + 0.0722 * _B
+        # Return tkinter foreground text color by it grayscale color name
+        # to override OS defaults for 'black' (gray0) and 'white' (gray100).
+        # Brightness limit of 130 has grayscale cutoff at gray51
+        if _pB > 130:
+            return 'gray0'
+        else:
+            return 'gray100'
 
 
 if __name__ == "__main__":
