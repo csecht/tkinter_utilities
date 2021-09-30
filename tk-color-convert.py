@@ -10,11 +10,11 @@ option is used. Option --gray generates grayscale equivalents.
 __author__ = 'cecht'
 __copyright__ = 'Copyright (C) 2021 C. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.0.6'
+__version__ = '0.1.0'
 __program_name__ = 'tk-color-convert.py'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
-__status__ = 'Development Status :: 1 - Alpha'
+__status__ = 'Development Status :: 2 - Beta'
 __dev__ = 'Development environment: Python 3.8'
 
 import argparse
@@ -316,7 +316,6 @@ class ColorChart(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
 
-        self.draw_table()
         # Need to color in all of master Frame to create near-shite border;
         #    border changes to grey for click-drag and not focus.
         self.master.configure(highlightthickness=3,
@@ -324,8 +323,12 @@ class ColorChart(tk.Frame):
                               highlightbackground='gray')
         self.master.minsize(500, 250)
 
+        self.draw_table()
+
     def draw_table(self) -> None:
-        """Make the tkinter color table.
+        """
+        Make the tkinter color table.
+        Call colorblind_simulate(), black_or_white(), show_info().
         """
         # row 0 reserved for clicked color info display.
         row = 1
@@ -335,8 +338,6 @@ class ColorChart(tk.Frame):
             label = tk.Label(self, text=color_name, bg=color_name,
                              font=('TkTextFont', FONT_SIZE))
             label.grid(row=row, column=col, ipady=1, ipadx=1, sticky=tk.NSEW)
-            # TODO: pass info vars to show_info.  use lambda?
-            label.bind('<Button-1>', self.show_info)  # <- binds all gridded labels
             row += 1
             _r, _g, _b, = label.winfo_rgb(color_name)
             r = _r // 256
@@ -344,22 +345,30 @@ class ColorChart(tk.Frame):
             b = _b // 256
             if args.d or args.p or args.t or args.gray:
                 # The simulated color is the background.
-                sim_tkhex_bg = self.colorblind_simulate(r, g, b)[0]
+                sim_hex = self.colorblind_simulate(r, g, b)[0]
                 sim_r, sim_g, sim_b = self.colorblind_simulate(r, g, b, )[1]
-                contrast_fg = self.black_or_white(sim_r, sim_g, sim_b, 'sim')
-                label.config(bg=sim_tkhex_bg, fg=contrast_fg)
+                contrast = self.black_or_white(sim_r, sim_g, sim_b, 'sim')
+                label.config(bg=sim_hex, fg=contrast)
+                # Bind each label to it's name and displayed bg and fg colors.
+                label.bind('<Button-1>',
+                           lambda event, c=color_name, h=sim_hex, f=contrast: self.show_info(c, h, f))
             else:
                 # The named color is the background.
-                contrast_fg = self.black_or_white(r, g, b, 'raw')
-                label.config(fg=contrast_fg)
+                contrast = self.black_or_white(r, g, b, 'raw')
+                label.config(fg=contrast)
+                raw_hex = f'#{r:02x}{g:02x}{b:02x}'
+                # Bind each label to it's name and displayed bg and fg colors.
+                label.bind('<Button-1>',
+                           lambda event, c=color_name, h=raw_hex, f=contrast: self.show_info(c, h, f))
 
             if row > MAX_ROWS:
                 row = 1
                 col += 1
 
+        # Info text is changed from this stub, to color info when a colored label is clicked.
         self.info = tk.Label(self,
-                        text=("Stub>> Selected color: white; tkinter hex code: '#ffffff'"
-                              ' (<- Future click option) Use hex code string in place of color name'),
+                        text=("Click on a color name to get the hex code of the color displayed."
+                              ' The hex code string can be used instead of a color name'),
                         bg='grey90', font=('TkTextFont', 11))
         self.info.grid(row=0, column=0, columnspan=col + 1, sticky=tk.EW)
 
@@ -426,7 +435,7 @@ class ColorChart(tk.Frame):
 
     def black_or_white(self, r: int, g: int, b: int, convert: str) -> str:
         """Calculate different luminosity values for use in determining
-        whether a white or black font foreground color should be used on
+        whether a white or black font contrast color should be used on
         the input RGB background color.
 
         :param r: Named color's R value, in range [0, 255]
@@ -434,7 +443,7 @@ class ColorChart(tk.Frame):
         :param b: Named color's B value, in range [0, 255]
         :param convert: Whether RBG is 'sim' (simulated) or 'raw'
 
-        :returns: recommended foreground color for given background RGB
+        :returns: recommended contrast color for given background RGB
         """
         _R = 0,
         _G = 0,
@@ -448,7 +457,7 @@ class ColorChart(tk.Frame):
         # https://www.nbdtech.com /Blog/archive/2008/04/27/
         #   Calculating-the-Perceived-Brightness-of-a-Color.aspx
         _pB = sqrt((.241 * (_R ** 2)) + (.691 * (_G ** 2)) + (.068 * (_B ** 2)))
-        # Return foreground color by its grayscale color name to override OS
+        # Return contrast color by its grayscale color name to override OS
         #   defaults for 'black' (use gray0) and 'white' (use gray100).
         # Brightness limit of 130 has grayscale cutoff at gray51
         # Range of 128-145 will give acceptable results, says author @NirDobovizki
@@ -457,9 +466,28 @@ class ColorChart(tk.Frame):
         else:
             return 'gray100'
 
-    def show_info(self, event):
-        # TODO: pass info as arguments to here.. use StringVar()?
-        self.info.configure(text='Stub: Color clicked')
+    def show_info(self, color: str, hexcode: str, contrast: str) -> None:
+        """
+        Fills in text of the info row with the selected color name,
+        the hex code for the (simulated) color as displayed. The
+        background fill is the color corresponding to the hexcode.
+        This method is called for every named color label, thus assigning
+        a name and hexcode specific to each label.
+
+        :param color: The color name; does not change
+        :param hexcode: The tkinter compatible hex code of either the
+                        named color or its displayed simulated color.
+        :param contrast: An appropriately contrasted fg based on the
+                         displayed color's perceived brightness.
+
+        :return: Label-specific info when color label is clicked.
+        """
+        self.info.configure(
+            text=f'Selected color name: {color}; displayed color hex code: {hexcode}')
+        if args.d or args.p or args.t or args.gray:
+            self.info.configure(bg=hexcode, fg=contrast)
+        else:
+            self.info.configure(bg=color, fg=contrast)
 
 
 if __name__ == "__main__":
