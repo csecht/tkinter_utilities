@@ -10,7 +10,7 @@ option is used. Option --gray generates grayscale equivalents.
 __author__ = 'cecht'
 __copyright__ = 'Copyright (C) 2021 C. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 __program_name__ = 'tk-color-convert.py'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
@@ -326,6 +326,11 @@ class ColorChart(tk.Frame):
                               highlightbackground='gray')
         self.master.minsize(500, 250)
 
+        self.colorinfo = tk.StringVar()
+        self.colorinfo.set(
+            'Click on a color to get its hex code and RGB. Hex code strings'
+            ' can be used instead of a foreground or background color name.')
+
         self.draw_table()
 
     def draw_table(self) -> None:
@@ -372,11 +377,9 @@ class ColorChart(tk.Frame):
                 row = 1
                 col += 1
 
-        # Info text is changed from this stub, to color info when a colored label is clicked.
-        self.info = tk.Label(self,
-                        text=("Click on a color name to get the hex code of the color displayed."
-                              ' The hex code string can be used instead of a color name'),
-                        bg='grey90', font=('TkTextFont', 11))
+        self.info = tk.Entry(self, justify='center',
+                             textvariable=self.colorinfo,
+                             bg='grey90', font=('TkTextFont', 11))
         self.info.grid(row=0, column=0, columnspan=col + 1, sticky=tk.EW)
 
         # While rowconfig can be outside of for loop,
@@ -491,12 +494,15 @@ class ColorChart(tk.Frame):
 
         :return: Label-specific info when color label is clicked.
         """
-        self.info.configure(
-            text=f'Color name: {color}, '
-                 f'displayed color hex code: {hexcode} and RGB: {rgb}')
+
         if args.d or args.p or args.t or args.gray:
+            self.colorinfo.set(
+                f'Name: {color},'
+                f' displayed color hex code: {hexcode}, RGB: {rgb}')
             self.info.configure(bg=hexcode, fg=contrast)
         else:
+            self.colorinfo.set(
+                f'Name: {color}, hex code: {hexcode}, RGB: {rgb}')
             self.info.configure(bg=color, fg=contrast)
 
 
