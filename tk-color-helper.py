@@ -12,12 +12,12 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 __author__ = 'cecht'
 __copyright__ = 'Copyright (C) 2021 C. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.1.4'
+__version__ = '0.1.6'
 __program_name__ = 'tk-color-helper.py'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
 __status__ = 'Development Status :: 2 - Beta'
-__dev__ = 'Development environment: Python 3.8'
+__dev__ = 'Development environment: Python 3.8, Linux 5.4, tkinter 8.6'
 
 import argparse
 import sys
@@ -25,10 +25,9 @@ from math import sqrt
 
 try:
     import tkinter as tk
-    from tkinter import messagebox, ttk
 except (ImportError, ModuleNotFoundError) as error:
     print('Requires tkinter, which is included with \n'
-          'Python 3.7+distributions.\n'
+          'Python 3.7+ distributions.\n'
           'Install the most recent version or re-install Python and include Tk/Tcl.\n'
           '\n'
           'On Linux you may also need:$ sudo apt-get install python3-tk\n'
@@ -192,10 +191,10 @@ X11_RGB_NAMES = ('white', 'black', 'snow', 'ghost white', 'GhostWhite', 'white s
                  'grey95', 'gray96', 'grey96', 'gray97', 'grey97', 'gray98', 'grey98',
                  'gray99', 'grey99', 'gray100', 'grey100')
 
-my_os = sys.platform[:3]
-if my_os in 'lin, win':
+MY_OS = sys.platform[:3]
+if MY_OS in 'lin, win':
     FONT_SIZE = 6
-if my_os == 'dar':
+if MY_OS == 'dar':
     FONT_SIZE = 9
 
 # 40 rows provide nice spatial organization for 760 color names.
@@ -206,6 +205,12 @@ CUTOFF_pB = 130
 
 
 class ColorChart(tk.Frame):
+    """
+    Set up tkinter window and fill with interactive widgets for all valid
+    named colors that can be used in tkinter. Generate simulations for different
+    types of color blindness. Apply perceived brightness contrasts for
+    backgrounds with black or white foregrounds.
+    """
 
     def __init__(self, master):
         tk.Frame.__init__(self, master)
@@ -288,7 +293,7 @@ class ColorChart(tk.Frame):
         Convert listed named color RGB values to values that simulate a
         specified colorblindness or a grayscale simulation. Source:
         http://mkweb.bcgsc.ca/colorblind/math.mhtml
-        
+
         :param r: Named color's R value, in range [0, 255]
         :param g: Named color's G value, in range [0, 255]
         :param b: Named color's B value, in range [0, 255]
@@ -335,9 +340,10 @@ class ColorChart(tk.Frame):
         return hexcode, (R, G, B)
 
     def black_or_white(self, r: int, g: int, b: int, convert: str) -> str:
-        """Calculate different luminosity values for use in determining
-        whether a white or black font contrast color should be used on
-        the input RGB background color.
+        """
+        Calculate perceived brightness value of input RGB to determine
+        whether a black or white font foreground contrast should be used
+        on the input RGB used as a background color.
 
         :param r: Named color's R value, in range [0, 255]
         :param g: Named color's G value, in range [0, 255]
@@ -346,8 +352,8 @@ class ColorChart(tk.Frame):
 
         :returns: recommended contrast color for given background RGB
         """
-        _R = 0,
-        _G = 0,
+        _R = 0
+        _G = 0
         _B = 0
         if convert == 'sim':
             _R, _G, _B = self.colorblind_simulate(r, g, b)[1]
@@ -364,8 +370,7 @@ class ColorChart(tk.Frame):
         _pB = sqrt((.241 * (_R ** 2)) + (.691 * (_G ** 2)) + (.068 * (_B ** 2)))
         if _pB > CUTOFF_pB:
             return 'gray0'
-        else:
-            return 'gray100'
+        return 'gray100'
 
     def show_info(self, color: str, hexcode: str, rgb: str, contrast: str):
         """
