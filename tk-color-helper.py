@@ -12,7 +12,7 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 __author__ = 'cecht'
 __copyright__ = 'Copyright (C) 2021 C. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.1.6'
+__version__ = '0.1.7'
 __program_name__ = 'tk-color-helper.py'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
@@ -96,8 +96,8 @@ X11_RGB_NAMES = ('white', 'black', 'snow', 'ghost white', 'GhostWhite', 'white s
                  'MediumVioletRed', 'pale violet red', 'PaleVioletRed', 'maroon',
                  'magenta', 'fuchsia', 'dark magenta',  'DarkMagenta', 'plum', 'orchid',
                  'medium orchid', 'MediumOrchid', 'dark orchid', 'DarkOrchid', 'violet',
-                 'dark violet', 'DarkViolet', 'blue violet', 'BlueViolet', 'purple',
-                 'medium purple', 'indigo', 'MediumPurple', 'thistle', 'snow1', 'snow2',
+                 'dark violet', 'DarkViolet', 'blue violet', 'BlueViolet', 'indigo',
+                 'purple', 'medium purple', 'MediumPurple', 'thistle', 'snow1', 'snow2',
                  'snow3', 'snow4', 'seashell1', 'seashell2', 'seashell3', 'seashell4',
                  'AntiqueWhite1', 'AntiqueWhite2', 'AntiqueWhite3', 'AntiqueWhite4',
                  'bisque1', 'bisque2', 'bisque3', 'bisque4', 'PeachPuff1', 'PeachPuff2',
@@ -201,7 +201,7 @@ if MY_OS == 'dar':
 MAX_ROWS = 40
 # Cutoff of perceived brightness in range(128-145) to switch from black to white
 #  foreground will give acceptable visual contrast when background below that pB.
-CUTOFF_pB = 130
+CUTOFF_pB = 138
 
 
 class ColorChart(tk.Frame):
@@ -379,6 +379,7 @@ class ColorChart(tk.Frame):
         background fill is the color corresponding to the hexcode.
         This method is called for every named color label, thus assigning
         a name and hexcode specific to each label.
+        Called from draw_table() mouse binding lambda statements.
 
         :param color: The color name; does not change
         :param hexcode: The tkinter compatible hex code of either the
@@ -391,6 +392,7 @@ class ColorChart(tk.Frame):
         :return: Label-specific info when color label is clicked.
         """
 
+        # Set the control variable in top row Entry() for each color label.
         if args.d or args.p or args.t or args.gray:
             self.colorinfo.set(
                 f'Name: {color},'
