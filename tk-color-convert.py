@@ -10,7 +10,7 @@ option is used. Option --gray generates grayscale equivalents.
 __author__ = 'cecht'
 __copyright__ = 'Copyright (C) 2021 C. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 __program_name__ = 'tk-color-convert.py'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
@@ -309,6 +309,9 @@ if my_os == 'dar':
 
 # 40 rows provide a nice spatial organization of color groups.
 MAX_ROWS = 40
+# Cutoff of perceived brightness in range(128-145) to switch from black to white
+#  foreground will give acceptable visual contrast when background below that pB.
+CUTOFF_pB = 130
 
 
 class ColorChart(tk.Frame):
@@ -347,19 +350,23 @@ class ColorChart(tk.Frame):
                 # The simulated color is the background.
                 sim_hex = self.colorblind_simulate(r, g, b)[0]
                 sim_r, sim_g, sim_b = self.colorblind_simulate(r, g, b, )[1]
-                contrast = self.black_or_white(sim_r, sim_g, sim_b, 'sim')
-                label.config(bg=sim_hex, fg=contrast)
+                rgb = f'({sim_r},{sim_g},{sim_b})'
+                bw = self.black_or_white(sim_r, sim_g, sim_b, 'sim')
+                label.config(bg=sim_hex, fg=bw)
                 # Bind each label to it's name and displayed bg and fg colors.
-                label.bind('<Button-1>',
-                           lambda event, c=color_name, h=sim_hex, f=contrast: self.show_info(c, h, f))
+                label.bind(
+                    '<Button-1>',
+                    lambda event, c=color_name, h=sim_hex, r=rgb, f=bw: self.show_info(c, h, r, f))
             else:
                 # The named color is the background.
-                contrast = self.black_or_white(r, g, b, 'raw')
-                label.config(fg=contrast)
+                bw = self.black_or_white(r, g, b, 'raw')
+                label.config(fg=bw)
                 raw_hex = f'#{r:02x}{g:02x}{b:02x}'
+                rgb = f'({r},{g},{b})'
                 # Bind each label to it's name and displayed bg and fg colors.
-                label.bind('<Button-1>',
-                           lambda event, c=color_name, h=raw_hex, f=contrast: self.show_info(c, h, f))
+                label.bind(
+                    '<Button-1>',
+                    lambda event, c=color_name, h=raw_hex, r=rgb, f=bw: self.show_info(c, h, r, f))
 
             if row > MAX_ROWS:
                 row = 1
@@ -456,17 +463,17 @@ class ColorChart(tk.Frame):
             _B = b
         # https://www.nbdtech.com /Blog/archive/2008/04/27/
         #   Calculating-the-Perceived-Brightness-of-a-Color.aspx
-        _pB = sqrt((.241 * (_R ** 2)) + (.691 * (_G ** 2)) + (.068 * (_B ** 2)))
-        # Return contrast color by its grayscale color name to override OS
-        #   defaults for 'black' (use gray0) and 'white' (use gray100).
         # Brightness limit of 130 has grayscale cutoff at gray51
         # Range of 128-145 will give acceptable results, says author @NirDobovizki
-        if _pB > 130:
+        # Return contrast color by its grayscale color name to override OS
+        #   defaults for 'black' (use gray0) and 'white' (use gray100).
+        _pB = sqrt((.241 * (_R ** 2)) + (.691 * (_G ** 2)) + (.068 * (_B ** 2)))
+        if _pB > CUTOFF_pB:
             return 'gray0'
         else:
             return 'gray100'
 
-    def show_info(self, color: str, hexcode: str, contrast: str) -> None:
+    def show_info(self, color: str, hexcode: str, rgb: str, contrast: str):
         """
         Fills in text of the info row with the selected color name,
         the hex code for the (simulated) color as displayed. The
@@ -477,13 +484,16 @@ class ColorChart(tk.Frame):
         :param color: The color name; does not change
         :param hexcode: The tkinter compatible hex code of either the
                         named color or its displayed simulated color.
+        :param rgb: (R,G,B) of either the named color or its displayed
+                    simulated color.
         :param contrast: An appropriately contrasted fg based on the
                          displayed color's perceived brightness.
 
         :return: Label-specific info when color label is clicked.
         """
         self.info.configure(
-            text=f'Selected color name: {color}; displayed color hex code: {hexcode}')
+            text=f'Color name: {color}, '
+                 f'displayed color hex code: {hexcode} and RGB: {rgb}')
         if args.d or args.p or args.t or args.gray:
             self.info.configure(bg=hexcode, fg=contrast)
         else:
