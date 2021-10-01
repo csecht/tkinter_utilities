@@ -509,23 +509,23 @@ class ColorChart(tk.Frame):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--about',
-                        help='Provides description, version, GNU license',
+                        help='Provide description, version, GNU license',
                         action='store_true',
                         default=False)
     parser.add_argument('--d',
-                        help='Generates deuteranopia colorblind equivalents',
+                        help='Generate deuteranopia simulated colors',
                         action='store_true',
                         default=False)
     parser.add_argument('--p',
-                        help='Generates protanopia colorblind equivalents',
+                        help='Generate protanopia simulated colors',
                         action='store_true',
                         default=False)
     parser.add_argument('--t',
-                        help='Generates tritanopia colorblind equivalents',
+                        help='Generate tritanopia simulated colors',
                         action='store_true',
                         default=False)
-    parser.add_argument('--gray',
-                        help='Generates grayscale equivalents of named colors',
+    parser.add_argument('--gray', '--grey',
+                        help='Generate grayscale equivalents of named colors',
                         action='store_true',
                         default=False)
     args = parser.parse_args()
