@@ -12,7 +12,7 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 __author__ = 'cecht'
 __copyright__ = 'Copyright (C) 2021 C. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.1.7'
+__version__ = '0.2.0'
 __program_name__ = 'tk-color-helper.py'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
@@ -204,6 +204,18 @@ MAX_ROWS = 40
 CUTOFF_pB = 138
 
 
+# pylint: disable=unused-argument
+def quit_gui(event=None) -> None:
+    """Safe and informative exit from the program.
+
+    :param event: Needed for keybindings.
+    :type event: Direct call from keybindings.
+    """
+    print('\n  *** User has quit the program. Exiting...\n')
+    app.destroy()
+    sys.exit(0)
+
+
 class ColorChart(tk.Frame):
     """
     Set up tkinter window and fill with interactive widgets for all valid
@@ -226,15 +238,19 @@ class ColorChart(tk.Frame):
         self.colorinfo.set(
             'Click on a color to get its hex code and RGB. Hex code strings'
             ' can be used instead of a foreground or background color name.')
+        self.info_width = 0
 
         self.draw_table()
+        # config_master() needs to run after draw_table to define the
+        #   number of columns needed for self.info_width.
+        self.config_master()
 
     def draw_table(self) -> None:
         """
         Make the tkinter color table.
         Call colorblind_simulate(), black_or_white(), show_info().
         """
-        # row 0 reserved for clicked color info display.
+        # row 0 reserved for color info display Entry().
         row = 1
         col = 0
 
@@ -273,19 +289,54 @@ class ColorChart(tk.Frame):
                 row = 1
                 col += 1
 
-        self.info = tk.Entry(self, justify='center',
-                             textvariable=self.colorinfo,
-                             bg='grey90', font=('TkTextFont', 11))
-        self.info.grid(row=0, column=0, columnspan=col + 1, sticky=tk.EW)
+        # Needed in config_master()
+        self.info_width = col + 1
 
-        # While rowconfig can be outside of for loop,
-        #   columnconfig depends on column count increment; so keep together.
+        # While rowconfigure can be outside of this for loop,
+        #   columnconfigure depends on column count increment; so keep together.
         for _row in range(MAX_ROWS + 1):
             self.rowconfigure(_row, weight=1)
         for _col in range(col + 1):
             self.columnconfigure(_col, weight=1)
 
         self.pack(expand=True, fill="both")
+
+    def config_master(self) -> None:
+        """
+        Set up universal and OS-specific keybindings and dropdown menus
+        with standard key and mouse commands.
+        Grid row0 color information here, with its keybindings.
+        """
+        self.master.bind_all('<Escape>', quit_gui)
+
+        cmdkey = ''
+        if MY_OS in 'lin, win':
+            cmdkey = 'Control'
+        elif MY_OS == 'dar':
+            cmdkey = 'Command'
+        self.master.bind(f'<{f"{cmdkey}"}-q>', quit_gui)
+
+        # Need to specify Ctrl-A for Linux b/c in tkinter that key is
+        #   bound to <<LineStart>>, not <<SelectAll>>, for some reason?
+        if MY_OS in 'lin':
+            def select_all():
+                app.focus_get().event_generate('<<SelectAll>>')
+            self.master.bind_all('<Control-a>', lambda _: select_all())
+
+        self.info = tk.Entry(self, justify='center',
+                             textvariable=self.colorinfo,
+                             bg='grey90', font=('TkTextFont', 11))
+        self.info.grid(row=0, column=0,
+                       columnspan=self.info_width, sticky=tk.EW)
+
+        # Set up OS-specific mouse right-click buttons for edit functions
+        #   needed in info Entry().
+        right_button = ''
+        if MY_OS in 'lin, win':
+            right_button = '<Button-3>'
+        elif MY_OS == 'dar':
+            right_button = '<Button-2>'
+        self.info.bind(f'{right_button}', RightClickCmds)
 
     @staticmethod
     def colorblind_simulate(r: int, g: int, b: int) -> tuple:
@@ -402,6 +453,38 @@ class ColorChart(tk.Frame):
             self.colorinfo.set(
                 f'Name: {color}, hex code: {hexcode}, RGB: {rgb}')
             self.info.configure(bg=color, fg=contrast)
+
+
+class RightClickCmds:
+    """
+    Right-click pop-up option to copy text;
+    call as a Button-2 (Linux, Windows) or Button-3 (macOS) binding.
+    """
+
+    # Based on: https://stackoverflow.com/questions/57701023/
+    def __init__(self, event):
+        right_click_menu = tk.Menu(None, tearoff=0, takefocus=0)
+
+        right_click_menu.add_command(
+            label='Select all',
+            command=lambda: self.right_click_edit(event, 'SelectAll'))
+        right_click_menu.add_command(
+            label='Copy',
+            command=lambda: self.right_click_edit(event, 'Copy'))
+        right_click_menu.add_command(
+            label='Cut',
+            command=lambda: self.right_click_edit(event, 'Cut'))
+
+        right_click_menu.tk_popup(event.x_root + 10, event.y_root + 15)
+
+    @staticmethod
+    def right_click_edit(event, command):
+        """
+        Sets menu command to the selected predefined virtual event.
+        Event is a unifying binding across multiple platforms.
+        https://www.tcl.tk/man/tcl8.6/TkCmd/event.htm#M7
+        """
+        event.widget.event_generate(f'<<{command}>>')
 
 
 if __name__ == "__main__":
