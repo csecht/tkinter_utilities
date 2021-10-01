@@ -40,9 +40,9 @@ if sys.version_info < (3, 6):
           'Python downloads are available from https://docs.python.org/')
     sys.exit(1)
 
-# X11_RGB_NAMES: 760 named colors the intersection of the rbg.txt files from
+# X11_RGB_NAMES: 760 named colors from the intersection of the rbg.txt files in
 #   Linux /usr/share/X11/rgb.txt and MacOS /opt/X11/share/X11/rgb.txt.
-#   Names containing 'X11' and 'Debian, were removed as well as a few others.
+#   Names containing 'X11' and 'Debian were removed, as well as a few others.
 #   The retained names are valid for tkinter 8.6 on Linux, MacOS, and Windows.
 # NOTE: Many Tcl/Tk colors from https://www.tcl.tk/man/tcl8.4/TkCmd/colors.html
 #   are invalid in tkinter 8.6.
@@ -227,17 +227,12 @@ class ColorChart(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
 
-        # Need to color in all of master Frame to create near-shite border;
-        #    border changes to grey for click-drag and not focus.
-        self.master.configure(highlightthickness=3,
-                              highlightcolor='gray95',
-                              highlightbackground='gray')
-        self.master.minsize(500, 250)
-
         self.colorinfo = tk.StringVar()
         self.colorinfo.set(
             'Click on a color to get its hex code and RGB. Hex code strings'
             ' can be used instead of a foreground or background color name.')
+
+        # Width of the info Entry() in row0, determined by number of columns.
         self.info_width = 0
 
         self.draw_table()
@@ -289,17 +284,10 @@ class ColorChart(tk.Frame):
                 row = 1
                 col += 1
 
+        self.pack(expand=True, fill="both")
+
         # Needed in config_master()
         self.info_width = col + 1
-
-        # While rowconfigure can be outside of this for loop,
-        #   columnconfigure depends on column count increment; so keep together.
-        for _row in range(MAX_ROWS + 1):
-            self.rowconfigure(_row, weight=1)
-        for _col in range(col + 1):
-            self.columnconfigure(_col, weight=1)
-
-        self.pack(expand=True, fill="both")
 
     def config_master(self) -> None:
         """
@@ -307,6 +295,20 @@ class ColorChart(tk.Frame):
         with standard key and mouse commands.
         Grid row0 color information here, with its keybindings.
         """
+
+        self.master.minsize(500, 250)
+
+        # Need to color in all of master Frame to create near-shite border;
+        #    border changes to grey for click-drag and not focus.
+        self.master.configure(highlightthickness=3,
+                              highlightcolor='gray95',
+                              highlightbackground='gray')
+
+        for _row in range(MAX_ROWS + 1):
+            self.rowconfigure(_row, weight=1)
+        for _col in range(self.info_width):
+            self.columnconfigure(_col, weight=1)
+
         self.master.bind_all('<Escape>', quit_gui)
 
         cmdkey = ''
@@ -318,7 +320,7 @@ class ColorChart(tk.Frame):
 
         # Need to specify Ctrl-A for Linux b/c in tkinter that key is
         #   bound to <<LineStart>>, not <<SelectAll>>, for some reason?
-        if MY_OS in 'lin':
+        if MY_OS == 'lin':
             def select_all():
                 app.focus_get().event_generate('<<SelectAll>>')
             self.master.bind_all('<Control-a>', lambda _: select_all())
