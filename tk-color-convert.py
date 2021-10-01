@@ -41,15 +41,12 @@ if sys.version_info < (3, 6):
           'Python downloads are available from https://docs.python.org/')
     sys.exit(1)
 
-# X11_RGB_NAMES: 760, derived from /opt/X11/share/X11/rgb.txt on macOS,
-#   Names containing 'X11' were removed (and a few others).
-#   The macOS rgb.txt file has these valid tkinter names not found in
-#   /usr/share/X11/rgb.txt in Ubuntu Linux 5.4:
-#   silver, aqua, teal, lime, olive, crimson, fuchsia, indigo.
-#   The Linux X11 name 'DebianRed' throws an error, _tkinter.TclError: unknown color name
-#     as does any invalid name.
-# NOTE: Many Tcl/Tk of the colors from https://www.tcl.tk/man/tcl8.4/TkCmd/colors.html
-#   are also invalid in tkinter.
+# X11_RGB_NAMES: 760 named colors the intersection of the rbg.txt files from
+#   Linux /usr/share/X11/rgb.txt and MacOS /opt/X11/share/X11/rgb.txt.
+#   Names containing 'X11' and 'Debian, were removed as well as a few others.
+#   The retained names are valid for tkinter 8.6 on Linux, MacOS, and Windows.
+# NOTE: Many Tcl/Tk colors from https://www.tcl.tk/man/tcl8.4/TkCmd/colors.html
+#   are invalid in tkinter 8.6.
 X11_RGB_NAMES = ('white', 'black', 'snow', 'ghost white', 'GhostWhite', 'white smoke',
                  'WhiteSmoke', 'gainsboro', 'floral white', 'FloralWhite', 'old lace',
                  'OldLace', 'linen', 'antique white', 'AntiqueWhite', 'papaya whip',
@@ -201,7 +198,7 @@ if my_os in 'lin, win':
 if my_os == 'dar':
     FONT_SIZE = 9
 
-# 40 rows provide a nice spatial organization of color groups.
+# 40 rows provide nice spatial organization for 760 color names.
 MAX_ROWS = 40
 # Cutoff of perceived brightness in range(128-145) to switch from black to white
 #  foreground will give acceptable visual contrast when background below that pB.
