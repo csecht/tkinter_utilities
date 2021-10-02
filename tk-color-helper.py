@@ -485,7 +485,7 @@ class ColorChart(tk.Frame):
         # Set the control variable in top row Entry() for each color label.
         if args.d or args.p or args.t or args.gray:
             self.colorinfo.set(
-                f"Color name '{color}' is seen as hex code '{hexcode}', RGB {rgb}")
+                f"'{color}' is seen as hex code '{hexcode}', RGB {rgb}")
             self.bg_info.configure(bg=hexcode, fg=contrast)
             self.new_fg.set('<- Right-click changes text color')
         else:
@@ -509,9 +509,11 @@ class ColorChart(tk.Frame):
         """
         self.bg_info.configure(fg=hexcode)
         if args.d or args.p or args.t or args.gray:
-            self.new_fg.set(f"<- Text: '{color}' seen as fg='{hexcode}', {rgb}")
+            self.new_fg.set(
+                f"<- Text: '{color}' is seen as fg='{hexcode}', {rgb}")
         else:
-            self.new_fg.set(f"<- Text: '{color}', fg='{hexcode}', {rgb}")
+            self.new_fg.set(
+                f"<- Text: '{color}', fg='{hexcode}', {rgb}")
 
 
 class RightClickCmds:
