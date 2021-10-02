@@ -12,7 +12,7 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 __author__ = 'cecht'
 __copyright__ = 'Copyright (C) 2021 C. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 __program_name__ = 'tk-color-helper.py'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
@@ -25,6 +25,7 @@ from math import sqrt
 
 try:
     import tkinter as tk
+    from tkinter import messagebox
 except (ImportError, ModuleNotFoundError) as error:
     print('Requires tkinter, which is included with \n'
           'Python 3.7+ distributions.\n'
@@ -33,12 +34,31 @@ except (ImportError, ModuleNotFoundError) as error:
           'On Linux you may also need:$ sudo apt-get install python3-tk\n'
           f'See also: https://tkdocs.com/tutorial/install.html \n{error}')
 
+MY_OS = sys.platform[:3]
+if MY_OS not in 'lin, win, dar':
+    msg = (f"Sorry, but {sys.platform} is not supported. "
+           'Linux, MacOS, and Windows are though!')
+    print(msg)
+    messagebox.showerror(detail=msg)
+    sys.exit(0)
+
 if sys.version_info < (3, 6):
     print('Sorry, but Python 3.6 or later is required.\n'
           'Current Python version: '
           f'{sys.version_info.major}.{sys.version_info.minor}\n'
           'Python downloads are available from https://docs.python.org/')
-    sys.exit(1)
+    sys.exit(0)
+
+# 40 rows provide nice spatial organization for 760 color names.
+MAX_ROWS = 40
+# Cutoff of perceived brightness in range(128-145) to switch from black to white
+#  foreground will give acceptable visual contrast when background below that pB.
+CUTOFF_pB = 138
+
+if MY_OS in 'lin, win':
+    FONT_SIZE = 6
+elif MY_OS == 'dar':
+    FONT_SIZE = 9
 
 # X11_RGB_NAMES: 760 named colors from the intersection of the rbg.txt files in
 #   Linux /usr/share/X11/rgb.txt and MacOS /opt/X11/share/X11/rgb.txt.
@@ -191,18 +211,6 @@ X11_RGB_NAMES = ('white', 'black', 'snow', 'ghost white', 'GhostWhite', 'white s
                  'grey95', 'gray96', 'grey96', 'gray97', 'grey97', 'gray98', 'grey98',
                  'gray99', 'grey99', 'gray100', 'grey100')
 
-MY_OS = sys.platform[:3]
-if MY_OS in 'lin, win':
-    FONT_SIZE = 6
-if MY_OS == 'dar':
-    FONT_SIZE = 9
-
-# 40 rows provide nice spatial organization for 760 color names.
-MAX_ROWS = 40
-# Cutoff of perceived brightness in range(128-145) to switch from black to white
-#  foreground will give acceptable visual contrast when background below that pB.
-CUTOFF_pB = 138
-
 
 # pylint: disable=unused-argument
 def quit_gui(event=None) -> None:
@@ -216,6 +224,7 @@ def quit_gui(event=None) -> None:
     sys.exit(0)
 
 
+# TODO: Consider this? https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/tkColorChooser.html
 class ColorChart(tk.Frame):
     """
     Set up tkinter window and fill with interactive widgets for all valid
@@ -245,7 +254,7 @@ class ColorChart(tk.Frame):
         Make the tkinter color table.
         Call colorblind_simulate(), black_or_white(), show_info().
         """
-        # row 0 reserved for color info display Entry().
+        # row 0 reserved for color info Entry().
         row = 1
         col = 0
 
@@ -265,20 +274,40 @@ class ColorChart(tk.Frame):
                 rgb = f'({sim_r},{sim_g},{sim_b})'
                 bw = self.black_or_white(sim_r, sim_g, sim_b, 'sim')
                 label.config(bg=sim_hex, fg=bw)
-                # Bind each label to it's name and displayed bg and fg colors.
+                # Bind each label to it's name, displayed bg, hex and RGB,
+                #  and a high-contrast fg to appear in self.info on mouse click.
                 label.bind(
                     '<Button-1>',
                     lambda event, c=color_name, h=sim_hex, r=rgb, f=bw: self.show_info(c, h, r, f))
+                # Right-click on label changes foreground of self.info.
+                if MY_OS in 'lin, win':
+                    label.bind(
+                        '<Button-3>',
+                        lambda event, c=color_name, h=sim_hex: self.new_foreground(c, h))
+                elif MY_OS == 'dar':
+                    label.bind(
+                        '<Button-2>',
+                        lambda event, c=color_name, h=sim_hex: self.new_foreground(c, h))
             else:
                 # The named color is the background.
-                bw = self.black_or_white(r, g, b, 'raw')
-                label.config(fg=bw)
                 raw_hex = f'#{r:02x}{g:02x}{b:02x}'
                 rgb = f'({r},{g},{b})'
-                # Bind each label to it's name and displayed bg and fg colors.
+                bw = self.black_or_white(r, g, b, 'raw')
+                label.config(fg=bw)
+                # Bind each label to it's name, bg, hex and RGB,
+                #  and a high-contrast fg to appear in self.info on mouse click.
                 label.bind(
                     '<Button-1>',
                     lambda event, c=color_name, h=raw_hex, r=rgb, f=bw: self.show_info(c, h, r, f))
+                # Right-click changes foreground of self.info.
+                if MY_OS in 'lin, win':
+                    label.bind(
+                        '<Button-3>',
+                        lambda event, c=color_name, h=raw_hex: self.new_foreground(c, h))
+                elif MY_OS == 'dar':
+                    label.bind(
+                        '<Button-2>',
+                        lambda event, c=color_name, h=raw_hex: self.new_foreground(c, h))
 
             if row > MAX_ROWS:
                 row = 1
@@ -455,6 +484,11 @@ class ColorChart(tk.Frame):
             self.colorinfo.set(
                 f'Name: {color}, hex code: {hexcode}, RGB: {rgb}')
             self.info.configure(bg=color, fg=contrast)
+
+    def new_foreground(self, color: str, hexcode: str) -> None:
+        self.info.configure(fg=hexcode)
+        messagebox.showinfo(message=f'{color}, {hexcode}',
+                            detail='New foreground name and hex code')
 
 
 class RightClickCmds:
