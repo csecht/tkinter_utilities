@@ -479,8 +479,6 @@ class ColorChart(tk.Frame):
                     simulated color.
         :param contrast: An appropriately contrasted fg based on the
                          displayed color's perceived brightness.
-
-        :return: Label-specific info when color label is clicked.
         """
 
         # Set the control variable in top row Entry() for each color label.
@@ -498,7 +496,13 @@ class ColorChart(tk.Frame):
     def new_foreground(self, color: str, hexcode: str, rgb: str) -> None:
         """
         Called from right-click on a color; changes foreground of
-        self.bg_info and appends fg info.
+        self.bg_info and provide new fg color info.
+
+        :param color: The color name; does not change
+        :param hexcode: The tkinter compatible hex code of either the
+                        named color or its displayed simulated color.
+        :param rgb: (R,G,B) of either the named color or its displayed
+                    simulated color.
         """
         self.bg_info.configure(fg=hexcode)
         if args.d or args.p or args.t or args.gray:
