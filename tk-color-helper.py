@@ -278,7 +278,7 @@ class ColorChart(tk.Frame):
                 bw = self.black_or_white(sim_r, sim_g, sim_b, 'sim')
                 label.config(bg=sim_hex, fg=bw)
                 # Bind each label to it's name, displayed bg, hex and RGB,
-                #  and a high-contrast fg to appear in self.bg_info on mouse click.
+                #  and a high-contrast fg to show in self.bg_info on mouse click.
                 label.bind(
                     '<Button-1>',
                     lambda event, c=color_name, h=sim_hex, r=rgb, f=bw: self.show_info(c, h, r, f))
@@ -298,7 +298,7 @@ class ColorChart(tk.Frame):
                 bw = self.black_or_white(r, g, b, 'raw')
                 label.config(fg=bw)
                 # Bind each label to it's name, bg, hex and RGB,
-                #  and a high-contrast fg to appear in self.bg_info on mouse click.
+                #  and a high-contrast fg to show in self.bg_info on mouse click.
                 label.bind(
                     '<Button-1>',
                     lambda event, c=color_name, h=raw_hex, r=rgb, f=bw: self.show_info(c, h, r, f))
@@ -461,17 +461,17 @@ class ColorChart(tk.Frame):
         #   Calculating-the-Perceived-Brightness-of-a-Color.aspx
         # Brightness limit of 130 has grayscale cutoff at gray51
         # Range of 128-145 will give acceptable results, says author @NirDobovizki
-        _pB = sqrt((.241 * (_R ** 2)) + (.691 * (_G ** 2)) + (.068 * (_B ** 2)))
+        _pB = sqrt((.241 * _R**2) + (.691 * _G**2) + (.068 * _B**2))
         if _pB > CUTOFF_pB:
             return 'black'
         return 'white'
 
     def show_info(self, color: str, hexcode: str, rgb: str, contrast: str):
         """
-        Binds to each color label its selected color name, hex code and
+        Assign each color label its selected color name, hex code and
         RGB strings of the (simulated) color, and the default foreground.
         Background is color corresponding to the (simulated) hexcode.
-        Called from draw_table() in a lambda function.
+        Called from draw_table() in a lambda .bind() function.
 
         :param color: The color name
         :param hexcode: The tkinter compatible hex code of either the
@@ -482,8 +482,8 @@ class ColorChart(tk.Frame):
                          displayed color's perceived brightness.
         """
 
-        # Set the control variable in top row Entry() for each color label.
-        if args.d or args.p or args.t or args.gray:
+        # Set the control variable in top row Entry() for each color 'label'.
+        if len(sys.argv) > 0:
             self.colorinfo.set(
                 f"'{color}' is seen as hex code '{hexcode}', RGB {rgb}")
             self.bg_info.configure(bg=hexcode, fg=contrast)
@@ -496,10 +496,10 @@ class ColorChart(tk.Frame):
 
     def new_foreground(self, color: str, hexcode: str, rgb: str) -> None:
         """
-        Binds to each color label a different foreground for self.bg_info,
+        Assign each color label a different foreground for self.bg_info,
         and provide new fg color info.
         Foreground is color corresponding to the (simulated) hexcode.
-        Called from draw_table() in a lambda function.
+        Called from draw_table() in a lambda .bind() function.
 
         :param color: The color name
         :param hexcode: The tkinter compatible hex code of either the
@@ -508,18 +508,18 @@ class ColorChart(tk.Frame):
                     simulated color.
         """
         self.bg_info.configure(fg=hexcode)
-        if args.d or args.p or args.t or args.gray:
+        if len(sys.argv) > 0:
             self.new_fg.set(
                 f"<- Text: '{color}' is seen as fg='{hexcode}', {rgb}")
         else:
             self.new_fg.set(
-                f"<- Text: '{color}', fg='{hexcode}', {rgb}")
+                f"<- fg='{color}', fg='{hexcode}', RGB {rgb}")
 
 
 class RightClickCmds:
     """
-    Right-click pop-up option to copy text;
-    call as a Button-2 (Linux, Windows) or Button-3 (macOS) binding.
+    Right-click pop-up option to select and copy text;
+    bind to Button-2 (Linux, Windows) or Button-3 (macOS).
     """
 
     # Based on: https://stackoverflow.com/questions/57701023/
