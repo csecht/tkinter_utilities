@@ -92,8 +92,8 @@ X11_RGB_NAMES = ('white', 'black', 'snow', 'ghost white', 'GhostWhite', 'white s
                  'dark turquoise', 'DarkTurquoise', 'medium turquoise', 'MediumTurquoise',
                  'turquoise', 'cyan', 'aqua', 'light cyan', 'LightCyan', 'dark cyan', 'DarkCyan',
                  'dark slate gray', 'DarkSlateGray', 'dark slate grey', 'DarkSlateGrey',
-                 'cadet blue', 'CadetBlue', 'medium aquamarine', 'MediumAquamarine',
-                 'aquamarine', 'dark sea green', 'DarkSeaGreen', 'sea green', 'SeaGreen',
+                 'cadet blue', 'CadetBlue', 'aquamarine', 'medium aquamarine',
+                 'MediumAquamarine', 'dark sea green', 'DarkSeaGreen', 'sea green', 'SeaGreen',
                  'medium sea green', 'MediumSeaGreen', 'light sea green', 'LightSeaGreen',
                  'teal', 'pale green', 'PaleGreen', 'spring green', 'SpringGreen',
                  'green', 'lime', 'light green', 'LightGreen', 'dark green', 'DarkGreen',
@@ -241,7 +241,7 @@ class ColorChart(tk.Frame):
         self.colorinfo.set('Click on a color to get its hex code and RGB.')
         self.bg_info = tk.Entry(self, textvariable=self.colorinfo)
         self.new_fg = tk.StringVar()
-        self.new_fg.set('Right click changes text color.')
+        self.new_fg.set('<- Right-click changes text color')
         self.fg_info = tk.Entry(self, textvariable=self.new_fg)
 
         # Width of the info Entry() in row0, determined by number of columns.
@@ -467,12 +467,12 @@ class ColorChart(tk.Frame):
 
     def show_info(self, color: str, hexcode: str, rgb: str, contrast: str):
         """
-        Binds to each label its selected color name, hex code and RBG
-        strings of the (simulated) color, and the default foreground.
+        Binds to each color label its selected color name, hex code and
+        RGB strings of the (simulated) color, and the default foreground.
         Background is color corresponding to the (simulated) hexcode.
         Called from draw_table() in a lambda function.
 
-        :param color: The color name; does not change
+        :param color: The color name
         :param hexcode: The tkinter compatible hex code of either the
                         named color or its displayed simulated color.
         :param rgb: (R,G,B) of either the named color or its displayed
@@ -486,19 +486,21 @@ class ColorChart(tk.Frame):
             self.colorinfo.set(
                 f"Color name '{color}' is seen as hex code '{hexcode}', RGB {rgb}")
             self.bg_info.configure(bg=hexcode, fg=contrast)
-            self.new_fg.set("<- right-click changes text color")
+            self.new_fg.set('<- Right-click changes text color')
         else:
             self.colorinfo.set(
                 f"'{color}', hex code '{hexcode}', RGB {rgb}")
             self.bg_info.configure(bg=color, fg=contrast)
-            self.new_fg.set("<- right-click changes text color")
+            self.new_fg.set('<- Right-click changes text color')
 
     def new_foreground(self, color: str, hexcode: str, rgb: str) -> None:
         """
-        Called from right-click on a color; changes foreground of
-        self.bg_info and provide new fg color info.
+        Binds to each color label a different foreground for self.bg_info,
+        and provide new fg color info.
+        Foreground is color corresponding to the (simulated) hexcode.
+        Called from draw_table() in a lambda function.
 
-        :param color: The color name; does not change
+        :param color: The color name
         :param hexcode: The tkinter compatible hex code of either the
                         named color or its displayed simulated color.
         :param rgb: (R,G,B) of either the named color or its displayed
@@ -506,9 +508,9 @@ class ColorChart(tk.Frame):
         """
         self.bg_info.configure(fg=hexcode)
         if args.d or args.p or args.t or args.gray:
-            self.new_fg.set(f"<-Text: '{color}' seen as fg='{hexcode}', {rgb}")
+            self.new_fg.set(f"<- Text: '{color}' seen as fg='{hexcode}', {rgb}")
         else:
-            self.new_fg.set(f"<-Text: '{color}', fg='{hexcode}', {rgb}")
+            self.new_fg.set(f"<- Text: '{color}', fg='{hexcode}', {rgb}")
 
 
 class RightClickCmds:
