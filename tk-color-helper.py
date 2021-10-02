@@ -16,7 +16,7 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 __author__ = 'cecht'
 __copyright__ = 'Copyright (C) 2021 C. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 __program_name__ = 'tk-color-helper.py'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
@@ -29,7 +29,6 @@ from math import sqrt
 
 try:
     import tkinter as tk
-    from tkinter import messagebox
 except (ImportError, ModuleNotFoundError) as error:
     print('Requires tkinter, which is included with \n'
           'Python 3.7+ distributions.\n'
@@ -40,10 +39,8 @@ except (ImportError, ModuleNotFoundError) as error:
 
 MY_OS = sys.platform[:3]
 if MY_OS not in 'lin, win, dar':
-    msg = (f"Sorry, but {sys.platform} is not supported. "
-           'Linux, MacOS, and Windows are though!')
-    print(msg)
-    messagebox.showerror(detail=msg)
+    print(f'Sorry, but {sys.platform} is not yet supported. '
+          'Linux, MacOS, and Windows are though!')
     sys.exit(0)
 
 if sys.version_info < (3, 6):
@@ -241,9 +238,11 @@ class ColorChart(tk.Frame):
         tk.Frame.__init__(self, master)
 
         self.colorinfo = tk.StringVar()
-        self.colorinfo.set(
-            'Click on a color to get its hex code and RGB. Hex code strings'
-            ' can be used instead of a foreground or background color name.')
+        self.colorinfo.set('Click on a color to get its hex code and RGB.')
+        self.bg_info = tk.Entry(self, textvariable=self.colorinfo)
+        self.new_fg = tk.StringVar()
+        self.new_fg.set('Right click changes text color.')
+        self.fg_info = tk.Entry(self, textvariable=self.new_fg)
 
         # Width of the info Entry() in row0, determined by number of columns.
         self.info_width = 0
@@ -258,7 +257,7 @@ class ColorChart(tk.Frame):
         Make the tkinter color table.
         Call colorblind_simulate(), black_or_white(), show_info().
         """
-        # row 0 reserved for color info Entry().
+        # row 0 reserved for color info Entry(), gridded in config_master().
         row = 1
         col = 0
 
@@ -279,19 +278,19 @@ class ColorChart(tk.Frame):
                 bw = self.black_or_white(sim_r, sim_g, sim_b, 'sim')
                 label.config(bg=sim_hex, fg=bw)
                 # Bind each label to it's name, displayed bg, hex and RGB,
-                #  and a high-contrast fg to appear in self.info on mouse click.
+                #  and a high-contrast fg to appear in self.bg_info on mouse click.
                 label.bind(
                     '<Button-1>',
                     lambda event, c=color_name, h=sim_hex, r=rgb, f=bw: self.show_info(c, h, r, f))
-                # Right-click on label changes foreground of self.info.
+                # Right-click on label changes foreground of self.bg_info.
                 if MY_OS in 'lin, win':
                     label.bind(
                         '<Button-3>',
-                        lambda event, c=color_name, h=sim_hex: self.new_foreground(c, h))
+                        lambda event, c=color_name, h=sim_hex, r=rgb: self.new_foreground(c, h, r))
                 elif MY_OS == 'dar':
                     label.bind(
                         '<Button-2>',
-                        lambda event, c=color_name, h=sim_hex: self.new_foreground(c, h))
+                        lambda event, c=color_name, h=sim_hex, r=rgb: self.new_foreground(c, h, r))
             else:
                 # The named color is the background.
                 raw_hex = f'#{r:02x}{g:02x}{b:02x}'
@@ -299,19 +298,19 @@ class ColorChart(tk.Frame):
                 bw = self.black_or_white(r, g, b, 'raw')
                 label.config(fg=bw)
                 # Bind each label to it's name, bg, hex and RGB,
-                #  and a high-contrast fg to appear in self.info on mouse click.
+                #  and a high-contrast fg to appear in self.bg_info on mouse click.
                 label.bind(
                     '<Button-1>',
                     lambda event, c=color_name, h=raw_hex, r=rgb, f=bw: self.show_info(c, h, r, f))
-                # Right-click changes foreground of self.info.
+                # Right-click changes foreground of self.bg_info.
                 if MY_OS in 'lin, win':
                     label.bind(
                         '<Button-3>',
-                        lambda event, c=color_name, h=raw_hex: self.new_foreground(c, h))
+                        lambda event, c=color_name, h=raw_hex, r=rgb: self.new_foreground(c, h, r))
                 elif MY_OS == 'dar':
                     label.bind(
                         '<Button-2>',
-                        lambda event, c=color_name, h=raw_hex: self.new_foreground(c, h))
+                        lambda event, c=color_name, h=raw_hex, r=rgb: self.new_foreground(c, h, r))
 
             if row > MAX_ROWS:
                 row = 1
@@ -320,7 +319,7 @@ class ColorChart(tk.Frame):
         self.pack(expand=True, fill="both")
 
         # Needed in config_master()
-        self.info_width = col + 1
+        self.info_width = col
 
     def config_master(self) -> None:
         """
@@ -358,11 +357,23 @@ class ColorChart(tk.Frame):
                 app.focus_get().event_generate('<<SelectAll>>')
             self.master.bind_all('<Control-a>', lambda _: select_all())
 
-        self.info = tk.Entry(self, justify='center',
-                             textvariable=self.colorinfo,
-                             bg='grey90', font=('TkTextFont', 11))
-        self.info.grid(row=0, column=0,
-                       columnspan=self.info_width, sticky=tk.EW)
+        # NOTE: fg_info col width needs to be enough to handle the longest
+        #   color name plus hex and RGB.
+        if MY_OS in 'lin, win':
+            self.bg_info.config(justify='center', bg='grey90',
+                                font=('TkTextFont', 11))
+            self.fg_info.config(justify='center', bg='grey90',
+                                font=('TkTextFont', 9))
+        elif MY_OS == 'dar':
+            self.bg_info.config(justify='center', bg='grey90',
+                                font=('TkTextFont', 15))
+            self.fg_info.config(justify='center', bg='grey90',
+                                font=('TkTextFont', 13))
+
+        self.bg_info.grid(row=0, column=0, sticky=tk.EW,
+                          columnspan=self.info_width-9)
+        self.fg_info.grid(row=0, column=self.info_width-9, sticky=tk.EW,
+                          columnspan=9)
 
         # Set up OS-specific mouse right-click buttons for edit functions
         #   needed in info Entry().
@@ -371,7 +382,7 @@ class ColorChart(tk.Frame):
             right_button = '<Button-3>'
         elif MY_OS == 'dar':
             right_button = '<Button-2>'
-        self.info.bind(f'{right_button}', RightClickCmds)
+        self.bg_info.bind(f'{right_button}', RightClickCmds)
 
     @staticmethod
     def colorblind_simulate(r: int, g: int, b: int) -> tuple:
@@ -451,21 +462,17 @@ class ColorChart(tk.Frame):
         #   Calculating-the-Perceived-Brightness-of-a-Color.aspx
         # Brightness limit of 130 has grayscale cutoff at gray51
         # Range of 128-145 will give acceptable results, says author @NirDobovizki
-        # Return contrast color by its grayscale color name to override OS
-        #   defaults for 'black' (use gray0) and 'white' (use gray100).
         _pB = sqrt((.241 * (_R ** 2)) + (.691 * (_G ** 2)) + (.068 * (_B ** 2)))
         if _pB > CUTOFF_pB:
-            return 'gray0'
-        return 'gray100'
+            return 'black'
+        return 'white'
 
     def show_info(self, color: str, hexcode: str, rgb: str, contrast: str):
         """
-        Fills in text of the info row with the selected color name,
-        the hex code for the (simulated) color as displayed. The
-        background fill is the color corresponding to the hexcode.
-        This method is called for every named color label, thus assigning
-        a name and hexcode specific to each label.
-        Called from draw_table() mouse binding lambda statements.
+        Binds to each label its selected color name, hex code and RBG
+        strings of the (simulated) color, and the default foreground.
+        Background is color corresponding to the (simulated) hexcode.
+        Called from draw_table() in a lambda function.
 
         :param color: The color name; does not change
         :param hexcode: The tkinter compatible hex code of either the
@@ -481,18 +488,25 @@ class ColorChart(tk.Frame):
         # Set the control variable in top row Entry() for each color label.
         if args.d or args.p or args.t or args.gray:
             self.colorinfo.set(
-                f'Name: {color},'
-                f' displayed color hex code: {hexcode}, RGB: {rgb}')
-            self.info.configure(bg=hexcode, fg=contrast)
+                f"Color name '{color}' is seen as hex code '{hexcode}', RGB {rgb}")
+            self.bg_info.configure(bg=hexcode, fg=contrast)
+            self.new_fg.set("<- right-click changes text color")
         else:
             self.colorinfo.set(
-                f'Name: {color}, hex code: {hexcode}, RGB: {rgb}')
-            self.info.configure(bg=color, fg=contrast)
+                f"'{color}', hex code '{hexcode}', RGB {rgb}'")
+            self.bg_info.configure(bg=color, fg=contrast)
+            self.new_fg.set("<- right-click changes text color")
 
-    def new_foreground(self, color: str, hexcode: str) -> None:
-        self.info.configure(fg=hexcode)
-        messagebox.showinfo(message=f'{color}, {hexcode}',
-                            detail='New foreground name and hex code')
+    def new_foreground(self, color: str, hexcode: str, rgb: str) -> None:
+        """
+        Called from right-click on a color; changes foreground of
+        self.bg_info and appends fg info.
+        """
+        self.bg_info.configure(fg=hexcode)
+        if args.d or args.p or args.t or args.gray:
+            self.new_fg.set(f"<-Text: '{color}' seen as fg='{hexcode}', {rgb}")
+        else:
+            self.new_fg.set(f"<-Text: '{color}', fg='{hexcode}', {rgb}")
 
 
 class RightClickCmds:
