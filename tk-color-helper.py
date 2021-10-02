@@ -362,13 +362,11 @@ class ColorChart(tk.Frame):
         if MY_OS in 'lin, win':
             self.bg_info.config(justify='center', bg='grey90',
                                 font=('TkTextFont', 11))
-            self.fg_info.config(justify='center', bg='grey90',
-                                font=('TkTextFont', 9))
+            self.fg_info.config(bg='grey90', font=('TkTextFont', 9))
         elif MY_OS == 'dar':
             self.bg_info.config(justify='center', bg='grey90',
                                 font=('TkTextFont', 15))
-            self.fg_info.config(justify='center', bg='grey90',
-                                font=('TkTextFont', 13))
+            self.fg_info.config(bg='grey90', font=('TkTextFont', 13))
 
         self.bg_info.grid(row=0, column=0, sticky=tk.EW,
                           columnspan=self.info_width-9)
@@ -493,7 +491,7 @@ class ColorChart(tk.Frame):
             self.new_fg.set("<- right-click changes text color")
         else:
             self.colorinfo.set(
-                f"'{color}', hex code '{hexcode}', RGB {rgb}'")
+                f"'{color}', hex code '{hexcode}', RGB {rgb}")
             self.bg_info.configure(bg=color, fg=contrast)
             self.new_fg.set("<- right-click changes text color")
 
