@@ -13,8 +13,8 @@ color; this can aid in choosing effective color combinations.
 https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 """
 # ^^ Text for --about invocation argument and use as __doc__>>
-__author__ = 'cecht'
-__copyright__ = 'Copyright (C) 2021 C. Echt'
+__author__ = 'csecht'
+__copyright__ = 'Copyright (C) 2021 C.S. Echt'
 __license__ = 'GNU General Public License'
 __version__ = '0.2.3'
 __program_name__ = 'tk-color-helper.py'
@@ -228,10 +228,10 @@ def quit_gui(event=None) -> None:
 # TODO: Consider this? https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/tkColorChooser.html
 class ColorChart(tk.Frame):
     """
-    Set up tkinter window and fill with interactive widgets for all valid
-    named colors that can be used in tkinter. Generate simulations for different
-    types of color blindness. Apply perceived brightness contrasts for
-    backgrounds with black or white foregrounds.
+    Set up main frame and fill with interactive widgets for all valid
+    named colors that can be used in tkinter. Generate simulations for
+    different types of color blindness. Apply perceived brightness
+    contrasts to use either default black or white foregrounds.
     """
 
     def __init__(self, master):
@@ -244,7 +244,7 @@ class ColorChart(tk.Frame):
         self.new_fg.set('<- Right-click changes text color')
         self.fg_info = tk.Entry(self, textvariable=self.new_fg)
 
-        # Width of the info Entry() in row0, determined by number of columns.
+        # Width of row0, as total number of columns gridded.
         self.info_width = 0
 
         self.draw_table()
@@ -342,6 +342,8 @@ class ColorChart(tk.Frame):
             self.columnconfigure(_col, weight=1)
 
         self.master.bind_all('<Escape>', quit_gui)
+        # A click on the close window icon will provide exit msg in Terminal.
+        self.master.protocol('WM_DELETE_WINDOW', quit_gui)
 
         cmdkey = ''
         if MY_OS in 'lin, win':
@@ -575,6 +577,7 @@ if __name__ == "__main__":
         print(__doc__)
         print('Author:    ', __author__)
         print('License:   ', __license__)
+        print('Copyright: ', __copyright__)
         print('URL:       ', __project_url__)
         print('Version:   ', __version__)
         print('Status:    ', __status__)
