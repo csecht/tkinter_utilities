@@ -16,7 +16,7 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 __author__ = 'cecht'
 __copyright__ = 'Copyright (C) 2021 C. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.2.2'
+__version__ = '0.2.3'
 __program_name__ = 'tk-color-helper.py'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
@@ -361,11 +361,11 @@ class ColorChart(tk.Frame):
         #   color name plus hex and RGB.
         if MY_OS in 'lin, win':
             self.bg_info.config(justify='center', bg='grey90',
-                                font=('TkTextFont', 11))
+                                font=('TkTextFont', 14))
             self.fg_info.config(bg='grey90', font=('TkTextFont', 9))
         elif MY_OS == 'dar':
             self.bg_info.config(justify='center', bg='grey90',
-                                font=('TkTextFont', 15))
+                                font=('TkTextFont', 17))
             self.fg_info.config(bg='grey90', font=('TkTextFont', 13))
 
         self.bg_info.grid(row=0, column=0, sticky=tk.EW,
@@ -381,6 +381,7 @@ class ColorChart(tk.Frame):
         elif MY_OS == 'dar':
             right_button = '<Button-2>'
         self.bg_info.bind(f'{right_button}', RightClickCmds)
+        self.fg_info.bind(f'{right_button}', RightClickCmds)
 
     @staticmethod
     def colorblind_simulate(r: int, g: int, b: int) -> tuple:
