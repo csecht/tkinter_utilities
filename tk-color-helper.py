@@ -5,7 +5,11 @@ Draws a tkinter table of all named colors in X11 rgb.txt.
 Command line options will simulate colorblind equivalent colors when the
 --d (deuteranopia), --p (protanopia), or -t (tritanopia)
 option is used. Option --gray generates grayscale equivalents.
-Table construction based on code from
+  Program usage: Click on a color to show its tkinter-ready hex code
+and RGB value. Values can be cut and pasted with standard keyboard
+and mouse commands. Right-click on a different color to change font
+color; this can aid in choosing effective color combinations.
+  Table construction based on code from
 https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 """
 # ^^ Text for --about invocation argument and use as __doc__>>
