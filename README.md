@@ -22,7 +22,7 @@ Example usage: Click on khaki, then right-click on VioletRed4 to change foregrou
 ![named-colors](images/tkinter_colors.png)
 
 TIP:
-Cut or delete the background color information and type or paste your own text. (Copy the color information first so you don't forget that awesome background color.)
+Type or paste your own text to replace, or add to, the background color information. (If you remove the color information, don't forget to copy it, so you don't forget that awesome background color.)
 ![custom_text](images/custom_text.png)
 
 Run as `$ ./tk-color-helper.py --d`
