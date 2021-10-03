@@ -3,20 +3,21 @@
 A command line utility to help choose colors in tkinter GUIs.
 Draws a tkinter table of all named colors in X11 rgb.txt.
 Command line options will simulate colorblind equivalent colors when the
---d (deuteranopia), --p (protanopia), or -t (tritanopia)
-option is used. Option --gray generates grayscale equivalents.
-  Program usage: Click on a color to show its tkinter-ready hex code
-and RGB value. Values can be cut and pasted with standard keyboard
-and mouse commands. Right-click on a different color to change font
-color; this can aid in choosing effective color combinations.
-  Table construction based on code from
+--d (deuteranopia), --p (protanopia), or -t (tritanopia) option is used.
+Option --gray generates grayscale equivalents.
+   Program usage: Click on a color name to show its hex code and RGB
+value with that color background. Right-click a different color to
+change text foreground. Custom text is allowed. Colorblind simulated
+hex codes and RGB values may not correspond to any named color.
+Values can be cut and pasted with standard keyboard and click commands.
+   Table construction based on code from
 https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 """
 # ^^ Text for --about invocation argument and use as __doc__>>
 __author__ = 'csecht'
 __copyright__ = 'Copyright (C) 2021 C.S. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.2.4'
+__version__ = '0.2.5'
 __program_name__ = 'tk-color-helper.py'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
@@ -278,7 +279,7 @@ class ColorChart(tk.Frame):
                 bw = self.black_or_white(sim_r, sim_g, sim_b, 'sim')
                 label.config(bg=sim_hex, fg=bw)
                 # Bind each label to it's name, displayed bg, hex and RGB,
-                #  and a high-contrast fg to show in self.bg_info on mouse click.
+                #  and a high-contrast fg to show in self.bg_info on click.
                 label.bind(
                     '<Button-1>',
                     lambda event, c=color_name, h=sim_hex, r=rgb, f=bw: self.show_info(c, h, r, f))
@@ -298,7 +299,7 @@ class ColorChart(tk.Frame):
                 bw = self.black_or_white(r, g, b, 'raw')
                 label.config(fg=bw)
                 # Bind each label to it's name, bg, hex and RGB,
-                #  and a high-contrast fg to show in self.bg_info on mouse click.
+                #  and a high-contrast fg to show in self.bg_info on click.
                 label.bind(
                     '<Button-1>',
                     lambda event, c=color_name, h=raw_hex, r=rgb, f=bw: self.show_info(c, h, r, f))
@@ -324,7 +325,7 @@ class ColorChart(tk.Frame):
     def config_master(self) -> None:
         """
         Set up universal and OS-specific keybindings and dropdown menus
-        with standard key and mouse commands.
+        with standard key and click commands.
         Grid row0 color information here, with its keybindings.
         """
 
@@ -375,15 +376,15 @@ class ColorChart(tk.Frame):
         self.fg_info.grid(row=0, column=self.info_width-9, sticky=tk.EW,
                           columnspan=9)
 
-        # Set up OS-specific mouse right-click buttons for edit functions
-        #   needed in info Entry().
-        right_button = ''
+        # Set up OS-specific right-click bindings for edit functions
+        #   used with info entry fields.
+        right_click = ''
         if MY_OS in 'lin, win':
-            right_button = '<Button-3>'
+            right_click = '<Button-3>'
         elif MY_OS == 'dar':
-            right_button = '<Button-2>'
-        self.bg_info.bind(f'{right_button}', RightClickCmds)
-        self.fg_info.bind(f'{right_button}', RightClickCmds)
+            right_click = '<Button-2>'
+        self.bg_info.bind(f'{right_click}', RightClickCmds)
+        self.fg_info.bind(f'{right_click}', RightClickCmds)
 
     @staticmethod
     def colorblind_simulate(r: int, g: int, b: int) -> tuple:
@@ -470,9 +471,10 @@ class ColorChart(tk.Frame):
 
     def show_info(self, color: str, hexcode: str, rgb: str, contrast: str):
         """
-        Assign each color label its selected color name, hex code and
-        RGB strings of the (simulated) color, and the default foreground.
-        Background is color corresponding to the (simulated) hexcode.
+        As each color label is generated, assign its color name, the hex
+        code and RGB strings for that (simulated) color, default
+        foreground, and associated functions.
+        Background will be the color or the simulated color's hexcode.
         Called from draw_table() in a lambda .bind() function.
 
         :param color: The color name
@@ -484,23 +486,30 @@ class ColorChart(tk.Frame):
                          displayed color's perceived brightness.
         """
 
-        # Set the control variable in top row Entry() for each color 'label'.
+        # Set the stringvariables in row0 entry fields for each color 'label'.
+        # Need to remove any prior string selection highlight when new color
+        #   is clicked.
         if len(sys.argv) > 1:
             self.colorinfo.set(
                 f"'{color}' is seen as bg='{hexcode}'; RGB {rgb}")
             self.bg_info.configure(bg=hexcode, fg=contrast)
             self.new_fg.set('<- Right-click changes text color')
+            self.bg_info.select_clear()
+            self.fg_info.select_clear()
+
         else:
             self.colorinfo.set(
                 f"bg='{color}' or bg='{hexcode}'; RGB {rgb}")
             self.bg_info.configure(bg=color, fg=contrast)
             self.new_fg.set('<- Right-click changes text color')
+            self.bg_info.select_clear()
+            self.fg_info.select_clear()
 
     def new_foreground(self, color: str, hexcode: str, rgb: str) -> None:
         """
-        Assign each color label a different foreground for self.bg_info,
-        and provide new fg color info.
-        Foreground is color corresponding to the (simulated) hexcode.
+        As each color label is generated, assign its color name, the hex
+        code and RGB strings for that (simulated) color.
+        Foreground will be the color or the simulated color's hexcode.
         Called from draw_table() in a lambda .bind() function.
 
         :param color: The color name
@@ -513,9 +522,14 @@ class ColorChart(tk.Frame):
         if len(sys.argv) > 1:
             self.new_fg.set(
                 f"<- Text: '{color}' is seen as fg='{hexcode}'; {rgb}")
+            self.bg_info.select_clear()
+            self.fg_info.select_clear()
+
         else:
             self.new_fg.set(
                 f"<- fg='{color}' or fg='{hexcode}'; RGB {rgb}")
+            self.bg_info.select_clear()
+            self.fg_info.select_clear()
 
 
 class RightClickCmds:
