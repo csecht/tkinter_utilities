@@ -226,7 +226,6 @@ def quit_gui(event=None) -> None:
     sys.exit(0)
 
 
-# TODO: Consider this? https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/tkColorChooser.html
 class ColorChart(tk.Frame):
     """
     Set up main frame and fill with interactive widgets for all valid
@@ -265,21 +264,21 @@ class ColorChart(tk.Frame):
         for color_name in X11_RGB_NAMES:
             label = tk.Label(self, text=color_name, bg=color_name,
                              font=('TkTextFont', FONT_SIZE))
-            label.grid(row=row, column=col, ipady=1, ipadx=1, sticky=tk.NSEW)
+            label.grid(row=row, column=col, sticky=tk.NSEW)
             row += 1
             _r, _g, _b, = label.winfo_rgb(color_name)
             r = _r // 256
             g = _g // 256
             b = _b // 256
-            if args.d or args.p or args.t or args.gray:
-                # The simulated color is the background.
+            if len(sys.argv) > 1:  # ...that is, running a simulation.
+                # The simulated color will be the background or foreground.
                 sim_hex = self.colorblind_simulate(r, g, b)[0]
                 sim_r, sim_g, sim_b = self.colorblind_simulate(r, g, b, )[1]
                 rgb = f'({sim_r},{sim_g},{sim_b})'
                 bw = self.black_or_white(sim_r, sim_g, sim_b, 'sim')
                 label.config(bg=sim_hex, fg=bw)
-                # Bind each label to it's name, displayed bg, hex and RGB,
-                #  and a high-contrast fg to show in self.bg_info on click.
+                # Bind each label to it's name, simulated bg, hex and RGB,
+                #  and to a high-contrast fg; shows in self.bg_info on click.
                 label.bind(
                     '<Button-1>',
                     lambda event, c=color_name, h=sim_hex, r=rgb, f=bw: self.show_info(c, h, r, f))
@@ -293,17 +292,17 @@ class ColorChart(tk.Frame):
                         '<Button-2>',
                         lambda event, c=color_name, h=sim_hex, r=rgb: self.new_foreground(c, h, r))
             else:
-                # The named color is the background.
+                # The named color will be the background.
                 raw_hex = f'#{r:02x}{g:02x}{b:02x}'
                 rgb = f'({r},{g},{b})'
                 bw = self.black_or_white(r, g, b, 'raw')
                 label.config(fg=bw)
                 # Bind each label to it's name, bg, hex and RGB,
-                #  and a high-contrast fg to show in self.bg_info on click.
+                #  and to a high-contrast fg; shows in self.bg_info on click.
                 label.bind(
                     '<Button-1>',
                     lambda event, c=color_name, h=raw_hex, r=rgb, f=bw: self.show_info(c, h, r, f))
-                # Right-click changes foreground of self.bg_info.
+                # Binding changes foreground of self.bg_info on right-click.
                 if MY_OS in 'lin, win':
                     label.bind(
                         '<Button-3>',
@@ -319,17 +318,17 @@ class ColorChart(tk.Frame):
 
         self.pack(expand=True, fill="both")
 
-        # Needed in config_master()
+        # Used in config_master()
         self.info_width = col
 
     def config_master(self) -> None:
         """
-        Set up universal and OS-specific keybindings and dropdown menus
+        Set up universal and OS-specific keybindings and popup menus
         with standard key and click commands.
         Grid row0 color information here, with its keybindings.
         """
 
-        self.master.minsize(500, 250)
+        self.master.minsize(600, 300)
 
         # Need to color in all of master Frame to create near-shite border;
         #    border changes to grey for click-drag and not focus.
@@ -360,8 +359,6 @@ class ColorChart(tk.Frame):
                 app.focus_get().event_generate('<<SelectAll>>')
             self.master.bind_all('<Control-a>', lambda _: select_all())
 
-        # NOTE: fg_info col width needs to be enough to handle the longest
-        #   color name plus hex and RGB.
         if MY_OS in 'lin, win':
             self.bg_info.config(justify='center', bg='grey90',
                                 font=('TkTextFont', 14))
@@ -371,9 +368,11 @@ class ColorChart(tk.Frame):
                                 font=('TkTextFont', 17))
             self.fg_info.config(bg='grey90', font=('TkTextFont', 13))
 
+        # NOTE: fg_info col width needs to be enough to handle the longest
+        #   color name plus hex and RGB, and considering font size.
         self.bg_info.grid(row=0, column=0, sticky=tk.EW,
-                          columnspan=self.info_width-9)
-        self.fg_info.grid(row=0, column=self.info_width-9, sticky=tk.EW,
+                          columnspan=self.info_width - 9)
+        self.fg_info.grid(row=0, column=self.info_width - 9, sticky=tk.EW,
                           columnspan=9)
 
         # Set up OS-specific right-click bindings for edit functions
@@ -449,7 +448,7 @@ class ColorChart(tk.Frame):
         :param b: Named color's B value, in range [0, 255]
         :param convert: Whether RBG is 'sim' (simulated) or 'raw'
 
-        :returns: recommended contrast color for given background RGB
+        :returns: recommended contrast color for given RGB
         """
         _R = 0
         _G = 0
