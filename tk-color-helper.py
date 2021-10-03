@@ -16,7 +16,7 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 __author__ = 'csecht'
 __copyright__ = 'Copyright (C) 2021 C.S. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 __program_name__ = 'tk-color-helper.py'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
@@ -485,14 +485,14 @@ class ColorChart(tk.Frame):
         """
 
         # Set the control variable in top row Entry() for each color 'label'.
-        if len(sys.argv) > 0:
+        if len(sys.argv) > 1:
             self.colorinfo.set(
-                f"'{color}' is seen as hex code '{hexcode}', RGB {rgb}")
+                f"'{color}' is seen as bg='{hexcode}'; RGB {rgb}")
             self.bg_info.configure(bg=hexcode, fg=contrast)
             self.new_fg.set('<- Right-click changes text color')
         else:
             self.colorinfo.set(
-                f"'{color}', hex code '{hexcode}', RGB {rgb}")
+                f"bg='{color}' or bg='{hexcode}'; RGB {rgb}")
             self.bg_info.configure(bg=color, fg=contrast)
             self.new_fg.set('<- Right-click changes text color')
 
@@ -510,12 +510,12 @@ class ColorChart(tk.Frame):
                     simulated color.
         """
         self.bg_info.configure(fg=hexcode)
-        if len(sys.argv) > 0:
+        if len(sys.argv) > 1:
             self.new_fg.set(
-                f"<- Text: '{color}' is seen as fg='{hexcode}', {rgb}")
+                f"<- Text: '{color}' is seen as fg='{hexcode}'; {rgb}")
         else:
             self.new_fg.set(
-                f"<- fg='{color}', fg='{hexcode}', RGB {rgb}")
+                f"<- fg='{color}' or fg='{hexcode}'; RGB {rgb}")
 
 
 class RightClickCmds:
@@ -537,6 +537,9 @@ class RightClickCmds:
         right_click_menu.add_command(
             label='Cut',
             command=lambda: self.right_click_edit(event, 'Cut'))
+        right_click_menu.add_command(
+            label='Paste',
+            command=lambda: self.right_click_edit(event, 'Paste'))
 
         right_click_menu.tk_popup(event.x_root + 10, event.y_root + 15)
 
@@ -594,6 +597,6 @@ if __name__ == "__main__":
         elif args.t:
             root.title("tkinter Colors, Tritanopia Simulation")
         elif args.gray:
-            root.title("tkinter Colors, in Grayscale")
+            root.title("tkinter Colors in Grayscale")
         app = ColorChart(root)
         root.mainloop()

@@ -18,10 +18,12 @@ optional arguments:
   --gray, --grey  Generate grayscale equivalents of named colors
 ```
 Run as `./tk-color-helper.py`
+Example usage: Click on khaki, then right-click on VioletRed4 to change foreground.
 ![named-colors](images/tkinter_colors.png)
 
-Right click to change foreground color:
-![new_text_color](images/new_text_color.png)
+TIP:
+Cut or delete the background color information and type or paste your own text. (Copy the color information first so you don't forget that awesome background color.)
+![custom_text](images/custom_text.png)
 
 Run as `$ ./tk-color-helper.py --d`
 ![deuteranopeia-simulated-colors](images/deuteranopia_sim.png)
@@ -34,3 +36,4 @@ Run as `$ ./tk-color-helper.py --t`
 
 Run as `$ ./tk-color-helper.py --gray`
 ![grayscale-tk-colors](images/grayscale_sim.png)
+
