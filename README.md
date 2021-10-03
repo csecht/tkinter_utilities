@@ -1,10 +1,10 @@
 # tkinter_utilities
 ## tk-color-helper.py
-A utility to help choose colors in tkinter GUIs and display their simulated colorblind colors.
-Draws a table using color names from X11 rgb.txt; names not recognized by tkinter are excluded.
-Use command line options to simulate those colors as might be perceived by people having different types of colorblindness, including grayscale equivalents. 
+A utility to help choose colors to use in tkinter GUIs or compare with colorblind simulated colors.
+A chart is drawn of color names from X11 rgb.txt; names not recognized by tkinter are excluded.
+Command line options draw charts that simulate those colors as might be perceived by people having different types of colorblindness. A grayscale chart is also an option. 
 
-Click on a color to bring up its tkinter-ready hex code and RGB value. Values can be cut and pasted with standard keyboard and click commands. Right-click on a different color to change font color; this can aid in choosing effective color combinations.
+To use, click on a color to display it and its tkinter-ready hex code and RGB value. Right-click on a different color to change the display's font color, and show that foreground color name, hex and RGB values. Values can be cut and pasted with standard keyboard and click commands. While values are formatted for direct use in tkinter code, the values themselves can be used for any color format style.
 ```
 $ ./tk-color-helper.py --help
 usage: tk-color-helper.py [-h] [--about] [--d] [--p] [--t] [--gray]

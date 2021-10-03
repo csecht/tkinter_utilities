@@ -357,7 +357,7 @@ class ColorChart(tk.Frame):
         if MY_OS == 'lin':
             def select_all():
                 app.focus_get().event_generate('<<SelectAll>>')
-            self.master.bind_all('<Control-a>', lambda _: select_all())
+            self.master.bind_all('<Control-a>', lambda event: select_all())
 
         if MY_OS in 'lin, win':
             self.bg_info.config(justify='center', bg='grey90',
