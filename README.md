@@ -37,3 +37,5 @@ Run as `$ ./tk-color-helper.py --t`
 Run as `$ ./tk-color-helper.py --gray`
 ![grayscale-tk-colors](images/grayscale_sim.png)
 
+###Planned enhancements:
+Allow in-place colorblind simulations of selected background and foreground colors from within the full-color table.

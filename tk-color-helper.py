@@ -437,25 +437,25 @@ class ColorChart(tk.Frame):
         hexcode = f'#{R:02x}{G:02x}{B:02x}'
         return hexcode, (R, G, B)
 
-    def black_or_white(self, r: int, g: int, b: int, convert: str) -> str:
+    def black_or_white(self, r: int, g: int, b: int, sim_type: str) -> str:
         """
         Calculate perceived brightness value of input RGB to determine
-        whether a black or white font foreground contrast should be used
-        on the input RGB used as a background color.
+        whether a black or white font foreground contrast is used on the
+        input RGB background.
 
         :param r: Named color's R value, in range [0, 255]
         :param g: Named color's G value, in range [0, 255]
         :param b: Named color's B value, in range [0, 255]
-        :param convert: Whether RBG is 'sim' (simulated) or 'raw'
+        :param sim_type: Whether RBG is 'sim' (simulated) or 'raw'
 
-        :returns: recommended contrast color for given RGB
+        :returns: 'black' or 'white' contrast for given RGB
         """
         _R = 0
         _G = 0
         _B = 0
-        if convert == 'sim':
+        if sim_type == 'sim':
             _R, _G, _B = self.colorblind_simulate(r, g, b)[1]
-        if convert == 'raw':
+        if sim_type == 'raw':
             _R = r
             _G = g
             _B = b
