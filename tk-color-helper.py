@@ -23,7 +23,7 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 __author__ = 'csecht'
 __copyright__ = 'Copyright (C) 2021 C.S. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 __program_name__ = 'tk-color-helper.py'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
@@ -636,23 +636,27 @@ class ColorChart(tk.Frame):
             messagebox.showinfo(title='MISMATCH NOTICE', detail=msg)
 
     def show_simtable(self, image: str) -> None:
-        """Show in new toplevel window the full color table in specified
+        """
+        Show in new toplevel window the full color table in specified
         colorblind simulated colors.  Called only as keybindings.
 
         :param image: Descriptor of color simulation image file to
                       retrieve: 'd', 'p', 't', 'g'.
         """
         colorwin = tk.Toplevel()
-        colorwin.title('test')
-        colorwin.minsize(1300, 800)
+        colorwin.minsize(1200, 580)
         if image == 'd':
             self.img = tk.PhotoImage(file="images/deuteranopia_colortable.png")
+            colorwin.title('Named colors with deuteranopia simulation')
         elif image == 'p':
             self.img = tk.PhotoImage(file="images/protanopia_colortable.png")
+            colorwin.title('Named colors with protanopia simulation')
         elif image == 't':
             self.img = tk.PhotoImage(file="images/tritanopia_colortable.png")
+            colorwin.title('Named colors with tritanopia simulation')
         elif image == 'g':
             self.img = tk.PhotoImage(file="images/grayscale_colortable.png")
+            colorwin.title('Named colors with grayscale simulation')
 
         colorwin.image = self.img
         colortable = tk.Text(colorwin)
