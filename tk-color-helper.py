@@ -1,23 +1,29 @@
 #!/usr/bin/env python3
 """
-A command line utility to help choose colors in tkinter GUIs.
-Draws a tkinter table of all named colors in X11 rgb.txt.
-Command line options will simulate colorblind equivalent colors when the
---d (deuteranopia), --p (protanopia), or -t (tritanopia) option is used.
-Option --gray generates grayscale equivalents.
+A Python utility to help choose colors and their colorblind equivalents
+in tkinter GUIs. Draws an interactive tkinter table of 760 named colors
+included in X11 rgb.txt.
    Program usage: Click on a color name to show its hex code and RGB
-value with that color background. Right-click a different color to
-change text foreground. Custom text is allowed. Colorblind simulated
-hex codes and RGB values may not correspond to any named color.
-Values can be cut and pasted with standard keyboard and click commands.
-   Table construction based on code from
+value showing that color as background. Right-click a different color to
+change the text foreground. Foreground colors can be changed for a given
+background color, but selecting a new background will reset the
+foreground to its default value. Click with a key modifier to show the
+colorblind simulation of the selected color: Shift (deuteranopia),
+Ctrl (protanopia), Alt (tritanopia), Shift-Ctrl (grayscale).
+Simulated color hex codes and RGB values may not correspond to any named
+color but the hex string will be recognized by tkinter. Hex and RGB
+values can also be used in other graphics applications.
+    Text in the color display and data fields can be cut, pasted, or
+edited with standard keyboard and click commands. Runs with Python 3.6
+and tkinter 8.6 or later in Linux, Windows, and MacOS systems.
+Table construction based on code from
 https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 """
 # ^^ Text for --about invocation argument and use as __doc__>>
 __author__ = 'csecht'
 __copyright__ = 'Copyright (C) 2021 C.S. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.2.5'
+__version__ = '0.3.0'
 __program_name__ = 'tk-color-helper.py'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
@@ -30,6 +36,7 @@ from math import sqrt
 
 try:
     import tkinter as tk
+    from tkinter import messagebox
 except (ImportError, ModuleNotFoundError) as error:
     print('Requires tkinter, which is included with \n'
           'Python 3.7+ distributions.\n'
@@ -37,6 +44,15 @@ except (ImportError, ModuleNotFoundError) as error:
           '\n'
           'On Linux you may also need:$ sudo apt-get install python3-tk\n'
           f'See also: https://tkdocs.com/tutorial/install.html \n{error}')
+
+# import functools
+# def trackcalls(func):
+#     @functools.wraps(func)
+#     def wrapper(*args, **kwargs):
+#         wrapper.has_been_called = True
+#         return func(*args, **kwargs)
+#     wrapper.has_been_called = False
+#     return wrapper
 
 MY_OS = sys.platform[:3]
 if MY_OS not in 'lin, win, dar':
@@ -55,12 +71,13 @@ if sys.version_info < (3, 6):
 MAX_ROWS = 40
 # Cutoff of perceived brightness in range(128-145) to switch from black to white
 #  foreground will give acceptable visual contrast when background below that pB.
-CUTOFF_pB = 138
+#  130 has a cutoff of gray51.
+CUTOFF_PB = 138
 
 if MY_OS in 'lin, win':
-    FONT_SIZE = 6
+    LABEL_FONT_SIZE = 6
 elif MY_OS == 'dar':
-    FONT_SIZE = 9
+    LABEL_FONT_SIZE = 9
 
 # X11_RGB_NAMES: 760 named colors from the intersection of the rbg.txt files in
 #   Linux /usr/share/X11/rgb.txt and MacOS /opt/X11/share/X11/rgb.txt.
@@ -100,7 +117,7 @@ X11_RGB_NAMES = ('white', 'black', 'snow', 'ghost white', 'GhostWhite', 'white s
                  'green', 'lime', 'light green', 'LightGreen', 'dark green', 'DarkGreen',
                  'chartreuse', 'lawn green', 'LawnGreen', 'medium spring green',
                  'MediumSpringGreen', 'green yellow', 'GreenYellow', 'lime green',
-                 'LimeGreen',  'yellow green', 'YellowGreen', 'forest green', 'ForestGreen',
+                 'LimeGreen', 'yellow green', 'YellowGreen', 'forest green', 'ForestGreen',
                  'olive', 'olive drab', 'OliveDrab', 'dark olive green', 'DarkOliveGreen',
                  'khaki', 'dark khaki', 'DarkKhaki', 'pale goldenrod',
                  'PaleGoldenrod', 'light goldenrod yellow', 'LightGoldenrodYellow',
@@ -116,7 +133,7 @@ X11_RGB_NAMES = ('white', 'black', 'snow', 'ghost white', 'GhostWhite', 'white s
                  'hot pink', 'HotPink', 'deep pink', 'DeepPink', 'pink', 'light pink',
                  'LightPink', 'violet red', 'VioletRed', 'medium violet red',
                  'MediumVioletRed', 'pale violet red', 'PaleVioletRed', 'maroon',
-                 'magenta', 'fuchsia', 'dark magenta',  'DarkMagenta', 'plum', 'orchid',
+                 'magenta', 'fuchsia', 'dark magenta', 'DarkMagenta', 'plum', 'orchid',
                  'medium orchid', 'MediumOrchid', 'dark orchid', 'DarkOrchid', 'violet',
                  'dark violet', 'DarkViolet', 'blue violet', 'BlueViolet', 'indigo',
                  'purple', 'medium purple', 'MediumPurple', 'thistle', 'snow1', 'snow2',
@@ -219,11 +236,47 @@ def quit_gui(event=None) -> None:
     """Safe and informative exit from the program.
 
     :param event: Needed for keybindings.
-    :type event: Direct call from keybindings.
+    :type event: Direct call from key bindings.
     """
     print('\n  *** User has quit the program. Exiting...\n')
     app.destroy()
     sys.exit(0)
+
+
+def right_click_menu(event=None) -> None:
+    """
+    Right-click pop-up option to select and copy text;
+    bind to Button-2 (Linux, Windows) or Button-3 (macOS).
+
+    :param event: Direct call from key bindings.
+    """
+
+    # Based on: https://stackoverflow.com/questions/57701023/
+    rtclick_menu = tk.Menu(None, tearoff=0, takefocus=0)
+
+    rtclick_menu.add_command(
+        label='Select all',
+        command=lambda: right_click_edit(event, 'SelectAll'))
+    rtclick_menu.add_command(
+        label='Copy',
+        command=lambda: right_click_edit(event, 'Copy'))
+    rtclick_menu.add_command(
+        label='Cut',
+        command=lambda: right_click_edit(event, 'Cut'))
+    rtclick_menu.add_command(
+        label='Paste',
+        command=lambda: right_click_edit(event, 'Paste'))
+
+    rtclick_menu.tk_popup(event.x_root + 10, event.y_root + 15)
+
+
+def right_click_edit(event, command):
+    """
+    Sets menu command to the selected predefined virtual event.
+    Event is a unifying binding across multiple platforms.
+    https://www.tcl.tk/man/tcl8.6/TkCmd/event.htm#M7
+    """
+    event.widget.event_generate(f'<<{command}>>')
 
 
 class ColorChart(tk.Frame):
@@ -238,24 +291,35 @@ class ColorChart(tk.Frame):
         tk.Frame.__init__(self, master)
 
         self.colorinfo = tk.StringVar()
-        self.colorinfo.set('Click on a color to get its hex code and RGB.')
+        self.colorinfo.set('Click for color data. Click with Shift, '
+                           'Ctrl, Alt, or Shift+Ctrl simulates colorblindness')
         self.bg_info = tk.Entry(self, textvariable=self.colorinfo)
         self.new_fg = tk.StringVar()
-        self.new_fg.set('<- Right-click changes text color')
+        self.new_fg.set('<- Right-click different color to change text color')
         self.fg_info = tk.Entry(self, textvariable=self.new_fg)
 
         # Width of row0, as total number of columns gridded.
         self.info_width = 0
 
+        self.color_dict = {}
+        self.bw_dict = {}
+        self.d_sim = {}
+        self.p_sim = {}
+        self.t_sim = {}
+        self.g_sim = {}
+
+        self.sim_type = tk.StringVar(value='orig')
+        self.img = tk.PhotoImage
+
         self.draw_table()
-        # config_master() needs to run after draw_table to define the
+        # config_master() needs to run after draw_table() to define the
         #   number of columns needed for self.info_width.
         self.config_master()
 
     def draw_table(self) -> None:
         """
         Make the tkinter color table.
-        Call colorblind_simulate(), black_or_white(), show_info().
+        Call simulate_color(), black_or_white(), show_orig().
         """
         # row 0 reserved for color info Entry(), gridded in config_master().
         row = 1
@@ -263,54 +327,59 @@ class ColorChart(tk.Frame):
 
         for color_name in X11_RGB_NAMES:
             label = tk.Label(self, text=color_name, bg=color_name,
-                             font=('TkTextFont', FONT_SIZE))
+                             font=('TkTooltipFont', LABEL_FONT_SIZE))
             label.grid(row=row, column=col, sticky=tk.NSEW)
             row += 1
             _r, _g, _b, = label.winfo_rgb(color_name)
             r = _r // 256
             g = _g // 256
             b = _b // 256
-            if len(sys.argv) > 1:  # ...that is, running a simulation.
-                # The simulated color will be the background or foreground.
-                sim_hex = self.colorblind_simulate(r, g, b)[0]
-                sim_r, sim_g, sim_b = self.colorblind_simulate(r, g, b, )[1]
-                rgb = f'({sim_r},{sim_g},{sim_b})'
-                bw = self.black_or_white(sim_r, sim_g, sim_b, 'sim')
-                label.config(bg=sim_hex, fg=bw)
-                # Bind each label to it's name, simulated bg, hex and RGB,
-                #  and to a high-contrast fg; shows in self.bg_info on click.
-                label.bind(
-                    '<Button-1>',
-                    lambda event, c=color_name, h=sim_hex, r=rgb, f=bw: self.show_info(c, h, r, f))
-                # Right-click on label changes foreground of self.bg_info.
-                if MY_OS in 'lin, win':
-                    label.bind(
-                        '<Button-3>',
-                        lambda event, c=color_name, h=sim_hex, r=rgb: self.new_foreground(c, h, r))
-                elif MY_OS == 'dar':
-                    label.bind(
-                        '<Button-2>',
-                        lambda event, c=color_name, h=sim_hex, r=rgb: self.new_foreground(c, h, r))
-            else:
-                # The named color will be the background.
-                raw_hex = f'#{r:02x}{g:02x}{b:02x}'
-                rgb = f'({r},{g},{b})'
-                bw = self.black_or_white(r, g, b, 'raw')
-                label.config(fg=bw)
-                # Bind each label to it's name, bg, hex and RGB,
-                #  and to a high-contrast fg; shows in self.bg_info on click.
-                label.bind(
-                    '<Button-1>',
-                    lambda event, c=color_name, h=raw_hex, r=rgb, f=bw: self.show_info(c, h, r, f))
-                # Binding changes foreground of self.bg_info on right-click.
-                if MY_OS in 'lin, win':
-                    label.bind(
-                        '<Button-3>',
-                        lambda event, c=color_name, h=raw_hex, r=rgb: self.new_foreground(c, h, r))
-                elif MY_OS == 'dar':
-                    label.bind(
-                        '<Button-2>',
-                        lambda event, c=color_name, h=raw_hex, r=rgb: self.new_foreground(c, h, r))
+            rgb = (r, g, b)
+            bw = self.black_or_white(rgb)
+            label.config(fg=bw)
+            orig_hex = f'#{r:02x}{g:02x}{b:02x}'
+            # This click bind displays the named color and data.
+            label.bind('<Button-1>',
+                       lambda event, c=color_name, h=orig_hex, r=rgb, fg=bw:
+                       self.show_bg(c, h, r, fg, 'orig'))
+            # These binds display the simulated color and data.
+            label.bind('<Shift-Button-1>', lambda event, c=color_name, r=rgb:
+                       self.simulate_color(c, r, 'deuteranopia'))
+            label.bind('<Control-Button-1>', lambda event, c=color_name, r=rgb:
+                       self.simulate_color(c, r, 'protanopia'))
+            label.bind('<Alt-Button-1>', lambda event, c=color_name, r=rgb:
+                       self.simulate_color(c, r, 'tritanopia'))
+            label.bind('<Shift-Control-Button-1>', lambda event, c=color_name, r=rgb:
+                       self.simulate_color(c, r, 'grayscale'))
+            # Right-click on label changes foreground of self.bg_info.
+            if MY_OS in 'lin, win':
+                # This bind displays the named color and data.
+                label.bind('<Button-3>',
+                           lambda event, c=color_name, h=orig_hex, r=rgb:
+                           self.update_fg(c, r, 'orig'))
+                # These binds display the simulated color and data.
+                label.bind('<Shift-Button-3>', lambda event, c=color_name, r=rgb:
+                           self.update_fg(c, r, 'deuteranopia'))
+                label.bind('<Control-Button-3>', lambda event, c=color_name, r=rgb:
+                           self.update_fg(c, r, 'protanopia'))
+                label.bind('<Alt-Button-3>', lambda event, c=color_name, r=rgb:
+                           self.update_fg(c, r, 'tritanopia'))
+                label.bind('<Shift-Control-Button-3>', lambda event, c=color_name, r=rgb:
+                           self.update_fg(c, r, 'grayscale'))
+            elif MY_OS == 'dar':
+                # This bind displays the named color and data.
+                label.bind('<Button-2>',
+                           lambda event, c=color_name, h=orig_hex, r=rgb:
+                           self.update_fg(c, r, 'orig'))
+                # These binds display the simulated color and data.
+                label.bind('<Shift-Button-2>', lambda event, c=color_name, r=rgb:
+                           self.update_fg(c, r, 'deuteranopia'))
+                label.bind('<Control-Button-2>', lambda event, c=color_name, r=rgb:
+                           self.update_fg(c, r, 'protanopia'))
+                label.bind('<Alt-Button-2>', lambda event, c=color_name, r=rgb:
+                           self.update_fg(c, r, 'tritanopia'))
+                label.bind('<Shift-Control-Button-2>', lambda event, c=color_name, r=rgb:
+                           self.update_fg(c, r, 'grayscale'))
 
             if row > MAX_ROWS:
                 row = 1
@@ -357,16 +426,17 @@ class ColorChart(tk.Frame):
         if MY_OS == 'lin':
             def select_all():
                 app.focus_get().event_generate('<<SelectAll>>')
+
             self.master.bind_all('<Control-a>', lambda event: select_all())
 
         if MY_OS in 'lin, win':
             self.bg_info.config(justify='center', bg='grey90',
-                                font=('TkTextFont', 14))
-            self.fg_info.config(bg='grey90', font=('TkTextFont', 9))
+                                font=('TkTooltipFont', 13))
+            self.fg_info.config(bg='grey90', font=('TkTooltipFont', 9))
         elif MY_OS == 'dar':
             self.bg_info.config(justify='center', bg='grey90',
-                                font=('TkTextFont', 17))
-            self.fg_info.config(bg='grey90', font=('TkTextFont', 13))
+                                font=('TkTooltipFont', 15))
+            self.fg_info.config(bg='grey90', font=('TkTooltipFont', 11))
 
         # NOTE: fg_info col width needs to be enough to handle the longest
         #   color name plus hex and RGB, and considering font size.
@@ -382,47 +452,42 @@ class ColorChart(tk.Frame):
             right_click = '<Button-3>'
         elif MY_OS == 'dar':
             right_click = '<Button-2>'
-        self.bg_info.bind(f'{right_click}', RightClickCmds)
-        self.fg_info.bind(f'{right_click}', RightClickCmds)
+        self.bg_info.bind(f'{right_click}', right_click_menu)
+        self.fg_info.bind(f'{right_click}', right_click_menu)
 
-    @staticmethod
-    def colorblind_simulate(r: int, g: int, b: int) -> tuple:
+        # Keybindings to show the simulated color table images in Toplevel.
+        # TODO: Add key commands (and click commands) to README.
+        cmdkey = ''
+        if MY_OS in 'lin, win':
+            cmdkey = 'Control'
+        elif MY_OS == 'dar':
+            cmdkey = 'Command'
+        self.master.bind(
+            f'<{f"{cmdkey}"}-d>', lambda event, img='d': self.show_simtable(img))
+        self.master.bind(
+            f'<{f"{cmdkey}"}-p>', lambda event, img='p': self.show_simtable(img))
+        self.master.bind(
+            f'<{f"{cmdkey}"}-t>', lambda event, img='t': self.show_simtable(img))
+        self.master.bind(
+            f'<{f"{cmdkey}"}-g>', lambda event, img='g': self.show_simtable(img))
+
+    def simulate_color(
+            self, color: str, rgb: tuple, sim_type: str) -> tuple:
         """
         Convert listed named color RGB values to values that simulate a
-        specified colorblindness or a grayscale simulation. Source:
-        http://mkweb.bcgsc.ca/colorblind/math.mhtml
+        specified colorblindness or a grayscale simulation.
+        Source: http://mkweb.bcgsc.ca/colorblind/math.mhtml
 
-        :param r: Named color's R value, in range [0, 255]
-        :param g: Named color's G value, in range [0, 255]
-        :param b: Named color's B value, in range [0, 255]
-
-        :returns: converted color hex code string and its RGB tuple.
+        :param color: A color name from X11_RGB_NAMES
+        :param rgb: (R, G, B) tuple of integers in range(0-255)
+        :param sim_type: 'orig', 'deuteranopia', 'protanopia',
+                         'tritanopia', 'grayscale'
+        :returns: (color: str, sim_hex: str, sim_rgb: tuple)
         """
+        r, g, b = rgb
         R = 0
         G = 0
         B = 0
-        # All T matrix values from http://mkweb.bcgsc.ca/colorblind/math.mhtml
-        #   and are conversion summaries with the LMSD65 XYZ-LMS conversion matrix.
-        # Simulate color blindness; deuteranopia- greens are greatly reduced (1% men)
-        if args.d:
-            R = round((0.33066007 * r) + (0.66933993 * g) + (0 * b))
-            G = round((0.33066007 * r) + (0.66933993 * g) + (0 * b))
-            B = round((-0.02785538 * r) + (0.02785538 * g) + (1 * b))
-        # Simulate color blindness; protanopia- reds are greatly reduced (1% men)
-        elif args.p:
-            R = round((0.170556992 * r) + (0.829443014 * g) + (0 * b))
-            G = round((0.170556991 * r) + (0.829443008 * g) + (0 * b))
-            B = round((-0.004517144 * r) + (0.004517144 * g) + (1 * b))
-        # Simulate color blindness; tritanopia - blues are greatly reduced (0.003% population)
-        elif args.t:
-            R = round((1 * r) + (0.1273989 * g) + (-0.1273989 * b))
-            G = round((0 * r) + (0.8739093 * g) + (0.1260907 * b))
-            B = round((0 * r) + (0.8739093 * g) + (0.1260907 * b))
-        elif args.gray:
-            # Grayscale RGBs are standard luminance values.
-            Y = int(round((.2126 * r) + (.7152 * g) + (.0722 * b), 0))
-            hexcode = f'#{Y:02x}{Y:02x}{Y:02x}'
-            return hexcode, (Y, Y, Y)
 
         # Need to restrict RGB values to integers in range [0, 255].
         # source: https://stackoverflow.com/questions/5996881/
@@ -430,81 +495,82 @@ class ColorChart(tk.Frame):
         def clip(_c):
             return max(min(255, _c), 0)
 
-        R = clip(R)
-        G = clip(G)
-        B = clip(B)
+        # Calculate color blind simulation using T matrix RGB conversion.
+        # All T matrix values from http://mkweb.bcgsc.ca/colorblind/math.mhtml
+        #   and are conversion summaries with the LMSD65 XYZ-LMS conversion matrix.
+        if sim_type == 'deuteranopia':
+            # Simulate deuteranopia- greens are greatly reduced (1% men)
+            R = clip(round((0.33066007 * r) + (0.66933993 * g) + (0 * b)))
+            G = clip(round((0.33066007 * r) + (0.66933993 * g) + (0 * b)))
+            B = clip(round((-0.02785538 * r) + (0.02785538 * g) + (1 * b)))
+        elif sim_type == 'protanopia':
+            # Simulate protanopia- reds are greatly reduced (1% men)
+            R = clip(round((0.170556992 * r) + (0.829443014 * g) + (0 * b)))
+            G = clip(round((0.170556991 * r) + (0.829443008 * g) + (0 * b)))
+            B = clip(round((-0.004517144 * r) + (0.004517144 * g) + (1 * b)))
+        elif sim_type == 'tritanopia':
+            # Simulate tritanopia - blues are greatly reduced (0.003% population)
+            R = clip(round((1 * r) + (0.1273989 * g) + (-0.1273989 * b)))
+            G = clip(round((0 * r) + (0.8739093 * g) + (0.1260907 * b)))
+            B = clip(round((0 * r) + (0.8739093 * g) + (0.1260907 * b)))
+        elif sim_type == 'grayscale':
+            # Simulate grayscale - standard color luminance
+            R = G = B = int(round((.2126 * r) + (.7152 * g) + (.0722 * b), 0))
 
-        hexcode = f'#{R:02x}{G:02x}{B:02x}'
-        return hexcode, (R, G, B)
+        # Tuple: info = (hex, RGB).
+        sim_hex = f'#{R:02x}{G:02x}{B:02x}'
+        sim_rgb = (R, G, B)
+        sim_contrast = self.black_or_white(sim_rgb)
 
-    def black_or_white(self, r: int, g: int, b: int, sim_type: str) -> str:
+        self.show_bg(color, sim_hex, sim_rgb, sim_contrast, sim_type)
+        # Need return for a call from update_fg()
+        return color, sim_hex, sim_rgb
+
+    def show_bg(self, color, hexcode, rgb, contrast, sim_type):
+        """
+        Displays click-selected color and its data in main display field.
+        """
+        if sim_type == 'orig':
+            self.colorinfo.set(
+                f"bg='{color}' or bg='{hexcode}'; RGB {rgb}")
+            self.bg_info.configure(bg=hexcode, fg=contrast)
+        else:
+            self.colorinfo.set(
+                f"{sim_type} sees '{color}' as: bg='{hexcode}', RGB {rgb}")
+            self.bg_info.configure(bg=hexcode, fg=contrast)
+
+        # Need to clear any previously selected text highlighting
+        self.bg_info.select_clear()
+        self.fg_info.select_clear()
+
+        # NOTE: fg_info resets each time a different bg color is selected,
+        #   but bg is retained for any number of different fg selections.
+        # TODO: Auto-retain clicked fg for each bg selection.
+        self.new_fg.set('<- Right-click different color to change text color')
+
+    @staticmethod
+    def black_or_white(rgb: tuple) -> str:
         """
         Calculate perceived brightness value of input RGB to determine
         whether a black or white font foreground contrast is used on the
         input RGB background.
 
-        :param r: Named color's R value, in range [0, 255]
-        :param g: Named color's G value, in range [0, 255]
-        :param b: Named color's B value, in range [0, 255]
-        :param sim_type: Whether RBG is 'sim' (simulated) or 'raw'
+        :param rgb: (R, G, B) tuple of integers in range(0-255)
 
         :returns: 'black' or 'white' contrast for given RGB
         """
-        _R = 0
-        _G = 0
-        _B = 0
-        if sim_type == 'sim':
-            _R, _G, _B = self.colorblind_simulate(r, g, b)[1]
-        if sim_type == 'raw':
-            _R = r
-            _G = g
-            _B = b
+        _R, _G, _B = rgb
+
         # https://www.nbdtech.com /Blog/archive/2008/04/27/
         #   Calculating-the-Perceived-Brightness-of-a-Color.aspx
         # Brightness limit of 130 has grayscale cutoff at gray51
         # Range of 128-145 will give acceptable results, says author @NirDobovizki
-        _pB = sqrt((.241 * _R**2) + (.691 * _G**2) + (.068 * _B**2))
-        if _pB > CUTOFF_pB:
+        _pb = sqrt((.241 * _R ** 2) + (.691 * _G ** 2) + (.068 * _B ** 2))
+        if _pb > CUTOFF_PB:
             return 'black'
         return 'white'
 
-    def show_info(self, color: str, hexcode: str, rgb: str, contrast: str):
-        """
-        As each color label is generated, assign its color name, the hex
-        code and RGB strings for that (simulated) color, default
-        foreground, and associated functions.
-        Background will be the color or the simulated color's hexcode.
-        Called from draw_table() in a lambda .bind() function.
-
-        :param color: The color name
-        :param hexcode: The tkinter compatible hex code of either the
-                        named color or its displayed simulated color.
-        :param rgb: (R,G,B) of either the named color or its displayed
-                    simulated color.
-        :param contrast: An appropriately contrasted fg based on the
-                         displayed color's perceived brightness.
-        """
-
-        # Set the stringvariables in row0 entry fields for each color 'label'.
-        # Need to remove any prior string selection highlight when new color
-        #   is clicked.
-        if len(sys.argv) > 1:
-            self.colorinfo.set(
-                f"'{color}' is seen as bg='{hexcode}'; RGB {rgb}")
-            self.bg_info.configure(bg=hexcode, fg=contrast)
-            self.new_fg.set('<- Right-click changes text color')
-            self.bg_info.select_clear()
-            self.fg_info.select_clear()
-
-        else:
-            self.colorinfo.set(
-                f"bg='{color}' or bg='{hexcode}'; RGB {rgb}")
-            self.bg_info.configure(bg=color, fg=contrast)
-            self.new_fg.set('<- Right-click changes text color')
-            self.bg_info.select_clear()
-            self.fg_info.select_clear()
-
-    def new_foreground(self, color: str, hexcode: str, rgb: str) -> None:
+    def update_fg(self, color: str, rgb: tuple, sim_type: str) -> None:
         """
         As each color label is generated, assign its color name, the hex
         code and RGB strings for that (simulated) color.
@@ -512,82 +578,95 @@ class ColorChart(tk.Frame):
         Called from draw_table() in a lambda .bind() function.
 
         :param color: The color name
-        :param hexcode: The tkinter compatible hex code of either the
-                        named color or its displayed simulated color.
         :param rgb: (R,G,B) of either the named color or its displayed
                     simulated color.
+        :param sim_type: 'deuteranopia', 'protanopia', 'tritanopia',
+                         'grayscale', 'orig'
         """
-        self.bg_info.configure(fg=hexcode)
-        if len(sys.argv) > 1:
+        if sim_type == 'orig':
+            # No simulation, data for rt-clicked color.
+            r, g, b = rgb
+            color_hex = f'#{r:02x}{g:02x}{b:02x}'
             self.new_fg.set(
-                f"<- Text: '{color}' is seen as fg='{hexcode}'; {rgb}")
-            self.bg_info.select_clear()
-            self.fg_info.select_clear()
-
+                f"<-Text: '{color}' or fg='{color_hex}'; RGB {rgb}")
+            self.bg_info.configure(fg=color)
         else:
+            # Generate simulated data for mod-rt-clicked color.
+            # Because call to simulate_color() also runs show_bg, need to
+            #   store and re-use current bg_info data so it isn't replaced
+            #   with the new_fg selection.
+            saved_bg = self.bg_info.cget('bg')
+            saved_text = self.bg_info.getvar(str(self.bg_info.cget('textvariable')))
+            color, sim_hex, sim_rgb = self.simulate_color(color, rgb, sim_type)
             self.new_fg.set(
-                f"<- fg='{color}' or fg='{hexcode}'; RGB {rgb}")
-            self.bg_info.select_clear()
-            self.fg_info.select_clear()
+                f"<-{sim_type} sees {color} text as fg='{sim_hex}', {sim_rgb}")
+            self.bg_info.configure(fg=sim_hex, bg=saved_bg)
+            self.colorinfo.set(saved_text)
 
+        # Need to clear any previously selected text edit highlighting.
+        self.bg_info.select_clear()
+        self.fg_info.select_clear()
 
-class RightClickCmds:
-    """
-    Right-click pop-up option to select and copy text;
-    bind to Button-2 (Linux, Windows) or Button-3 (macOS).
-    """
+        # Need to notify if new_fg and bg sim_types do not match.
+        self.simtype_mismatch()
 
-    # Based on: https://stackoverflow.com/questions/57701023/
-    def __init__(self, event):
-        right_click_menu = tk.Menu(None, tearoff=0, takefocus=0)
-
-        right_click_menu.add_command(
-            label='Select all',
-            command=lambda: self.right_click_edit(event, 'SelectAll'))
-        right_click_menu.add_command(
-            label='Copy',
-            command=lambda: self.right_click_edit(event, 'Copy'))
-        right_click_menu.add_command(
-            label='Cut',
-            command=lambda: self.right_click_edit(event, 'Cut'))
-        right_click_menu.add_command(
-            label='Paste',
-            command=lambda: self.right_click_edit(event, 'Paste'))
-
-        right_click_menu.tk_popup(event.x_root + 10, event.y_root + 15)
-
-    @staticmethod
-    def right_click_edit(event, command):
+    def simtype_mismatch(self) -> None:
         """
-        Sets menu command to the selected predefined virtual event.
-        Event is a unifying binding across multiple platforms.
-        https://www.tcl.tk/man/tcl8.6/TkCmd/event.htm#M7
+        Check text string in data display fields; raise messagebox if
+        color types of background and foreground do not match.
         """
-        event.widget.event_generate(f'<<{command}>>')
+        bg_text = self.colorinfo.get()
+        fg_text = self.new_fg.get()
+        match = False
+        if 'deuteranopia' in bg_text and 'deuteranopia' in fg_text:
+            match = True
+        elif 'protanopia' in bg_text and 'protanopia' in fg_text:
+            match = True
+        elif 'tritanopia' in bg_text and 'tritanopia' in fg_text:
+            match = True
+        elif 'grayscale' in bg_text and 'grayscale' in fg_text:
+            match = True
+        # NOTE: matches when simulations not used; 'sees' works ONLY because
+        #  that is part of the set textvariable whenever a simulation is run.
+        elif 'sees' not in bg_text and 'sees' not in fg_text:
+            match = True
+        if not match:
+            msg = ('Background and foreground color simulations differ.'
+                   ' Use the same click modifiers when selecting each.')
+            messagebox.showinfo(title='MISMATCH NOTICE', detail=msg)
+
+    def show_simtable(self, image: str) -> None:
+        """Show in new toplevel window the full color table in specified
+        colorblind simulated colors.  Called only as keybindings.
+
+        :param image: Descriptor of color simulation image file to
+                      retrieve: 'd', 'p', 't', 'g'.
+        """
+        colorwin = tk.Toplevel()
+        colorwin.title('test')
+        colorwin.minsize(1300, 800)
+        if image == 'd':
+            self.img = tk.PhotoImage(file="images/deuteranopia_colortable.png")
+        elif image == 'p':
+            self.img = tk.PhotoImage(file="images/protanopia_colortable.png")
+        elif image == 't':
+            self.img = tk.PhotoImage(file="images/tritanopia_colortable.png")
+        elif image == 'g':
+            self.img = tk.PhotoImage(file="images/grayscale_colortable.png")
+
+        colorwin.image = self.img
+        colortable = tk.Text(colorwin)
+        colortable.image_create(tk.END, image=self.img)
+        colortable.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--about',
-                        help='Provide description, version, GNU license',
+                        help='Provide description, usage, version, GNU license',
                         action='store_true',
                         default=False)
-    parser.add_argument('--d',
-                        help='Generate deuteranopia simulated colors',
-                        action='store_true',
-                        default=False)
-    parser.add_argument('--p',
-                        help='Generate protanopia simulated colors',
-                        action='store_true',
-                        default=False)
-    parser.add_argument('--t',
-                        help='Generate tritanopia simulated colors',
-                        action='store_true',
-                        default=False)
-    parser.add_argument('--gray', '--grey',
-                        help='Generate grayscale equivalents of named colors',
-                        action='store_true',
-                        default=False)
+
     args = parser.parse_args()
     if args.about:
         print(__doc__)
@@ -603,13 +682,5 @@ if __name__ == "__main__":
     else:
         root = tk.Tk()
         root.title("tkinter Named Colors")
-        if args.d:
-            root.title("tkinter Colors, Deuteranopia Simulation")
-        elif args.p:
-            root.title("tkinter Colors, Protanopia Simulation")
-        elif args.t:
-            root.title("tkinter Colors, Tritanopia Simulation")
-        elif args.gray:
-            root.title("tkinter Colors in Grayscale")
         app = ColorChart(root)
         root.mainloop()
