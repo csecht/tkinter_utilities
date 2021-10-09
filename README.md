@@ -50,3 +50,5 @@ Use Ctrl-T (or Command-T on MacOS), to pop up non-interactive tritanopia simulat
 Use Ctrl-G (or Command-G on MacOS), to pop up non-interactive grayscale simulation of the color table.
 ![grayscale-simulated-colors](images/grayscale_colortable.png)
 
+## Known Issues
+Right-click selection of some long color names may not fit all data into the foreground data cell; it's there, just scroll to the right. You can also 'select all' and copy and paste all the data elsewhere. All basic editing tools are available in either data cell.

@@ -26,7 +26,7 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 __author__ = 'csecht'
 __copyright__ = 'Copyright (C) 2021 C.S. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.3.2'
+__version__ = '0.3.3'
 __program_name__ = 'tk-color-helper.py'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
@@ -359,14 +359,14 @@ class ColorChart(tk.Frame):
             # OS-specific bindings:
             if MY_OS in 'lin, win':
                 label.bind('<Alt-Button-1>', lambda event, c=color_name, r_b=rgb:
-                           self.simulate_color(c, r, 'tritanopia'))
+                           self.simulate_color(c, r_b, 'tritanopia'))
                 label.bind('<Button-3>',
                            lambda event, c=color_name, h=orig_hex, r_b=rgb:
                            self.update_fg(c, r_b, 'orig'))
                 label.bind('<Shift-Button-3>', lambda event, c=color_name, r_b=rgb:
                            self.update_fg(c, r_b, 'deuteranopia'))
                 label.bind('<Control-Button-3>', lambda event, c=color_name, r_b=rgb:
-                           self.update_fg(c, r, 'protanopia'))
+                           self.update_fg(c, r_b, 'protanopia'))
                 label.bind('<Alt-Button-3>', lambda event, c=color_name, r_b=rgb:
                            self.update_fg(c, r_b, 'tritanopia'))
                 label.bind('<Shift-Control-Button-3>', lambda event, c=color_name, r_b=rgb:
