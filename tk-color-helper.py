@@ -13,8 +13,11 @@ Ctrl = protanopia, Alt(Command) = tritanopia, Shift-Ctrl = grayscale.
 Simulated color hex codes and RGB values may not correspond to any named
 color but the hex string will be recognized by tkinter. Hex and RGB
 values can also be used in other graphics applications.
-    Text in the color display and data fields can be cut, pasted, or
-edited with standard keyboard and click commands. Runs with Python 3.6
+    Using the Ctrl or Command (macOS) key in combination with the key
+D, P, T, or G will pop-up a non-interactive color table simulated for
+deuteranopia, protanopia, tritanopia, or grayscale, respectively.
+    Text in the color display and data fields can be cut, copied, pasted,
+or edited with standard keyboard and click commands. Runs with Python 3.6
 and tkinter 8.6 or later in Linux, Windows, and MacOS systems.
 Table construction based on code from
 https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
