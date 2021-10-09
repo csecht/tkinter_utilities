@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-A Python utility to help choose colors and their colorblind equivalents
+A Python utility to help choose colors and their color blind equivalents
 in tkinter GUIs. Draws an interactive tkinter table of 760 named colors
 included in X11 rgb.txt.
    Program usage: Click on a color name to show its hex code and RGB
@@ -8,8 +8,8 @@ value showing that color as background. Right-click a different color to
 change the text foreground. Foreground colors can be changed for a given
 background color, but selecting a new background will reset the
 foreground to its default value. Click with a key modifier to show the
-colorblind simulation of the selected color: Shift (deuteranopia),
-Ctrl (protanopia), Alt (tritanopia), Shift-Ctrl (grayscale).
+color blind simulation of the selected color: Shift = deuteranopia,
+Ctrl = protanopia, Alt(Command) = tritanopia, Shift-Ctrl = grayscale.
 Simulated color hex codes and RGB values may not correspond to any named
 color but the hex string will be recognized by tkinter. Hex and RGB
 values can also be used in other graphics applications.
@@ -23,7 +23,7 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 __author__ = 'csecht'
 __copyright__ = 'Copyright (C) 2021 C.S. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.3.1'
+__version__ = '0.3.2'
 __program_name__ = 'tk-color-helper.py'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
@@ -291,8 +291,8 @@ class ColorChart(tk.Frame):
         tk.Frame.__init__(self, master)
 
         self.colorinfo = tk.StringVar()
-        self.colorinfo.set('Click for color data. Click with Shift, '
-                           'Ctrl, Alt, or Shift+Ctrl simulates colorblindness')
+        self.colorinfo.set('Click for color data; use Shift, Ctrl,'
+                           ' Alt (or Command), or Shift+Ctrl to simulate color blindness')
         self.bg_info = tk.Entry(self, textvariable=self.colorinfo)
         self.new_fg = tk.StringVar()
         self.new_fg.set('<- Right-click different color to change text color')
@@ -338,48 +338,50 @@ class ColorChart(tk.Frame):
             bw = self.black_or_white(rgb)
             label.config(fg=bw)
             orig_hex = f'#{r:02x}{g:02x}{b:02x}'
-            # This click bind displays the named color and data.
+            # Use clicks to bind color label to color and data display.
+            # Click selects background, rt-click selects foreground.
+            # Rt-click Button is OS-specific.
+            # MacOS cannot use the Alt/option modifier, so use Command.
+            # Universal bindings:
             label.bind('<Button-1>',
-                       lambda event, c=color_name, h=orig_hex, r=rgb, fg=bw:
-                       self.show_bg(c, h, r, fg, 'orig'))
+                       lambda event, c=color_name, h=orig_hex, r_b=rgb, fg=bw:
+                       self.show_bg(c, h, r_b, fg, 'orig'))
             # These binds display the simulated color and data.
-            label.bind('<Shift-Button-1>', lambda event, c=color_name, r=rgb:
-                       self.simulate_color(c, r, 'deuteranopia'))
-            label.bind('<Control-Button-1>', lambda event, c=color_name, r=rgb:
-                       self.simulate_color(c, r, 'protanopia'))
-            label.bind('<Alt-Button-1>', lambda event, c=color_name, r=rgb:
-                       self.simulate_color(c, r, 'tritanopia'))
-            label.bind('<Shift-Control-Button-1>', lambda event, c=color_name, r=rgb:
-                       self.simulate_color(c, r, 'grayscale'))
-            # Right-click on label changes foreground of self.bg_info.
+            label.bind('<Shift-Button-1>', lambda event, c=color_name, r_b=rgb:
+                       self.simulate_color(c, r_b, 'deuteranopia'))
+            label.bind('<Control-Button-1>', lambda event, c=color_name, r_b=rgb:
+                       self.simulate_color(c, r_b, 'protanopia'))
+            label.bind('<Shift-Control-Button-1>', lambda event, c=color_name, r_b=rgb:
+                       self.simulate_color(c, r_b, 'grayscale'))
+            # OS-specific bindings:
             if MY_OS in 'lin, win':
-                # This bind displays the named color and data.
+                label.bind('<Alt-Button-1>', lambda event, c=color_name, r_b=rgb:
+                           self.simulate_color(c, r, 'tritanopia'))
                 label.bind('<Button-3>',
-                           lambda event, c=color_name, h=orig_hex, r=rgb:
-                           self.update_fg(c, r, 'orig'))
-                # These binds display the simulated color and data.
-                label.bind('<Shift-Button-3>', lambda event, c=color_name, r=rgb:
-                           self.update_fg(c, r, 'deuteranopia'))
-                label.bind('<Control-Button-3>', lambda event, c=color_name, r=rgb:
+                           lambda event, c=color_name, h=orig_hex, r_b=rgb:
+                           self.update_fg(c, r_b, 'orig'))
+                label.bind('<Shift-Button-3>', lambda event, c=color_name, r_b=rgb:
+                           self.update_fg(c, r_b, 'deuteranopia'))
+                label.bind('<Control-Button-3>', lambda event, c=color_name, r_b=rgb:
                            self.update_fg(c, r, 'protanopia'))
-                label.bind('<Alt-Button-3>', lambda event, c=color_name, r=rgb:
-                           self.update_fg(c, r, 'tritanopia'))
-                label.bind('<Shift-Control-Button-3>', lambda event, c=color_name, r=rgb:
-                           self.update_fg(c, r, 'grayscale'))
+                label.bind('<Alt-Button-3>', lambda event, c=color_name, r_b=rgb:
+                           self.update_fg(c, r_b, 'tritanopia'))
+                label.bind('<Shift-Control-Button-3>', lambda event, c=color_name, r_b=rgb:
+                           self.update_fg(c, r_b, 'grayscale'))
             elif MY_OS == 'dar':
-                # This bind displays the named color and data.
+                label.bind('<Command-Button-1>', lambda event, c=color_name, r_b=rgb:
+                           self.simulate_color(c, r_b, 'tritanopia'))
                 label.bind('<Button-2>',
-                           lambda event, c=color_name, h=orig_hex, r=rgb:
-                           self.update_fg(c, r, 'orig'))
-                # These binds display the simulated color and data.
-                label.bind('<Shift-Button-2>', lambda event, c=color_name, r=rgb:
-                           self.update_fg(c, r, 'deuteranopia'))
-                label.bind('<Control-Button-2>', lambda event, c=color_name, r=rgb:
-                           self.update_fg(c, r, 'protanopia'))
-                label.bind('<Alt-Button-2>', lambda event, c=color_name, r=rgb:
-                           self.update_fg(c, r, 'tritanopia'))
-                label.bind('<Shift-Control-Button-2>', lambda event, c=color_name, r=rgb:
-                           self.update_fg(c, r, 'grayscale'))
+                           lambda event, c=color_name, h=orig_hex, r_b=rgb:
+                           self.update_fg(c, r_b, 'orig'))
+                label.bind('<Shift-Button-2>', lambda event, c=color_name, r_b=rgb:
+                           self.update_fg(c, r_b, 'deuteranopia'))
+                label.bind('<Control-Button-2>', lambda event, c=color_name, r_b=rgb:
+                           self.update_fg(c, r_b, 'protanopia'))
+                label.bind('<Command-Button-2>', lambda event, c=color_name, r_b=rgb:
+                           self.update_fg(c, r_b, 'tritanopia'))
+                label.bind('<Shift-Control-Button-2>', lambda event, c=color_name, r_b=rgb:
+                           self.update_fg(c, r_b, 'grayscale'))
 
             if row > MAX_ROWS:
                 row = 1
@@ -435,8 +437,8 @@ class ColorChart(tk.Frame):
             self.fg_info.config(bg='grey90', font=('TkTooltipFont', 9))
         elif MY_OS == 'dar':
             self.bg_info.config(justify='center', bg='grey90',
-                                font=('TkTooltipFont', 15))
-            self.fg_info.config(bg='grey90', font=('TkTooltipFont', 11))
+                                font=('TkTooltipFont', 16))
+            self.fg_info.config(bg='grey90', font=('TkTooltipFont', 12))
 
         # NOTE: fg_info col width needs to be enough to handle the longest
         #   color name plus hex and RGB, and considering font size.
@@ -475,7 +477,7 @@ class ColorChart(tk.Frame):
             self, color: str, rgb: tuple, sim_type: str) -> tuple:
         """
         Convert listed named color RGB values to values that simulate a
-        specified colorblindness or a grayscale simulation.
+        specified color blindness or a grayscale simulation.
         Source: http://mkweb.bcgsc.ca/colorblind/math.mhtml
 
         :param color: A color name from X11_RGB_NAMES
@@ -546,7 +548,7 @@ class ColorChart(tk.Frame):
         # NOTE: fg_info resets each time a different bg color is selected,
         #   but bg is retained for any number of different fg selections.
         # TODO: Auto-retain clicked fg for each bg selection.
-        self.new_fg.set('<- Right-click different color to change text color')
+        self.new_fg.set(f"<-fg='{contrast}'; Right-click different color to change text color")
 
     @staticmethod
     def black_or_white(rgb: tuple) -> str:
@@ -599,7 +601,7 @@ class ColorChart(tk.Frame):
             saved_text = self.bg_info.getvar(str(self.bg_info.cget('textvariable')))
             color, sim_hex, sim_rgb = self.simulate_color(color, rgb, sim_type)
             self.new_fg.set(
-                f"<-{sim_type} sees {color} text as fg='{sim_hex}', {sim_rgb}")
+                f"<-{sim_type} sees '{color}' as fg='{sim_hex}', {sim_rgb}")
             self.bg_info.configure(fg=sim_hex, bg=saved_bg)
             self.colorinfo.set(saved_text)
 
@@ -632,13 +634,15 @@ class ColorChart(tk.Frame):
             match = True
         if not match:
             msg = ('Background and foreground color simulations differ.'
-                   ' Use the same click modifiers when selecting each.')
+                   ' Use the same click modifiers when selecting each.'
+                   ' Shift=deuteranopia, Ctrl=protanopia, '
+                   'Alt(Command)=tritanopia, Shift-Ctrl=grayscale')
             messagebox.showinfo(title='MISMATCH NOTICE', detail=msg)
 
     def show_simtable(self, image: str) -> None:
         """
         Show in new toplevel window the full color table in specified
-        colorblind simulated colors.  Called only as keybindings.
+        color blind simulated colors.  Called only as keybindings.
 
         :param image: Descriptor of color simulation image file to
                       retrieve: 'd', 'p', 't', 'g'.
