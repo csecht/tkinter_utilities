@@ -2,23 +2,26 @@
 ## tk-color-helper.py
 
 A Python utility to help choose colors and their color blind equivalents
-in tkinter GUIs. Draws an interactive tkinter table of 760 named colors
-included in X11 rgb.txt. 
-   Program usage: Click on a color name to show its hex code and RGB
-value and displayed as background. Right-click a different color to
-change the foreground (text) color. Foreground colors can be changed using the same
-background color, but selecting a new background will reset the
-foreground to its default value (black or white). Click with a modifier key to show a
-color blind simulation of the selected color: Shift (deuteranopia), 
-Ctrl (protanopia), and Alt or Command (tritanopia). Shift-Ctrl simulates grayscale.
-The simulated color hex codes and RGB values may not correspond to any named
-tkinter color, but the hex string will be recognized by tkinter. Hex and
-RGB values can also be used in other graphics applications.
-    Using the Ctrl or Command (macOS) key in combination with the key
-D, P, T, or G will pop-up a non-interactive color table simulated for deuteranopia, protanopia, tritanopia, or grayscale, respectively.
-    Text in the color display and data fields can be cut, copied, pasted, or
-edited with standard keyboard and click commands. This program runs with Python 3.6 
-and tkinter 8.6 or later in Linux, Windows, and MacOS systems.
+for tkinter GUIs. Draws an interactive color table for 760 color names
+found in X11 rgb.txt. Works with Linux, Windows, and MacOS systems.
+   Usage: Click on a color name to show its hex code and RGB
+value and display that color as background. Right-click a different color
+to change the text foreground. Clicking on another color will retain
+that selected foreground. Click with a key modifier to show the
+color blind simulation of the selected color: Shift = deuteranopia,
+Ctrl = protanopia, Alt(Command) = tritanopia, Shift-Ctrl = grayscale;
+the displayed foreground color will automatically match the simulation
+type. Simulated color hex codes and RGB values may not correspond to any
+named color but the hex string will be recognized by tkinter. Hex and RGB
+values can also be used in other graphics applications.
+    Using the Ctrl key (or Command in macOS) while pressing D, P, T, or
+G will pop-up a non-interactive color table simulated for deuteranopia,
+protanopia, tritanopia, or grayscale, respectively.
+    Text in the color display and data fields can be cut, copied, pasted,
+or edited with standard keyboard and click commands. Runs with Python 3.6
+and tkinter 8.6 or later.
+Color table construction based on code from
+https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 ```
 $ ./tk-color-helper.py --help
 usage: tk-color-helper.py [-h] [--about]
