@@ -516,9 +516,8 @@ class ColorChart(tk.Frame):
         sim_hex = f'#{R:02x}{G:02x}{B:02x}'
         sim_rgb = (R, G, B)
 
-        # TODO: Move fg statements to foregrnd_info()?
         prior_fg = self.fg_hex.get()
-        # call is None is true when call is from button1 click.
+        # 'fg_click is None' is true when call is from button1 click.
         if sim_type == 'nosim' and fg_click is None:
             fg_hex = self.black_or_white(sim_rgb)
             self.fg_hex.set(fg_hex)
@@ -527,14 +526,13 @@ class ColorChart(tk.Frame):
             else:
                 self.fg_hex.set(fg_hex)
             self.display_colors(color, sim_rgb, sim_type)
-        elif sim_type == 'nosim' and fg_click == 'yes':
-            self.fg_hex.set(sim_hex)
         elif sim_type != 'nosim' and fg_click is None:
             fg_hex = self.black_or_white(sim_rgb)
             if prior_fg in 'black, white':
                 self.fg_hex.set(fg_hex)
             self.display_colors(color, sim_rgb, sim_type)
-        elif sim_type != 'nosim' and fg_click == 'yes':
+        # 'fg_click is yes' when call is from button2 or 3, via foregrnd_info().
+        elif fg_click == 'yes':
             self.fg_hex.set(sim_hex)
 
         return sim_hex, sim_rgb
@@ -543,7 +541,7 @@ class ColorChart(tk.Frame):
         """
         Displays click-selected color and its data in main display field.
         Preserves prior foreground color.
-        Called from simulate_color() fg statements.
+        Called from simulate_color().
 
         :param color: The color name, string
         :param rgb: (R, G, B) of either the named color or its displayed
@@ -557,9 +555,8 @@ class ColorChart(tk.Frame):
         # self.bg_hex.set(bg_hex)
 
         self.sim_type.set(sim_type)
-        # self.fg_hex is first set in simulate_color(), so will be empty
-        #   until a sim mod-click calls there; thus, it must still be
-        #   using the default fg colors from 'black' or 'white'.
+        # self.fg_hex is first set in simulate_color(). It will be the
+        #   default 'black' or 'white' until rt-click changes the fg.
         fg_hex = self.fg_hex.get()
 
         # Click sends color selection to simulate_color(),
@@ -579,7 +576,7 @@ class ColorChart(tk.Frame):
 
         self.sync_simtypes()
 
-        # Need to clear any previously selected text highlighting
+        # Need to clear any previously selected text highlighting.
         self.display.select_clear()
         self.fg_info.select_clear()
         self.update_idletasks()
