@@ -490,6 +490,7 @@ class ColorChart(tk.Frame):
         # Calculate color blind simulation using T matrix RGB conversion.
         # All T matrix values from http://mkweb.bcgsc.ca/colorblind/math.mhtml
         #   and are conversion summaries with the LMSD65 XYZ-LMS conversion matrix.
+        #   Author: Martin Krzywinski
         if sim_type == 'deuteranopia':
             # Simulate deuteranopia- greens are greatly reduced (1% men)
             _R = clip(round((0.33066007 * r) + (0.66933993 * g) + (0 * b)))
@@ -516,7 +517,7 @@ class ColorChart(tk.Frame):
         sim_hex = f'#{_R:02x}{_G:02x}{_B:02x}'
         sim_rgb = (_R, _G, _B)
 
-        # Need to distinguish whether sim is for default fg, new bg, or default fg.
+        # Need to distinguish whether sim is for default fg, new bg, or new fg.
         prior_fg = self.fg_hex.get()
         # 'fg_click is None' is true when call is from button1 click.
         if sim_type == 'nosim' and fg_click is None:
@@ -553,7 +554,6 @@ class ColorChart(tk.Frame):
 
         _r, _g, _b = rgb
         bg_hex = f'#{_r:02x}{_g:02x}{_b:02x}'
-        # self.bg_hex.set(bg_hex)
 
         self.sim_type.set(sim_type)
         # self.fg_hex is first set in simulate_color(). It will be the
@@ -592,7 +592,7 @@ class ColorChart(tk.Frame):
         _r, _g, _b = rgb
         fg_hex = f'#{_r:02x}{_g:02x}{_b:02x}'
         sim_type = self.sim_type.get()
-        # Used in sync_simtypes() to sync fg to bg sim_type.
+        # Used in sync_simtypes() to synchronize fg to bg sim_types.
         self.fg_color.set(color)
         self.fg_rgb = rgb
 
