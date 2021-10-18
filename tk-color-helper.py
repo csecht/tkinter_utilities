@@ -39,7 +39,6 @@ from math import sqrt
 
 try:
     import tkinter as tk
-    from tkinter import messagebox
 except (ImportError, ModuleNotFoundError) as error:
     print('Requires tkinter, which is included with \n'
           'Python 3.7+ distributions.\n'
