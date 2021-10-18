@@ -477,9 +477,9 @@ class ColorChart(tk.Frame):
 
         self.sim_type.set(sim_type)
         r, g, b = rgb
-        R = 0
-        G = 0
-        B = 0
+        _R = 0
+        _G = 0
+        _B = 0
 
         # Need to restrict RGB values to integers in range [0, 255].
         # source: https://stackoverflow.com/questions/5996881/
@@ -492,30 +492,31 @@ class ColorChart(tk.Frame):
         #   and are conversion summaries with the LMSD65 XYZ-LMS conversion matrix.
         if sim_type == 'deuteranopia':
             # Simulate deuteranopia- greens are greatly reduced (1% men)
-            R = clip(round((0.33066007 * r) + (0.66933993 * g) + (0 * b)))
-            G = clip(round((0.33066007 * r) + (0.66933993 * g) + (0 * b)))
-            B = clip(round((-0.02785538 * r) + (0.02785538 * g) + (1 * b)))
+            _R = clip(round((0.33066007 * r) + (0.66933993 * g) + (0 * b)))
+            _G = clip(round((0.33066007 * r) + (0.66933993 * g) + (0 * b)))
+            _B = clip(round((-0.02785538 * r) + (0.02785538 * g) + (1 * b)))
         elif sim_type == 'protanopia':
             # Simulate protanopia- reds are greatly reduced (1% men)
-            R = clip(round((0.170556992 * r) + (0.829443014 * g) + (0 * b)))
-            G = clip(round((0.170556991 * r) + (0.829443008 * g) + (0 * b)))
-            B = clip(round((-0.004517144 * r) + (0.004517144 * g) + (1 * b)))
+            _R = clip(round((0.170556992 * r) + (0.829443014 * g) + (0 * b)))
+            _G = clip(round((0.170556991 * r) + (0.829443008 * g) + (0 * b)))
+            _B = clip(round((-0.004517144 * r) + (0.004517144 * g) + (1 * b)))
         elif sim_type == 'tritanopia':
             # Simulate tritanopia - blues are greatly reduced (0.003% population)
-            R = clip(round((1 * r) + (0.1273989 * g) + (-0.1273989 * b)))
-            G = clip(round((0 * r) + (0.8739093 * g) + (0.1260907 * b)))
-            B = clip(round((0 * r) + (0.8739093 * g) + (0.1260907 * b)))
+            _R = clip(round((1 * r) + (0.1273989 * g) + (-0.1273989 * b)))
+            _G = clip(round((0 * r) + (0.8739093 * g) + (0.1260907 * b)))
+            _B = clip(round((0 * r) + (0.8739093 * g) + (0.1260907 * b)))
         elif sim_type == 'grayscale':
             # Simulate grayscale - standard color luminance
-            R = G = B = int(round((.2126 * r) + (.7152 * g) + (.0722 * b), 0))
+            _R = _G = _B = int(round((.2126 * r) + (.7152 * g) + (.0722 * b), 0))
         elif sim_type == 'nosim':
-            R = r
-            G = g
-            B = b
+            _R = r
+            _G = g
+            _B = b
 
-        sim_hex = f'#{R:02x}{G:02x}{B:02x}'
-        sim_rgb = (R, G, B)
+        sim_hex = f'#{_R:02x}{_G:02x}{_B:02x}'
+        sim_rgb = (_R, _G, _B)
 
+        # Need to distinguish whether sim is for default fg, new bg, or default fg.
         prior_fg = self.fg_hex.get()
         # 'fg_click is None' is true when call is from button1 click.
         if sim_type == 'nosim' and fg_click is None:
@@ -556,22 +557,18 @@ class ColorChart(tk.Frame):
 
         self.sim_type.set(sim_type)
         # self.fg_hex is first set in simulate_color(). It will be the
-        #   default 'black' or 'white' until rt-click changes the fg.
+        #   default 'black' or 'white' until rt-click binding changes the fg.
         fg_hex = self.fg_hex.get()
 
-        # Click sends color selection to simulate_color(),
+        # Click binding sends color selection to simulate_color(),
         #   with a sim_type tag.
         if sim_type == 'nosim':
             self.display_text.set(
                 f"bg='{color}' or bg='{bg_hex}'; RGB {rgb}")
             self.display.configure(bg=bg_hex, fg=fg_hex)
-        # A click modifier sent color selection to simulate_color()
-        #   with a mod-specific color blind simulator tag.
         else:
             self.display_text.set(
                 f"{sim_type} sees '{color}' as: bg='{bg_hex}'; RGB {rgb}")
-            # When a new fg is rt-click selected, simulate_color() is called
-            #   and sets the simulated self.fg_hex control variable.
             self.display.configure(bg=bg_hex, fg=fg_hex)
 
         self.sync_simtypes()
