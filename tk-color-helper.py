@@ -26,7 +26,7 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 __author__ = 'csecht'
 __copyright__ = 'Copyright (C) 2021 C.S. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.4.0'
+__version__ = '0.4.1'
 __program_name__ = 'tk-color-helper.py'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
@@ -303,7 +303,7 @@ class ColorChart(tk.Frame):
 
         self.fg_color = tk.StringVar()
         self.fg_hex = tk.StringVar()
-        self.fg_rgb = None
+        self.fg_rgb = ('None',)
         self.sim_type = tk.StringVar(value='nosim')
         # Note: display bg and fg will change with click bindings,
         #   set with _hex control variables; startup with default colors.
@@ -442,11 +442,11 @@ class ColorChart(tk.Frame):
 
             self.master.bind_all('<Control-a>', lambda event: select_all())
 
-        self.display_text.set('Click for color data; use Shift, Ctrl,'
-                              ' Alt (or Command), or Shift+Ctrl to simulate'
+        self.display_text.set('Click on a color; use Shift, Ctrl,'
+                              ' Alt (Command), or Shift+Ctrl to simulate'
                               ' color blindness')
         if MY_OS in 'lin, win':
-            self.display.config(font=('TkTooltipFont', 13))
+            self.display.config(font=('TkTooltipFont', 11))
             self.fg_info.config(font=('TkTooltipFont', 9))
         elif MY_OS == 'dar':
             self.display.config(font=('TkTooltipFont', 16))
@@ -458,7 +458,6 @@ class ColorChart(tk.Frame):
                           columnspan=self.info_width - 10)
         self.fg_info.grid(row=0, column=self.info_width - 10, sticky=tk.EW,
                           columnspan=10)
-
 
     def simulate_color(
             self, color: str, rgb: tuple, sim_type: str, fg_click=None) -> tuple:
@@ -518,13 +517,13 @@ class ColorChart(tk.Frame):
         sim_rgb = (R, G, B)
 
         # TODO: Move fg statements to foregrnd_info()?
-        self.prior_fg = self.fg_hex.get()
+        prior_fg = self.fg_hex.get()
         # call is None is true when call is from button1 click.
         if sim_type == 'nosim' and fg_click is None:
             fg_hex = self.black_or_white(sim_rgb)
             self.fg_hex.set(fg_hex)
-            if self.prior_fg not in 'black, white':
-                self.fg_hex.set(self.prior_fg)
+            if prior_fg not in 'black, white':
+                self.fg_hex.set(prior_fg)
             else:
                 self.fg_hex.set(fg_hex)
             self.display_colors(color, sim_rgb, sim_type)
@@ -532,7 +531,7 @@ class ColorChart(tk.Frame):
             self.fg_hex.set(sim_hex)
         elif sim_type != 'nosim' and fg_click is None:
             fg_hex = self.black_or_white(sim_rgb)
-            if self.prior_fg in 'black, white':
+            if prior_fg in 'black, white':
                 self.fg_hex.set(fg_hex)
             self.display_colors(color, sim_rgb, sim_type)
         elif sim_type != 'nosim' and fg_click == 'yes':
@@ -632,7 +631,15 @@ class ColorChart(tk.Frame):
         fg_text = self.fg_text.get()
         sim_type = self.sim_type.get()
         color = self.fg_color.get()
-        sim_list = ['deuteranopia', 'protanopia', 'tritanopia', 'grayscale']
+        fg_hex = self.fg_hex.get()
+        # Need to set self.fg_rgb to default color fg of black or white
+        #   in cases of sim color selected before a fg color is selected
+        if fg_hex == 'black':
+            self.fg_rgb = (0, 0, 0)
+        elif fg_hex == 'white':
+            self.fg_rgb = (255, 255, 255)
+
+        sim_list = ['deuteranopia', 'protanopia', 'tritanopia', 'grayscale', 'nosim']
         match = False
         for sim in sim_list:
             if sim in bg_text and sim in fg_text:
