@@ -304,7 +304,7 @@ class ColorChart(tk.Frame):
         self.fg_hex = tk.StringVar()
         self.fg_rgb = ('None',)
         self.sim_type = tk.StringVar(value='nosim')
-        self.use_info = tk.Label(self, bg='gray85')
+        self.use_info = tk.Label(self, bg='gray15', fg='gray85')
         # Note: display bg and fg will change with click bindings,
         #   set with _hex control variables; startup with default colors.
         self.display = tk.Entry(self, justify='center',
@@ -442,11 +442,11 @@ class ColorChart(tk.Frame):
 
             self.master.bind_all('<Control-a>', lambda event: select_all())
 
-        useage = ('Click changes background, right-click changes foreground.'
-                  ' Click modifiers simulate color blindness. Shift:deuteranopia,'
-                  ' Ctrl:protanopia; Alt(Command on Mac):tritanopia,'
-                  ' Shift-Crtl:grayscale.')
-        self.use_info.configure(text=useage, font=('TkTooltipFont', 9))
+        usage = ('Click changes background, right-click changes foreground.'
+                 ' Click modifiers simulate color blindness. Shift:deuteranopia,'
+                 ' Ctrl:protanopia; Alt(Command on Mac):tritanopia,'
+                 ' Shift-Crtl:grayscale.')
+        self.use_info.configure(text=usage, font=('TkTooltipFont', 9))
 
         self.display_text.set('Click on a color to display its hex code '
                               'and RGB values.')
