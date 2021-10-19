@@ -445,7 +445,7 @@ class ColorChart(tk.Frame):
                               ' Alt (Command), or Shift+Ctrl to simulate'
                               ' color blindness')
         if MY_OS in 'lin, win':
-            self.display.config(font=('TkTooltipFont', 11))
+            self.display.config(font=('TkTooltipFont', 12))
             self.fg_info.config(font=('TkTooltipFont', 9))
         elif MY_OS == 'dar':
             self.display.config(font=('TkTooltipFont', 16))
