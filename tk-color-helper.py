@@ -26,7 +26,7 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 __author__ = 'csecht'
 __copyright__ = 'Copyright (C) 2021 C.S. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.4.1'
+__version__ = '0.4.2'
 __program_name__ = 'tk-color-helper.py'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
@@ -445,7 +445,7 @@ class ColorChart(tk.Frame):
                               ' Alt (Command), or Shift+Ctrl to simulate'
                               ' color blindness')
         if MY_OS in 'lin, win':
-            self.display.config(font=('TkTooltipFont', 12))
+            self.display.config(font=('TkTooltipFont', 11))
             self.fg_info.config(font=('TkTooltipFont', 9))
         elif MY_OS == 'dar':
             self.display.config(font=('TkTooltipFont', 16))
@@ -519,7 +519,10 @@ class ColorChart(tk.Frame):
         # Need to distinguish whether sim is for default fg, new bg, or new fg.
         prior_fg = self.fg_hex.get()
         # 'fg_click is None' is true when call is from button1 click.
+        #  Note: Once sync_simtypes() is called, fg no longer defaults to the
+        #     color label's black or white.
         if sim_type == 'nosim' and fg_click is None:
+            # Note: here, fg_hex is the color name, not the hexcode.
             fg_hex = self.black_or_white(sim_rgb)
             self.fg_hex.set(fg_hex)
             if prior_fg not in 'black, white':
@@ -531,6 +534,7 @@ class ColorChart(tk.Frame):
             fg_hex = self.black_or_white(sim_rgb)
             if prior_fg in 'black, white':
                 self.fg_hex.set(fg_hex)
+                self.fg_color.set(fg_hex)
             self.display_colors(color, sim_rgb, sim_type)
         # 'fg_click is yes' when call is from button2 or 3, via foregrnd_info().
         elif fg_click == 'yes':
@@ -626,7 +630,7 @@ class ColorChart(tk.Frame):
         color = self.fg_color.get()
         fg_hex = self.fg_hex.get()
         # Need to set self.fg_rgb to default color fg of black or white
-        #   in cases of sim color selected before a fg color is selected
+        #   in cases of sim color selected before a fg color is selected.
         if fg_hex == 'black':
             self.fg_rgb = (0, 0, 0)
         elif fg_hex == 'white':
