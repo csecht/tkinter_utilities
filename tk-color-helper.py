@@ -2,11 +2,11 @@
 """
 A Python utility to help choose colors and their color blind equivalents
 for tkinter GUIs. Draws an interactive color table for 760 color names
-found in X11 rgb.txt. Works with Linux, Windows, and MacOS systems.
+found in X11 rgb.txt. Works with Linux, Windows, and MacOS.
    Usage: Click on a color name to show its hex code and RGB
 value and display that color as background. Right-click a different color
 to change the text foreground. Clicking on another color will retain
-that selected foreground. Click with a key modifier to show the
+that selected foreground. Click with a modifier key to show the
 color blind simulation of the selected color: Shift = deuteranopia,
 Ctrl = protanopia, Alt(Command) = tritanopia, Shift-Ctrl = grayscale;
 the displayed foreground color will automatically match the simulation
@@ -26,7 +26,7 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 __author__ = 'csecht'
 __copyright__ = 'Copyright (C) 2021 C.S. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.4.2'
+__version__ = '0.4.3'
 __program_name__ = 'tk-color-helper.py'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
@@ -70,7 +70,7 @@ if sys.version_info < (3, 6):
     sys.exit(0)
 
 # 40 rows provide nice spatial organization for 760 color names.
-MAX_ROWS = 40
+MAX_ROWS = 41
 # Cutoff of perceived brightness in range(128-145) to switch from black to white
 #  foreground will give acceptable visual contrast when background below that pB.
 #  130 has a cutoff of gray51.
@@ -297,13 +297,14 @@ class ColorChart(tk.Frame):
 
         self.fg_text = tk.StringVar()
         # intro_fg_txt var used for a comparison in display_colors().
-        self.intro_fg_txt = '<- Right-click different color to change text color'
+        self.intro_fg_txt = '<- Selected foreground color data are displayed here.'
         self.fg_text.set(self.intro_fg_txt)
 
         self.fg_color = tk.StringVar()
         self.fg_hex = tk.StringVar()
         self.fg_rgb = ('None',)
         self.sim_type = tk.StringVar(value='nosim')
+        self.use_info = tk.Label(self, bg='gray85')
         # Note: display bg and fg will change with click bindings,
         #   set with _hex control variables; startup with default colors.
         self.display = tk.Entry(self, justify='center',
@@ -328,7 +329,7 @@ class ColorChart(tk.Frame):
         Call simulate_color(), black_or_white(), show_orig().
         """
         # row 0 reserved for color info Entry(), gridded in config_master().
-        row = 1
+        row = 2
         col = 0
 
         for color_name in X11_RGB_NAMES:
@@ -374,7 +375,7 @@ class ColorChart(tk.Frame):
                            self.foregrnd_info(c, r_b))
 
             if row > MAX_ROWS:
-                row = 1
+                row = 2
                 col += 1
 
         self.pack(expand=True, fill="both")
@@ -441,11 +442,16 @@ class ColorChart(tk.Frame):
 
             self.master.bind_all('<Control-a>', lambda event: select_all())
 
-        self.display_text.set('Click on a color; use Shift, Ctrl,'
-                              ' Alt (Command), or Shift+Ctrl to simulate'
-                              ' color blindness')
+        useage = ('Click changes background, right-click changes foreground.'
+                  ' Click modifiers simulate color blindness. Shift:deuteranopia,'
+                  ' Ctrl:protanopia; Alt(Command on Mac):tritanopia,'
+                  ' Shift-Crtl:grayscale.')
+        self.use_info.configure(text=useage, font=('TkTooltipFont', 9))
+
+        self.display_text.set('Click on a color to display its hex code '
+                              'and RGB values.')
         if MY_OS in 'lin, win':
-            self.display.config(font=('TkTooltipFont', 11))
+            self.display.config(font=('TkTooltipFont', 12))
             self.fg_info.config(font=('TkTooltipFont', 9))
         elif MY_OS == 'dar':
             self.display.config(font=('TkTooltipFont', 16))
@@ -453,9 +459,10 @@ class ColorChart(tk.Frame):
 
         # NOTE: fg_info col width needs to be enough to handle the longest
         #   color name plus hex and RGB, and considering font size.
-        self.display.grid(row=0, column=0, sticky=tk.EW,
+        self.use_info.grid(row=0, column=0, columnspan=20, sticky=tk.EW)
+        self.display.grid(row=1, column=0, sticky=tk.EW,
                           columnspan=self.info_width - 10)
-        self.fg_info.grid(row=0, column=self.info_width - 10, sticky=tk.EW,
+        self.fg_info.grid(row=1, column=self.info_width - 10, sticky=tk.EW,
                           columnspan=10)
 
     def simulate_color(
@@ -567,11 +574,11 @@ class ColorChart(tk.Frame):
         #   with a sim_type tag.
         if sim_type == 'nosim':
             self.display_text.set(
-                f"bg='{color}' or bg='{bg_hex}'; RGB {rgb}")
+                f"bg='{color}' or bg='{bg_hex}', RGB {rgb}")
             self.display.configure(bg=bg_hex, fg=fg_hex)
         else:
             self.display_text.set(
-                f"{sim_type} sees '{color}' as: bg='{bg_hex}'; RGB {rgb}")
+                f"{sim_type} sees '{color}' as bg='{bg_hex}', RGB {rgb}")
             self.display.configure(bg=bg_hex, fg=fg_hex)
 
         self.sync_simtypes()
@@ -602,7 +609,7 @@ class ColorChart(tk.Frame):
         if sim_type == 'nosim':
             self.fg_hex.set(fg_hex)
             self.fg_text.set(
-                f"<-Text: fg='{color}' or fg='{fg_hex}'; RGB {rgb}")
+                f"<-Text: fg='{color}' or fg='{fg_hex}', RGB {rgb}")
             self.display.configure(fg=fg_hex)
 
         else:
@@ -610,7 +617,7 @@ class ColorChart(tk.Frame):
             #   which .sets() the fg sim hex and rgb control variables.
             sim_hex, sim_rgb = self.simulate_color(color, rgb, sim_type, 'yes')
             self.fg_text.set(
-                f"<-{sim_type} sees '{color}' as fg='{sim_hex}'; RGB {sim_rgb}")
+                f"<-{sim_type} sees '{color}' as fg='{sim_hex}', RGB {sim_rgb}")
             self.display.configure(fg=sim_hex)
 
         # Need to clear any previously selected text edit-highlighting.
@@ -649,11 +656,11 @@ class ColorChart(tk.Frame):
             sim_hex, sim_rgb = self.simulate_color(color, self.fg_rgb, sim_type, 'yes')
             if sim_type == 'nosim':
                 self.fg_text.set(
-                    f"<-Text: fg='{color}' or fg='{sim_hex}'; RGB {sim_rgb}")
+                    f"<-Text: fg='{color}' or fg='{sim_hex}', RGB {sim_rgb}")
                 self.display.configure(fg=sim_hex)
             else:
                 self.fg_text.set(
-                    f"<-{sim_type} sees '{color}' as fg='{sim_hex}'; RGB {sim_rgb}")
+                    f"<-{sim_type} sees '{color}' as fg='{sim_hex}', RGB {sim_rgb}")
                 self.display.configure(fg=sim_hex)
 
     @staticmethod
