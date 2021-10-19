@@ -10,10 +10,9 @@ to change the text foreground. Clicking on another color will retain
 that selected foreground. Click with a key modifier to show the
 color blind simulation of the selected color: Shift = deuteranopia,
 Ctrl = protanopia, Alt(Command) = tritanopia, Shift-Ctrl = grayscale;
-the displayed foreground color will automatically match the simulation
+the foreground color will automatically match the simulation
 type. Simulated color hex codes and RGB values may not correspond to any
-named color but the hex string will be recognized by tkinter. Hex and RGB
-values can also be used in other graphics applications.
+named color but the hex string will be recognized by tkinter.
     Using the Ctrl key (or Command in macOS) while pressing D, P, T, or
 G will pop-up a non-interactive color table simulated for deuteranopia,
 protanopia, tritanopia, or grayscale, respectively.
@@ -38,7 +37,7 @@ Example usage: Click on khaki, then right-click on VioletRed4 to change foregrou
 ![named-colors](images/tkinter_colors.png)
 
 TIP:
-Type or paste your own text to replace, or add to, the background color information. (If you remove the color information, don't forget to copy it, so you don't forget that awesome background color.)
+Type or paste your own text to replace, or add to, the background color information. (If you replace the color information, don't forget to first copy it, so you don't forget the color.)
 ![custom_text](images/custom_text.png)
 
 Use Ctrl-D (or Command-D on MacOS), to pop up non-interactive deuteranopia simulation of the color table.
