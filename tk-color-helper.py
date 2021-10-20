@@ -317,7 +317,8 @@ class ColorChart(tk.Frame):
         Make the tkinter color table.
         Call simulate_color(), black_or_white(), show_orig().
         """
-        # row 0 reserved for color info Entry(), gridded in config_master().
+        # row 0 reserved for standing usage instructions, row 1 reserved for
+        #   color information Entry() fields; gridded in config_master(),
         row = 2
         col = 0
 
