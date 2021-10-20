@@ -23,7 +23,7 @@ and tkinter 8.6 or later.
 Color table construction based on code from
 https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 
-From within the tkinter-utilities-main folder, from the Terminal
+From within the tkinter_utilities-main folder, from the Terminal
 
 in Linux or macOS, run as `./tk-color-helper` or as `python3  tk-color-helper`
 
