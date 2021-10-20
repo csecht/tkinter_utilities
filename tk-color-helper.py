@@ -2,7 +2,8 @@
 """
 A Python utility to help choose colors and their color blind equivalents
 for tkinter GUIs. Draws an interactive color table for 760 color names
-found in X11 rgb.txt. Works with Linux, Windows, and MacOS.
+found in X11 rgb.txt that are recognized by tkinter 8.6. Works with
+Linux, Windows, and MacOS.
    Usage: Click on a color name to show its hex code and RGB
 value and display that color as background. Right-click a different color
 to change the text foreground. Clicking on another color will retain
@@ -25,8 +26,8 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 __author__ = 'csecht'
 __copyright__ = 'Copyright (C) 2021 C.S. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.4.5'
-__program_name__ = 'tk-color-helper.py'
+__version__ = '0.4.6'
+__program_name__ = 'tk-color-helper'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
 __status__ = 'Development Status :: 2 - Beta'
@@ -46,15 +47,6 @@ except (ImportError, ModuleNotFoundError) as error:
           'On Linux you may also need:$ sudo apt-get install python3-tk\n'
           f'See also: https://tkdocs.com/tutorial/install.html \n{error}')
 
-# import functools
-# def trackcalls(func):
-#     @functools.wraps(func)
-#     def wrapper(*args, **kwargs):
-#         wrapper.has_been_called = True
-#         return func(*args, **kwargs)
-#     wrapper.has_been_called = False
-#     return wrapper
-
 MY_OS = sys.platform[:3]
 if MY_OS not in 'lin, win, dar':
     print(f'Sorry, but {sys.platform} is not yet supported. '
@@ -71,7 +63,7 @@ if sys.version_info < (3, 6):
 # 39 rows provide nice spatial organization for 760 color names; add 2 for info rows.
 MAX_ROWS = 41
 # Cutoff of perceived brightness in range(128-145) to switch from black to white
-#  foreground will give acceptable visual contrast when background below that pB.
+#  foreground will give acceptable visual contrast when background below that PB.
 #  130 has a cutoff of gray51.
 CUTOFF_PB = 138
 
