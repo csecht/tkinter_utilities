@@ -30,7 +30,7 @@ __program_name__ = 'tk-color-helper.py'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
 __status__ = 'Development Status :: 2 - Beta'
-__dev__ = 'Development environment: Python 3.8, tkinter 8.6; Linux 5.4 and macOS 10.13'
+__dev__ = 'Development environment: Python 3.8, tkinter 8.6; Linux 5.4, macOS 10.13'
 
 import argparse
 import sys
@@ -375,8 +375,8 @@ class ColorChart(tk.Frame):
     def config_master(self) -> None:
         """
         Set up universal and OS-specific keybindings and popup menus
-        with standard key and click commands.
-        Grid row0 color information here, with its keybindings.
+        with standard key and click commands. Set default info text and
+        grid info widgets.
         """
 
         self.master.minsize(600, 300)
@@ -431,6 +431,15 @@ class ColorChart(tk.Frame):
         self.display.bind(f'{right_click}', right_click_menu)
         self.fg_info.bind(f'{right_click}', right_click_menu)
 
+        if MY_OS in 'lin, win':
+            self.use_info.configure(font=('TkTooltipFont', 9))
+            self.display.config(font=('TkTooltipFont', 12))
+            self.fg_info.config(font=('TkTooltipFont', 9))
+        elif MY_OS == 'dar':
+            self.use_info.configure(font=('TkTooltipFont', 12))
+            self.display.config(font=('TkTooltipFont', 16))
+            self.fg_info.config(font=('TkTooltipFont', 12))
+
         self.sim_type.set('nosim')  # 'nosim' is default start value.
         self.use_info.configure(bg='gray25', fg='gray90')
         # Note: bg and fg of display and fg_info will change with click bindings,
@@ -444,19 +453,11 @@ class ColorChart(tk.Frame):
                  ' Ctrl:protanopia; Alt(Command on Mac):tritanopia,'
                  ' Shift-Crtl:grayscale.')
         self.use_info.configure(text=usage)
+
         # Startup text for the two Entry widgets.
         self.display_text.set('Click on a color to display its hex code '
                               'and RGB values.')
         self.fg_text.set('<- Selected foreground color values are displayed here.')
-
-        if MY_OS in 'lin, win':
-            self.use_info.configure(font=('TkTooltipFont', 9))
-            self.display.config(font=('TkTooltipFont', 12))
-            self.fg_info.config(font=('TkTooltipFont', 9))
-        elif MY_OS == 'dar':
-            self.use_info.configure(font=('TkTooltipFont', 12))
-            self.display.config(font=('TkTooltipFont', 16))
-            self.fg_info.config(font=('TkTooltipFont', 12))
 
         # NOTE: fg_info col width needs to be enough to handle the longest
         #   color name plus hex and RGB; depends on font size.
@@ -727,7 +728,6 @@ if __name__ == "__main__":
                         help='Provide description, usage, version, GNU license',
                         action='store_true',
                         default=False)
-
     args = parser.parse_args()
     if args.about:
         print(__doc__)
