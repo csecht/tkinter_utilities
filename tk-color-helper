@@ -26,7 +26,7 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 __author__ = 'csecht'
 __copyright__ = 'Copyright (C) 2021 C.S. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.4.8'
+__version__ = '0.4.9'
 __program_name__ = 'tk-color-helper'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
@@ -100,9 +100,9 @@ X11_RGB_NAMES = ('white', 'black', 'snow', 'ghost white', 'GhostWhite', 'white s
                  'dodger blue', 'DodgerBlue', 'steel blue', 'SteelBlue', 'deep sky blue',
                  'DeepSkyBlue', 'sky blue', 'SkyBlue', 'light sky blue', 'LightSkyBlue',
                  'light steel blue', 'LightSteelBlue', 'light blue', 'LightBlue',
-                 'powder blue', 'PowderBlue', 'pale turquoise', 'PaleTurquoise',
+                 'powder blue', 'PowderBlue', 'turquoise', 'pale turquoise', 'PaleTurquoise',
                  'dark turquoise', 'DarkTurquoise', 'medium turquoise', 'MediumTurquoise',
-                 'turquoise', 'cyan', 'aqua', 'light cyan', 'LightCyan', 'dark cyan', 'DarkCyan',
+                 'cyan', 'aqua', 'light cyan', 'LightCyan', 'dark cyan', 'DarkCyan',
                  'dark slate gray', 'DarkSlateGray', 'dark slate grey', 'DarkSlateGrey',
                  'cadet blue', 'CadetBlue', 'aquamarine', 'medium aquamarine',
                  'MediumAquamarine', 'dark sea green', 'DarkSeaGreen', 'sea green', 'SeaGreen',
@@ -113,13 +113,12 @@ X11_RGB_NAMES = ('white', 'black', 'snow', 'ghost white', 'GhostWhite', 'white s
                  'MediumSpringGreen', 'green yellow', 'GreenYellow', 'lime green',
                  'LimeGreen', 'yellow green', 'YellowGreen', 'forest green', 'ForestGreen',
                  'olive', 'olive drab', 'OliveDrab', 'dark olive green', 'DarkOliveGreen',
-                 'khaki', 'dark khaki', 'DarkKhaki', 'pale goldenrod',
-                 'PaleGoldenrod', 'light goldenrod yellow', 'LightGoldenrodYellow',
-                 'light yellow', 'LightYellow', 'yellow',
-                 'gold', 'light goldenrod', 'LightGoldenrod', 'goldenrod',
-                 'dark goldenrod', 'DarkGoldenrod', 'rosy brown', 'RosyBrown',
-                 'indian red', 'IndianRed', 'saddle brown', 'SaddleBrown', 'sienna',
-                 'peru', 'burlywood', 'beige', 'wheat', 'sandy brown', 'SandyBrown',
+                 'khaki', 'dark khaki', 'DarkKhaki', 'pale goldenrod', 'PaleGoldenrod', 'light goldenrod',
+                 'LightGoldenrod', 'light goldenrod yellow',
+                 'LightGoldenrodYellow', 'light yellow', 'LightYellow', 'yellow', 'gold',
+                 'goldenrod', 'dark goldenrod', 'DarkGoldenrod', 'rosy brown',
+                 'RosyBrown', 'indian red', 'IndianRed', 'saddle brown', 'SaddleBrown',
+                 'sienna', 'peru', 'burlywood', 'beige',  'wheat', 'sandy brown', 'SandyBrown',
                  'tan', 'chocolate', 'firebrick', 'brown', 'dark salmon', 'DarkSalmon',
                  'salmon', 'light salmon', 'LightSalmon', 'orange', 'dark orange',
                  'DarkOrange', 'coral', 'light coral', 'LightCoral', 'tomato',
@@ -440,19 +439,20 @@ class ColorChart(tk.Frame):
         #   startup with these default colors.
         self.bg_info.configure(justify='center', bg='gray90', relief='sunken',
                                bd=2, textvariable=self.bg_text)
-        self.fg_info.configure(bg='gray90',  relief='sunken',
+        self.fg_info.configure(justify='center', bg='gray90', relief='sunken',
                                textvariable=self.fg_text)
         # This usage information goes on the top row and is always visible.
         usage = ('Click changes background, right-click changes foreground.'
-                 ' Click modifiers simulate color blindness. Shift:deuteranopia,'
-                 ' Ctrl:protanopia; Alt(Command on Mac):tritanopia,'
+                 ' Click modifiers simulate color blindness; Shift:deuteranopia,'
+                 ' Ctrl:protanopia, Alt(Command on Mac):tritanopia,'
                  ' Shift-Crtl:grayscale.')
         self.use_info.configure(text=usage)
 
         # Startup text for the two Entry widgets.
-        self.bg_text.set('Click on a color to display its hex code '
-                         'and RGB values.')
-        self.fg_text.set('<- Selected foreground color values are displayed here.')
+        self.bg_text.set('Background color name, hex code, '
+                         'and RGB values are displayed here.')
+        self.fg_text.set('Foreground color name, hex code, '
+                         'and RGB values are displayed here.')
 
         # NOTE: fg_info col width needs to be enough to handle the longest
         #   color name plus hex and RGB; depends on font size.
@@ -572,12 +572,12 @@ class ColorChart(tk.Frame):
         #   with a sim_type tag.
         if sim_type == 'nosim':
             self.bg_text.set(
-                f"bg='{color}' or bg='{bg_hex}', RGB {rgb}")
+                f"bg='{color}' or bg='{bg_hex}'; RGB {rgb}")
             self.bg_info.configure(bg=bg_hex, fg=fg_hex)
             self.fg_info.configure(bg=bg_hex, fg=fg_hex)
         else:
             self.bg_text.set(
-                f"{sim_type} sees '{color}' as bg='{bg_hex}', RGB {rgb}")
+                f"{sim_type} sees '{color}' as bg='{bg_hex}'; RGB {rgb}")
             self.bg_info.configure(bg=bg_hex, fg=fg_hex)
             self.fg_info.configure(bg=bg_hex, fg=fg_hex)
 
@@ -609,7 +609,7 @@ class ColorChart(tk.Frame):
         if sim_type == 'nosim':
             self.fg_hex.set(fg_hex)
             self.fg_text.set(
-                f"<-Text: fg='{color}' or fg='{fg_hex}', RGB {rgb}")
+                f"fg='{color}' or fg='{fg_hex}'; RGB {rgb}")
             self.bg_info.configure(fg=fg_hex)
             self.fg_info.configure(fg=fg_hex)
 
@@ -618,7 +618,7 @@ class ColorChart(tk.Frame):
             #   which .sets() the fg sim hex and rgb control variables.
             sim_hex, sim_rgb = self.simulate_color(color, rgb, sim_type, 'yes')
             self.fg_text.set(
-                f"<-{sim_type} sees '{color}' as fg='{sim_hex}', RGB {sim_rgb}")
+                f"{sim_type} sees '{color}' as fg='{sim_hex}'; RGB {sim_rgb}")
             self.bg_info.configure(fg=sim_hex)
             self.fg_info.configure(fg=sim_hex)
 
@@ -658,12 +658,12 @@ class ColorChart(tk.Frame):
             sim_hex, sim_rgb = self.simulate_color(color, self.fg_rgb, sim_type, 'yes')
             if sim_type == 'nosim':
                 self.fg_text.set(
-                    f"<-Text: fg='{color}' or fg='{sim_hex}', RGB {sim_rgb}")
+                    f"fg='{color}' or fg='{sim_hex}'; RGB {sim_rgb}")
                 self.bg_info.configure(fg=sim_hex)
                 self.fg_info.configure(fg=sim_hex)
             else:
                 self.fg_text.set(
-                    f"<-{sim_type} sees '{color}' as fg='{sim_hex}', RGB {sim_rgb}")
+                    f"{sim_type} sees '{color}' as fg='{sim_hex}'; RGB {sim_rgb}")
                 self.bg_info.configure(fg=sim_hex)
                 self.fg_info.configure(fg=sim_hex)
 
