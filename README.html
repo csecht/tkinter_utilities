@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- md to htlm conversion done by https://markdowntohtml.com/ -->
+<h1 id="tkinter_utilities">tkinter_utilities</h1>
+<h2 id="tk-color-helper">tk-color-helper</h2>
+<p>A Python utility to help choose colors and their color blind equivalents
+for tkinter GUIs. Draws an interactive color table for 760 color names
+found in X11 rgb.txt that are recognized by tkinter 8.6. Works with
+Linux, Windows, and MacOS.
+   Usage: Click on a color name to show its hex code and RGB
+value and display that color as background. Right-click a different color
+to change the text foreground. Clicking on another color will retain
+that selected foreground. Click with a key modifier to show the
+color blind simulation of the selected color: Shift = deuteranopia,
+Ctrl = protanopia, Alt(Command) = tritanopia, Shift-Ctrl = grayscale;
+the foreground color will automatically match the simulation
+type. Simulated color hex codes and RGB values may not correspond to any
+named color, but the hex string will be recognized by tkinter.
+    Using the Ctrl key (or Command in macOS) while pressing D, P, T, or
+G will pop-up a non-interactive color table simulated for deuteranopia,
+protanopia, tritanopia, or grayscale, respectively.
+    Text in the color display and data fields can be cut, copied, pasted,
+or edited with standard keyboard and click commands. Runs with Python 3.6
+and tkinter 8.6 or later.
+Color table construction based on code from
+<a href="https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix">https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix</a></p>
+<p>From the green Code button above, download and unzip the ZIP file. From within the resulting tkinter_utilities-main folder, open a Terminal or Command Prompt and run this command:</p>
+<blockquote>
+<p>Linux or macOS, run as <code>./tk-color-helper</code> or as <code>python3  tk-color-helper</code></p>
+<p>Windows, run as <code>python tk-color-helper</code></p>
+</blockquote>
+<p>Command line arguments <code>--help</code> and <code>--about</code> are available, e.g.,</p>
+<pre><code>$ ./tk-color-helper --<span class="hljs-keyword">help</span>
+usage: tk-color-helper [-h] [--about]
+
+optional <span class="hljs-keyword">argument</span><span class="hljs-variable">s:</span>
+  -h, --<span class="hljs-keyword">help</span>      show this <span class="hljs-keyword">help</span> message <span class="hljs-built_in">and</span> <span class="hljs-keyword">exit</span>
+  --about         Provide description, <span class="hljs-keyword">version</span>, GNU license
+</code></pre><p>Table at startup:
+<img src="images/full_color_start.png" alt="tkinter-colors"></p>
+<p>Example usage: Click on LightSeaGreen to select a background...
+<img src="images/select-bg.png" alt="select-background"></p>
+<p>...next, right-click MediumVioletRed to change the foreground...
+<img src="images/select-fg.png" alt="select-foreground"></p>
+<p>..next, Shift-click on LightSeaGreen. The background and foreground switch to the simulated colors for deuteranopia. Right-clicking on other colors will display those foreground selections with deuteranopia simulation. Shift-click on different colors to change the simulated background.
+<img src="images/select-deuteranopia.png" alt="change-simulation"></p>
+<p>Use Ctrl-D (or Command-D on MacOS), to pop up a non-interactive deuteranopia simulation of the color table.
+<img src="images/deuteranopia_colortable.png" alt="deuteranopeia-simulated-colors"></p>
+<p>Use Ctrl-P (or Command-P on MacOS), to pop up a non-interactive protanopia simulation of the color table.
+<img src="images/protanopia_colortable.png" alt="protanopeia-simulated-colors"></p>
+<p>Use Ctrl-T (or Command-T on MacOS), to pop up a non-interactive tritanopia simulation of the color table.
+<img src="images/tritanopia_colortable.png" alt="tritanopia_-simulated-colors"></p>
+<p>Use Ctrl-G (or Command-G on MacOS), to pop up a non-interactive grayscale simulation of the color table.
+<img src="images/grayscale_colortable.png" alt="grayscale-simulated-colors"></p>
+<h2 id="known-issues">Known Issues</h2>
+<p>Right-click selection of some long color names may not fit all data into the foreground data cell; it&#39;s there, just scroll to the right. You can also &#39;select all&#39; and copy and paste all the data elsewhere. All basic editing tools are available in either data display cell.</p>
+
+</html>
