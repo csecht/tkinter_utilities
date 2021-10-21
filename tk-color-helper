@@ -26,7 +26,7 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 __author__ = 'csecht'
 __copyright__ = 'Copyright (C) 2021 C.S. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.4.7'
+__version__ = '0.4.8'
 __program_name__ = 'tk-color-helper'
 __project_url__ = 'https://github.com/csecht/'
 __docformat__ = 'reStructuredText'
@@ -296,7 +296,7 @@ class ColorChart(tk.Frame):
         self.fg_rgb = ('None',)
         self.sim_type = tk.StringVar()
 
-        # Width of row0, as total number of columns gridded.
+        # Width of row1, as total number of columns gridded.
         self.info_width = 0
 
         self.img = tk.PhotoImage
@@ -313,29 +313,29 @@ class ColorChart(tk.Frame):
         """
         # row 0 reserved for standing usage instructions, row 1 reserved for
         #   color information Entry() fields; both gridded in config_master().
-        row = 2
-        col = 0
+        _row = 2
+        _col = 0
 
         for color_name in X11_RGB_NAMES:
             label = tk.Label(self, text=color_name, bg=color_name,
                              font=('TkTooltipFont', LABEL_FONT_SIZE))
-            label.grid(row=row, column=col, sticky=tk.NSEW)
-            row += 1
+            label.grid(row=_row, column=_col, sticky=tk.NSEW)
+            _row += 1
             _r, _g, _b, = label.winfo_rgb(color_name)
-            r = _r // 256
-            g = _g // 256
-            b = _b // 256
-            rgb = (r, g, b)
+            _R = _r // 256
+            _G = _g // 256
+            _B = _b // 256
+            rgb = (_R, _G, _B)
             bw = self.black_or_white(rgb)
             label.config(fg=bw)
-            orig_hex = f'#{r:02x}{g:02x}{b:02x}'
+            orig_hex = f'#{_R:02x}{_G:02x}{_B:02x}'
             # Use clicks to bind color label to color and data display.
             # Click selects background, rt-click selects foreground.
             # Rt-click Button is OS-specific.
             # MacOS cannot use the Alt/option modifier, so use Command.
             # Universal bindings:
             label.bind('<Button-1>',
-                       lambda event, c=color_name, r_b=rgb, fg=bw:
+                       lambda event, c=color_name, r_b=rgb:
                        self.simulate_color(c, r_b, 'nosim'))
             label.bind('<Shift-Button-1>', lambda event, c=color_name, r_b=rgb:
                        self.simulate_color(c, r_b, 'deuteranopia'))
@@ -357,14 +357,14 @@ class ColorChart(tk.Frame):
                            lambda event, c=color_name, h=orig_hex, r_b=rgb:
                            self.foregrnd_info(c, r_b))
 
-            if row > MAX_ROWS:
-                row = 2
-                col += 1
+            if _row > MAX_ROWS:
+                _row = 2
+                _col += 1
 
         self.pack(expand=True, fill="both")
 
         # Used in config_master()
-        self.info_width = col
+        self.info_width = _col
 
     def config_master(self) -> None:
         """
@@ -480,7 +480,7 @@ class ColorChart(tk.Frame):
         """
 
         self.sim_type.set(sim_type)
-        r, g, b = rgb
+        _r, _g, _b = rgb
         _R = 0
         _G = 0
         _B = 0
@@ -497,26 +497,26 @@ class ColorChart(tk.Frame):
         #   Author: Martin Krzywinski
         if sim_type == 'deuteranopia':
             # Simulate deuteranopia- greens are greatly reduced (1% men)
-            _R = clip(round((0.33066007 * r) + (0.66933993 * g) + (0 * b)))
-            _G = clip(round((0.33066007 * r) + (0.66933993 * g) + (0 * b)))
-            _B = clip(round((-0.02785538 * r) + (0.02785538 * g) + (1 * b)))
+            _R = clip(round((0.33066007 * _r) + (0.66933993 * _g) + (0 * _b)))
+            _G = clip(round((0.33066007 * _r) + (0.66933993 * _g) + (0 * _b)))
+            _B = clip(round((-0.02785538 * _r) + (0.02785538 * _g) + (1 * _b)))
         elif sim_type == 'protanopia':
             # Simulate protanopia- reds are greatly reduced (1% men)
-            _R = clip(round((0.170556992 * r) + (0.829443014 * g) + (0 * b)))
-            _G = clip(round((0.170556991 * r) + (0.829443008 * g) + (0 * b)))
-            _B = clip(round((-0.004517144 * r) + (0.004517144 * g) + (1 * b)))
+            _R = clip(round((0.170556992 * _r) + (0.829443014 * _g) + (0 * _b)))
+            _G = clip(round((0.170556991 * _r) + (0.829443008 * _g) + (0 * _b)))
+            _B = clip(round((-0.004517144 * _r) + (0.004517144 * _g) + (1 * _b)))
         elif sim_type == 'tritanopia':
             # Simulate tritanopia - blues are greatly reduced (0.003% population)
-            _R = clip(round((1 * r) + (0.1273989 * g) + (-0.1273989 * b)))
-            _G = clip(round((0 * r) + (0.8739093 * g) + (0.1260907 * b)))
-            _B = clip(round((0 * r) + (0.8739093 * g) + (0.1260907 * b)))
+            _R = clip(round((1 * _r) + (0.1273989 * _g) + (-0.1273989 * _b)))
+            _G = clip(round((0 * _r) + (0.8739093 * _g) + (0.1260907 * _b)))
+            _B = clip(round((0 * _r) + (0.8739093 * _g) + (0.1260907 * _b)))
         elif sim_type == 'grayscale':
             # Simulate grayscale - standard color luminance
-            _R = _G = _B = int(round((.2126 * r) + (.7152 * g) + (.0722 * b), 0))
+            _R = _G = _B = int(round((.2126 * _r) + (.7152 * _g) + (.0722 * _b), 0))
         elif sim_type == 'nosim':
-            _R = r
-            _G = g
-            _B = b
+            _R = _r
+            _G = _g
+            _B = _b
 
         sim_hex = f'#{_R:02x}{_G:02x}{_B:02x}'
         sim_rgb = (_R, _G, _B)
