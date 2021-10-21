@@ -23,11 +23,11 @@ and tkinter 8.6 or later.
 Color table construction based on code from
 https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 
-From within the tkinter_utilities-main folder, from the Terminal
+From the green Code button above, download and unzip the ZIP file. From within the resulting tkinter_utilities-main folder, open a Terminal or Command Prompt and run this command:
 
-in Linux or macOS, run as `./tk-color-helper` or as `python3  tk-color-helper`
+>Linux or macOS, run as `./tk-color-helper` or as `python3  tk-color-helper`
 
-in Windows Command Prompt, run as `python tk-color-helper`
+>Windows, run as `python tk-color-helper`
 
 Command line arguments `--help` and `--about` are available, e.g.,
 ```

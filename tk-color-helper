@@ -438,9 +438,10 @@ class ColorChart(tk.Frame):
         self.use_info.configure(bg='gray25', fg='gray90')
         # Note: bg and fg of display and fg_info will change with click bindings,
         #   startup with these default colors.
-        self.bg_info.configure(justify='center', bg='gray90',
-                               textvariable=self.bg_text)
-        self.fg_info.configure(bg='gray90', textvariable=self.fg_text)
+        self.bg_info.configure(justify='center', bg='gray90', relief='sunken',
+                               bd=2, textvariable=self.bg_text)
+        self.fg_info.configure(bg='gray90',  relief='sunken',
+                               textvariable=self.fg_text)
         # This usage information goes on the top row and is always visible.
         usage = ('Click changes background, right-click changes foreground.'
                  ' Click modifiers simulate color blindness. Shift:deuteranopia,'
