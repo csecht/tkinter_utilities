@@ -28,7 +28,7 @@ __copyright__ = 'Copyright (C) 2021 C.S. Echt'
 __license__ = 'GNU General Public License'
 __version__ = '0.4.9'
 __program_name__ = 'tk-color-helper'
-__project_url__ = 'https://github.com/csecht/'
+__project_url__ = 'https://github.com/csecht/tkinter_utilities'
 __docformat__ = 'reStructuredText'
 __status__ = 'Development Status :: 2 - Beta'
 __dev__ = 'Development environment: Python 3.8, tkinter 8.6; Linux 5.4, macOS 10.13'
@@ -113,12 +113,12 @@ X11_RGB_NAMES = ('white', 'black', 'snow', 'ghost white', 'GhostWhite', 'white s
                  'MediumSpringGreen', 'green yellow', 'GreenYellow', 'lime green',
                  'LimeGreen', 'yellow green', 'YellowGreen', 'forest green', 'ForestGreen',
                  'olive', 'olive drab', 'OliveDrab', 'dark olive green', 'DarkOliveGreen',
-                 'khaki', 'dark khaki', 'DarkKhaki', 'pale goldenrod', 'PaleGoldenrod', 'light goldenrod',
-                 'LightGoldenrod', 'light goldenrod yellow',
-                 'LightGoldenrodYellow', 'light yellow', 'LightYellow', 'yellow', 'gold',
-                 'goldenrod', 'dark goldenrod', 'DarkGoldenrod', 'rosy brown',
+                 'khaki', 'dark khaki', 'DarkKhaki', 'pale goldenrod', 'PaleGoldenrod',
+                 'light goldenrod', 'LightGoldenrod', 'light goldenrod yellow',
+                 'LightGoldenrodYellow', 'beige', 'light yellow', 'LightYellow', 'yellow',
+                 'gold', 'goldenrod', 'dark goldenrod', 'DarkGoldenrod', 'rosy brown',
                  'RosyBrown', 'indian red', 'IndianRed', 'saddle brown', 'SaddleBrown',
-                 'sienna', 'peru', 'burlywood', 'beige',  'wheat', 'sandy brown', 'SandyBrown',
+                 'sienna', 'peru', 'burlywood', 'wheat', 'sandy brown', 'SandyBrown',
                  'tan', 'chocolate', 'firebrick', 'brown', 'dark salmon', 'DarkSalmon',
                  'salmon', 'light salmon', 'LightSalmon', 'orange', 'dark orange',
                  'DarkOrange', 'coral', 'light coral', 'LightCoral', 'tomato',
