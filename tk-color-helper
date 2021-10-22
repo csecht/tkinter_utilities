@@ -26,7 +26,7 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 __author__ = 'csecht'
 __copyright__ = 'Copyright (C) 2021 C.S. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.4.9'
+__version__ = '0.4.10'
 __program_name__ = 'tk-color-helper'
 __project_url__ = 'https://github.com/csecht/tkinter_utilities'
 __docformat__ = 'reStructuredText'
@@ -295,7 +295,7 @@ class ColorChart(tk.Frame):
         self.fg_rgb = ('None',)
         self.sim_type = tk.StringVar()
 
-        # Width of row1, as total number of columns gridded.
+        # Width of row1; total number of columns gridded in draw_table().
         self.info_width = 0
 
         self.img = tk.PhotoImage
@@ -404,7 +404,7 @@ class ColorChart(tk.Frame):
             cmdkey = 'Command'
         self.master.bind(f'<{f"{cmdkey}"}-q>', quit_gui)
 
-        # Keybindings to show the simulated color table images in Toplevel.
+        # Keybindings to show the simulated color table images in Toplevel windows.
         self.master.bind(
             f'<{f"{cmdkey}"}-d>', lambda event, img='d': self.show_simtable(img))
         self.master.bind(
@@ -415,7 +415,7 @@ class ColorChart(tk.Frame):
             f'<{f"{cmdkey}"}-g>', lambda event, img='g': self.show_simtable(img))
 
         # OS-specific right-click bindings for edit functions
-        #   used with info entry fields.
+        #   used with info Entry() widgets.
         right_click = ''
         if MY_OS in 'lin, win':
             right_click = '<Button-3>'
@@ -433,20 +433,19 @@ class ColorChart(tk.Frame):
             self.bg_info.config(font=('TkTooltipFont', 16))
             self.fg_info.config(font=('TkTooltipFont', 12))
 
-        self.sim_type.set('nosim')  # 'nosim' is default start value.
-        self.use_info.configure(bg='gray25', fg='gray90')
-        # Note: bg and fg of display and fg_info will change with click bindings,
-        #   startup with these default colors.
-        self.bg_info.configure(justify='center', bg='gray90', relief='sunken',
-                               bd=2, textvariable=self.bg_text)
-        self.fg_info.configure(justify='center', bg='gray90', relief='sunken',
-                               textvariable=self.fg_text)
         # This usage information goes on the top row and is always visible.
         usage = ('Click changes background, right-click changes foreground.'
                  ' Click modifiers simulate color blindness; Shift:deuteranopia,'
                  ' Ctrl:protanopia, Alt(Command on Mac):tritanopia,'
                  ' Shift-Crtl:grayscale.')
-        self.use_info.configure(text=usage)
+        self.use_info.configure(text=usage, bg='gray25', fg='gray90')
+        # self.use_info.configure(bg='gray25', fg='gray90')
+        # Note: bg and fg of info Entry() widgets will change with click
+        #    bindings, but start with a default bg.
+        self.bg_info.configure(justify='center', bg='gray90', relief='sunken',
+                               bd=2, textvariable=self.bg_text)
+        self.fg_info.configure(justify='center', bg='gray90', relief='sunken',
+                               textvariable=self.fg_text)
 
         # Startup text for the two Entry widgets.
         self.bg_text.set('Background color name, hex code, '
@@ -462,8 +461,11 @@ class ColorChart(tk.Frame):
         self.fg_info.grid(row=1, column=self.info_width - 10, sticky=tk.EW,
                           columnspan=10)
 
+        # Need 'nosim' as default start value.
+        self.sim_type.set('nosim')
+
     def simulate_color(
-            self, color: str, rgb: tuple, sim_type: str, fg_click=None) -> tuple:
+            self, color: str, rgb: tuple, sim_type: str, fg_do=None) -> tuple:
         """
         Convert listed named color RGB values to values that simulate the
         specified type of color blindness or grayscale. RGB is defined in
@@ -474,7 +476,7 @@ class ColorChart(tk.Frame):
         :param rgb: (R, G, B) tuple of integers in range(0-255)
         :param sim_type: 'deuteranopia', 'protanopia',
                          'tritanopia', 'grayscale', 'nosim'
-        :param fg_click: Flags a call from foregrnd_info() as 'yes'
+        :param fg_do: Flags a call from foregrnd_info() as 'yes'
 
         :returns: (sim_hex: str, sim_rgb: tuple)
         """
@@ -526,7 +528,7 @@ class ColorChart(tk.Frame):
         # 'fg_click is None' is true when call is from button1 click.
         #  Note: Once sync_simtypes() is called, fg no longer defaults to the
         #     color label's black or white.
-        if sim_type == 'nosim' and fg_click is None:
+        if sim_type == 'nosim' and fg_do is None:
             # Note: here, fg_hex is the color name, not the hexcode.
             fg_hex = self.black_or_white(sim_rgb)
             self.fg_hex.set(fg_hex)
@@ -535,14 +537,14 @@ class ColorChart(tk.Frame):
             else:
                 self.fg_hex.set(fg_hex)
             self.display_colors(color, sim_rgb, sim_type)
-        elif sim_type != 'nosim' and fg_click is None:
+        elif sim_type != 'nosim' and fg_do is None:
             fg_hex = self.black_or_white(sim_rgb)
             if prior_fg in 'black, white':
                 self.fg_hex.set(fg_hex)
                 self.fg_color.set(fg_hex)
             self.display_colors(color, sim_rgb, sim_type)
         # 'fg_click is yes' when call is from button2 or 3, via foregrnd_info().
-        elif fg_click == 'yes':
+        if fg_do == 'yes':
             self.fg_hex.set(sim_hex)
 
         return sim_hex, sim_rgb
@@ -573,13 +575,11 @@ class ColorChart(tk.Frame):
         if sim_type == 'nosim':
             self.bg_text.set(
                 f"bg='{color}' or bg='{bg_hex}'; RGB {rgb}")
-            self.bg_info.configure(bg=bg_hex, fg=fg_hex)
-            self.fg_info.configure(bg=bg_hex, fg=fg_hex)
         else:
             self.bg_text.set(
                 f"{sim_type} sees '{color}' as bg='{bg_hex}'; RGB {rgb}")
-            self.bg_info.configure(bg=bg_hex, fg=fg_hex)
-            self.fg_info.configure(bg=bg_hex, fg=fg_hex)
+        self.bg_info.configure(bg=bg_hex, fg=fg_hex)
+        self.fg_info.configure(bg=bg_hex, fg=fg_hex)
 
         self.sync_simtypes()
 
@@ -612,7 +612,6 @@ class ColorChart(tk.Frame):
                 f"fg='{color}' or fg='{fg_hex}'; RGB {rgb}")
             self.bg_info.configure(fg=fg_hex)
             self.fg_info.configure(fg=fg_hex)
-
         else:
             # To match fg to bg sim_type, fg selection calls simulated_color(),
             #   which .sets() the fg sim hex and rgb control variables.
@@ -659,13 +658,11 @@ class ColorChart(tk.Frame):
             if sim_type == 'nosim':
                 self.fg_text.set(
                     f"fg='{color}' or fg='{sim_hex}'; RGB {sim_rgb}")
-                self.bg_info.configure(fg=sim_hex)
-                self.fg_info.configure(fg=sim_hex)
             else:
                 self.fg_text.set(
                     f"{sim_type} sees '{color}' as fg='{sim_hex}'; RGB {sim_rgb}")
-                self.bg_info.configure(fg=sim_hex)
-                self.fg_info.configure(fg=sim_hex)
+            self.bg_info.configure(fg=sim_hex)
+            self.fg_info.configure(fg=sim_hex)
 
     @staticmethod
     def black_or_white(rgb: tuple) -> str:
