@@ -308,7 +308,7 @@ class ColorChart(tk.Frame):
     def draw_table(self) -> None:
         """
         Make the tkinter color table.
-        Call simulate_color(), black_or_white(), show_orig().
+        Call simulate_color(), black_or_white(), foreground_info.
         """
         # row 0 reserved for standing usage instructions, row 1 reserved for
         #   color information Entry() fields; both gridded in config_master().
@@ -439,7 +439,6 @@ class ColorChart(tk.Frame):
                  ' Ctrl:protanopia, Alt(Command on Mac):tritanopia,'
                  ' Shift-Crtl:grayscale.')
         self.use_info.configure(text=usage, bg='gray25', fg='gray90')
-        # self.use_info.configure(bg='gray25', fg='gray90')
         # Note: bg and fg of info Entry() widgets will change with click
         #    bindings, but start with a default bg.
         self.bg_info.configure(justify='center', bg='gray90', relief='sunken',
@@ -590,10 +589,9 @@ class ColorChart(tk.Frame):
 
     def foregrnd_info(self, color: str, rgb: tuple) -> None:
         """
-        As each color label is generated, assign its color name, the hex
-        code and RGB strings for that (simulated) color.
-        Foreground will be the color or the simulated color's hexcode.
-        Called from draw_table() in a lambda .bind() function.
+        Assign foreground color to Entry() fields. Provide fg data.
+        Convert selected color to current background simulation type.
+        Called from draw_table() in a keybinding lambda function.
 
         :param color: The color name
         :param rgb: (R,G,B) of either the named color or its displayed
@@ -628,8 +626,9 @@ class ColorChart(tk.Frame):
 
     def sync_simtypes(self) -> None:
         """
-        Automatically converts foreground to match the simulation (or
+        Convert foreground color to match the simulation (or
         lack of simulation) to that of the selected background color.
+        Called from display_colors().
         """
 
         bg_text = self.bg_text.get()
