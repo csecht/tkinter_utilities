@@ -26,16 +26,18 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 __author__ = 'csecht'
 __copyright__ = 'Copyright (C) 2021 C.S. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.4.11'
+__version__ = '0.4.12'
 __program_name__ = 'tk-color-helper'
 __project_url__ = 'https://github.com/csecht/tkinter_utilities'
-__docformat__ = 'reStructuredText'
+__docformat__ = 'markdown'
 __status__ = 'Development Status :: 2 - Beta'
-__dev__ = 'Development environment: Python 3.8, tkinter 8.6; Linux 5.4, macOS 10.13'
+__dev__ = ('Development environment: '
+           'Python 3.8, tkinter 8.6; Linux 5.4, macOS 10.13, Windows 10')
 
 import argparse
 import sys
 from math import sqrt
+from pathlib import Path
 
 try:
     import tkinter as tk
@@ -271,6 +273,24 @@ def right_click_edit(event, command):
     https://www.tcl.tk/man/tcl8.6/TkCmd/event.htm#M7
     """
     event.widget.event_generate(f'<<{command}>>')
+
+
+def valid_path_to(relative_path: str) -> Path:
+    """
+    Get absolute path to files and directories.
+    _MEIPASS var is used by distribution programs from
+    PyInstaller --onefile; e.g. for images dir.
+
+    :param relative_path: File or dir name path, as string.
+    :return: Absolute path as pathlib Path object.
+    """
+    # Modified from: https://stackoverflow.com/questions/7674790/
+    #    bundling-data-files-with-pyinstaller-onefile and PyInstaller manual.
+    if getattr(sys, 'frozen', False):  # hasattr(sys, '_MEIPASS'):
+        base_path = getattr(sys, '_MEIPASS', Path(Path(__file__).resolve()).parent)
+        return Path(base_path) / relative_path
+    else:
+        return Path(relative_path).resolve()
 
 
 class ColorChart(tk.Frame):
@@ -696,16 +716,20 @@ class ColorChart(tk.Frame):
         colorwin = tk.Toplevel()
         colorwin.minsize(1200, 580)
         if image == 'd':
-            self.img = tk.PhotoImage(file="images/deuteranopia_colortable.png")
+            self.img = tk.PhotoImage(
+                file=valid_path_to("images/deuteranopia_colortable.png"))
             colorwin.title('X11 named colors with deuteranopia simulation')
         elif image == 'p':
-            self.img = tk.PhotoImage(file="images/protanopia_colortable.png")
+            self.img = tk.PhotoImage(
+                file=valid_path_to("images/protanopia_colortable.png"))
             colorwin.title('X11 named colors with protanopia simulation')
         elif image == 't':
-            self.img = tk.PhotoImage(file="images/tritanopia_colortable.png")
+            self.img = tk.PhotoImage(
+                file=valid_path_to("images/tritanopia_colortable.png"))
             colorwin.title('X11 named colors with tritanopia simulation')
         elif image == 'g':
-            self.img = tk.PhotoImage(file="images/grayscale_colortable.png")
+            self.img = tk.PhotoImage(
+                file=valid_path_to("images/grayscale_colortable.png"))
             colorwin.title('X11 named colors with grayscale simulation')
 
         colorwin.image = self.img
@@ -735,7 +759,9 @@ if __name__ == "__main__":
     else:
         root = tk.Tk()
         root.title("tkinter Named Colors")
-        img = tk.PhotoImage(file='images/helper_icon512.png')
-        root.wm_iconphoto(True, img)
+        # Need valid_path_to() to make onefile with PyInstaller.
+        img = tk.PhotoImage(file=valid_path_to('images/helper_icon512.png'))
+        root.iconphoto(True, img)
+        print(f'{valid_path_to(str(Path(__file__))).name} now running...')
         app = ColorChart(root)
         root.mainloop()
