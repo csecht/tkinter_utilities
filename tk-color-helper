@@ -227,15 +227,22 @@ X11_RGB_NAMES = ('white', 'black', 'snow', 'ghost white', 'GhostWhite', 'white s
 
 
 # pylint: disable=unused-argument
-def quit_gui(event=None) -> None:
-    """Safe and informative exit from the program.
+def quit_gui(*keybind):
+    """
+    Error-free and informative exit from the program.
+    Called from widgets or keybindings.
 
-    :param event: Needed for keybindings.
-    :type event: Direct call from key bindings.
+    :param keybind: Empty parameter to pass implicit keybinding event.
     """
     print('\n  *** User has quit the program. Exiting...\n')
-    app.destroy()
-    sys.exit(0)
+    try:
+        app.update_idletasks()
+        app.after(200)
+        root.destroy()
+    # pylint: disable=broad-except
+    except Exception:
+        sys.exit(0)
+    return keybind
 
 
 def right_click_menu(event=None) -> None:
@@ -289,8 +296,7 @@ def valid_path_to(relative_path: str) -> Path:
     if getattr(sys, 'frozen', False):  # hasattr(sys, '_MEIPASS'):
         base_path = getattr(sys, '_MEIPASS', Path(Path(__file__).resolve()).parent)
         return Path(base_path) / relative_path
-    else:
-        return Path(relative_path).resolve()
+    return Path(relative_path).resolve()
 
 
 class ColorChart(tk.Frame):
@@ -426,13 +432,13 @@ class ColorChart(tk.Frame):
 
         # Keybindings to show the simulated color table images in Toplevel windows.
         self.master.bind(
-            f'<{f"{cmdkey}"}-d>', lambda event, img='d': self.show_simtable(img))
+            f'<{f"{cmdkey}"}-d>', lambda event, d='d': self.show_simtable(d))
         self.master.bind(
-            f'<{f"{cmdkey}"}-p>', lambda event, img='p': self.show_simtable(img))
+            f'<{f"{cmdkey}"}-p>', lambda event, p='p': self.show_simtable(p))
         self.master.bind(
-            f'<{f"{cmdkey}"}-t>', lambda event, img='t': self.show_simtable(img))
+            f'<{f"{cmdkey}"}-t>', lambda event, t='t': self.show_simtable(t))
         self.master.bind(
-            f'<{f"{cmdkey}"}-g>', lambda event, img='g': self.show_simtable(img))
+            f'<{f"{cmdkey}"}-g>', lambda event, g='g': self.show_simtable(g))
 
         # OS-specific right-click bindings for edit functions
         #   used with info Entry() widgets.
