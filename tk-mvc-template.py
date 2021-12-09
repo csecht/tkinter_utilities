@@ -159,17 +159,15 @@ class AppController(tk.Tk):
     def __init__(self):
         super().__init__()
         # From https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/root-resize.html
-        self.winfo_toplevel()  # Also works: tk.Frame().grid()
+        self.winfo_toplevel()
         GuiViewer(share=self)
-
-        # From B. Oakley post, but doesn't make a Frame object and
-        #   is NoneType and throws a warning:
-        # container = tk.Frame().grid()
-        # GuiViewer(parent=container, share=self)
-        # If needing multiple frames, use a dictionary ...
-        # self.frames = {
-        #     "Viewer": GuiViewer(parent=container, share=self)}
-        # self.frames["Viewer"].grid(sticky=tk.NSEW)
+        # NOTE: Instead of self.winfo_toplevel(), can use tk.Frame().grid().
+        # It creates a tkinter.Frame object as the first child widget, but
+        #   it makes no difference to function or layout.
+        # Using winfo_toplevel() first creates the __main__.CountViewer child,
+        #   without any enclosing Frame.
+        # In neither case is it necessary to name the child as a master
+        #   parameter to call CountViewer() b/c self.master is implicit.
 
     def doubleit(self) -> None:
         """
