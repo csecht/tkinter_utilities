@@ -400,11 +400,11 @@ class ColorChart(tk.Frame):
 
         self.master.minsize(600, 300)
 
-        # Need to color in all of master Frame to create near-shite border;
+        # Need to color in all master Frame to create near-white border;
         #    border changes to grey for click-drag and not focus.
-        self.master.configure(highlightthickness=3,
-                              highlightcolor='gray95',
-                              highlightbackground='gray')
+        self.master.config(highlightthickness=3,
+                           highlightcolor='gray95',
+                           highlightbackground='gray')
 
         for _row in range(MAX_ROWS + 1):
             self.rowconfigure(_row, weight=1)
