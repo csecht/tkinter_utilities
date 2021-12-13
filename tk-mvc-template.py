@@ -163,7 +163,8 @@ class AppController(tk.Tk):
         GuiViewer(share=self)
         # NOTE: Instead of self.winfo_toplevel(), can use tk.Frame().grid().
         # It creates a tkinter.Frame object as the first child widget, but
-        #   it makes no difference to function or layout.
+        #   it makes no difference to function or layout. The Frame() approach
+        #   may be useful for starting up with multiple frames.
         # Using winfo_toplevel() first creates the __main__.CountViewer child,
         #   without any enclosing Frame.
         # In neither case is it necessary to name the child as a master
