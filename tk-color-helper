@@ -23,10 +23,10 @@ Color table construction based on code from
 https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 """
 # ^^ Text for --about invocation argument and use as __doc__>>
-__author__ = 'csecht'
+__author__ = 'Craig Echt'
 __copyright__ = 'Copyright (C) 2021 C.S. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.4.12'
+__version__ = '0.5.0'
 __program_name__ = 'tk-color-helper'
 __project_url__ = 'https://github.com/csecht/tkinter_utilities'
 __docformat__ = 'markdown'
@@ -38,6 +38,10 @@ import argparse
 import sys
 from math import sqrt
 from pathlib import Path
+
+from tkutils_modules import utils
+
+Utils = utils
 
 try:
     import tkinter as tk
@@ -226,79 +230,6 @@ X11_RGB_NAMES = ('white', 'black', 'snow', 'ghost white', 'GhostWhite', 'white s
                  'gray99', 'grey99', 'gray100', 'grey100')
 
 
-# pylint: disable=unused-argument
-def quit_gui(*keybind):
-    """
-    Error-free and informative exit from the program.
-    Called from widgets or keybindings.
-
-    :param keybind: Empty parameter to pass implicit keybinding event.
-    """
-    print('\n  *** User has quit the program. Exiting...\n')
-    try:
-        app.update_idletasks()
-        app.after(200)
-        root.destroy()
-    # pylint: disable=broad-except
-    except Exception:
-        sys.exit(0)
-    return keybind
-
-
-def right_click_menu(event=None) -> None:
-    """
-    Right-click pop-up option to select and copy text;
-    bind to Button-2 (Linux, Windows) or Button-3 (macOS).
-
-    :param event: Direct call from key bindings.
-    """
-
-    # Based on: https://stackoverflow.com/questions/57701023/
-    rtclick_menu = tk.Menu(None, tearoff=0, takefocus=0)
-
-    rtclick_menu.add_command(
-        label='Select all',
-        command=lambda: right_click_edit(event, 'SelectAll'))
-    rtclick_menu.add_command(
-        label='Copy',
-        command=lambda: right_click_edit(event, 'Copy'))
-    rtclick_menu.add_command(
-        label='Cut',
-        command=lambda: right_click_edit(event, 'Cut'))
-    rtclick_menu.add_command(
-        label='Paste',
-        command=lambda: right_click_edit(event, 'Paste'))
-
-    rtclick_menu.tk_popup(event.x_root + 10, event.y_root + 15)
-
-
-def right_click_edit(event, command):
-    """
-    Sets menu command to the selected predefined virtual event, as
-    called from right_click_menu().
-    Event is a unifying binding across multiple platforms.
-    https://www.tcl.tk/man/tcl8.6/TkCmd/event.htm#M7
-    """
-    event.widget.event_generate(f'<<{command}>>')
-
-
-def valid_path_to(relative_path: str) -> Path:
-    """
-    Get absolute path to files and directories.
-    _MEIPASS var is used by distribution programs from
-    PyInstaller --onefile; e.g. for images dir.
-
-    :param relative_path: File or dir name path, as string.
-    :return: Absolute path as pathlib Path object.
-    """
-    # Modified from: https://stackoverflow.com/questions/7674790/
-    #    bundling-data-files-with-pyinstaller-onefile and PyInstaller manual.
-    if getattr(sys, 'frozen', False):  # hasattr(sys, '_MEIPASS'):
-        base_path = getattr(sys, '_MEIPASS', Path(Path(__file__).resolve()).parent)
-        return Path(base_path) / relative_path
-    return Path(relative_path).resolve()
-
-
 class ColorChart(tk.Frame):
     """
     Set up main frame and fill with interactive widgets for all valid
@@ -411,9 +342,9 @@ class ColorChart(tk.Frame):
         for _col in range(self.info_width):
             self.columnconfigure(_col, weight=1)
 
-        self.master.bind_all('<Escape>', quit_gui)
+        self.master.bind_all('<Escape>', lambda: Utils.quit_gui(root))
         # A click on the close window icon will provide exit msg in Terminal.
-        self.master.protocol('WM_DELETE_WINDOW', quit_gui)
+        self.master.protocol('WM_DELETE_WINDOW', lambda: Utils.quit_gui(root))
 
         # Need to specify Ctrl-a for Linux b/c in tkinter that key is
         #   bound to <<LineStart>>, not <<SelectAll>>, for some reason?
@@ -428,17 +359,18 @@ class ColorChart(tk.Frame):
             cmdkey = 'Control'
         elif MY_OS == 'dar':
             cmdkey = 'Command'
-        self.master.bind(f'<{f"{cmdkey}"}-q>', quit_gui)
+
+        Utils.keyboard('quit', self.master, root)
 
         # Keybindings to show the simulated color table images in Toplevel windows.
         self.master.bind(
-            f'<{f"{cmdkey}"}-d>', lambda event, d='d': self.show_simtable(d))
+            f'<{f"{cmdkey}"}-d>', lambda _: self.show_simtable('d'))
         self.master.bind(
-            f'<{f"{cmdkey}"}-p>', lambda event, p='p': self.show_simtable(p))
+            f'<{f"{cmdkey}"}-p>', lambda _: self.show_simtable('p'))
         self.master.bind(
-            f'<{f"{cmdkey}"}-t>', lambda event, t='t': self.show_simtable(t))
+            f'<{f"{cmdkey}"}-t>', lambda _: self.show_simtable('t'))
         self.master.bind(
-            f'<{f"{cmdkey}"}-g>', lambda event, g='g': self.show_simtable(g))
+            f'<{f"{cmdkey}"}-g>', lambda _: self.show_simtable('g'))
 
         # OS-specific right-click bindings for edit functions
         #   used with info Entry() widgets.
@@ -447,8 +379,10 @@ class ColorChart(tk.Frame):
             right_click = '<Button-3>'
         elif MY_OS == 'dar':
             right_click = '<Button-2>'
-        self.bg_info.bind(f'{right_click}', right_click_menu)
-        self.fg_info.bind(f'{right_click}', right_click_menu)
+        self.bg_info.bind(
+            f'{right_click}', lambda _: Utils.click(self.bg_info, 'right'))
+        self.fg_info.bind(
+            f'{right_click}', lambda _: Utils.click(self.fg_info, 'right'))
 
         if MY_OS in 'lin, win':
             self.use_info.configure(font=('TkTooltipFont', 9))
@@ -721,21 +655,23 @@ class ColorChart(tk.Frame):
         """
         colorwin = tk.Toplevel()
         colorwin.minsize(1200, 580)
+        Utils.keyboard('close', colorwin, root)
+
         if image == 'd':
             self.img = tk.PhotoImage(
-                file=valid_path_to("images/deuteranopia_colortable.png"))
+                file=Utils.valid_path_to("images/deuteranopia_colortable.png"))
             colorwin.title('X11 named colors with deuteranopia simulation')
         elif image == 'p':
             self.img = tk.PhotoImage(
-                file=valid_path_to("images/protanopia_colortable.png"))
+                file=Utils.valid_path_to("images/protanopia_colortable.png"))
             colorwin.title('X11 named colors with protanopia simulation')
         elif image == 't':
             self.img = tk.PhotoImage(
-                file=valid_path_to("images/tritanopia_colortable.png"))
+                file=Utils.valid_path_to("images/tritanopia_colortable.png"))
             colorwin.title('X11 named colors with tritanopia simulation')
         elif image == 'g':
             self.img = tk.PhotoImage(
-                file=valid_path_to("images/grayscale_colortable.png"))
+                file=Utils.valid_path_to("images/grayscale_colortable.png"))
             colorwin.title('X11 named colors with grayscale simulation')
 
         colorwin.image = self.img
@@ -744,30 +680,39 @@ class ColorChart(tk.Frame):
         colortable.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
 
 
-if __name__ == "__main__":
+def parse_args() -> None:
+    """Allow handling of common command line arguments.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument('--about',
-                        help='Provide description, usage, version, GNU license',
+                        help='Provides description, version, GNU license',
                         action='store_true',
                         default=False)
     args = parser.parse_args()
     if args.about:
         print(__doc__)
-        print('Author:    ', __author__)
-        print('License:   ', __license__)
-        print('Copyright: ', __copyright__)
-        print('URL:       ', __project_url__)
-        print('Version:   ', __version__)
-        print('Status:    ', __status__)
-        print('Dev env:   ', __dev__)
+        print(f'{"Author:".ljust(13)}', __author__)
+        print(f'{"License:".ljust(13)}', __license__)
+        print(f'{"Copyright:".ljust(13)}', __copyright__)
+        print(f'{"URL:".ljust(13)}', __project_url__)
+        print(f'{"Program:".ljust(13)}', __program_name__)
+        print(f'{"Version:".ljust(13)}', __version__)
+        print(f'{"Dev Env:".ljust(13)}', __dev__)
+        print(f'{"Status:".ljust(13)}', __status__)
         print()
         sys.exit(0)
-    else:
+
+
+if __name__ == "__main__":
+    parse_args()
+    try:
         root = tk.Tk()
         root.title("tkinter Named Colors")
-        # Need valid_path_to() to make onefile with PyInstaller.
-        img = tk.PhotoImage(file=valid_path_to('images/helper_icon512.png'))
+        # Need valid_path_to() to make onefile or windowed (macOS) with PyInstaller.
+        img = tk.PhotoImage(file=Utils.valid_path_to('images/helper_icon512.png'))
         root.iconphoto(True, img)
-        print(f'{valid_path_to(str(Path(__file__))).name} now running...')
+        print(f'{Utils.valid_path_to(str(Path(__file__))).name} now running...')
         app = ColorChart(root)
         root.mainloop()
+    except KeyboardInterrupt:
+        print(' *** Quit program on keyboard interrupt by user ***\n')
