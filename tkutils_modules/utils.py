@@ -136,17 +136,17 @@ def get_toplevel(action: str, mainwin):
     return None
 
 
-def click(click_obj, click_type) -> None:
+def click(click_type, click_obj) -> None:
     """
     Mouse button bindings for the named object.
     Creates pop-up menu of commands for the clicked object.
     Example: from tkutils_modules import utils
              utils.click(myentryobject, 'right')
 
-    :param click_obj: Name of the object in which click commands are
-                      to be active.
     :param click_type: Example mouse button or button modifiers;
                      'left', 'right', 'shift', 'ctrl', 'shiftctrl', etc.
+    :param click_obj: Name of the object in which click commands are
+                      to be active.
     """
 
     def on_click(event, command):
@@ -176,6 +176,8 @@ def click(click_obj, click_type) -> None:
         right_click_menu.add_command(
             label='Cut',
             command=lambda: on_click(event, 'Cut'))
+
+        right_click_menu.tk_popup(event.x_root + 10, event.y_root + 15)
 
     if click_type == 'right':
         if MY_OS in 'lin, win':

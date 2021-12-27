@@ -26,7 +26,7 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 __author__ = 'Craig Echt'
 __copyright__ = 'Copyright (C) 2021 C.S. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.5.0'
+__version__ = '0.5.1'
 __program_name__ = 'tk-color-helper'
 __project_url__ = 'https://github.com/csecht/tkinter_utilities'
 __docformat__ = 'markdown'
@@ -372,17 +372,8 @@ class ColorChart(tk.Frame):
         self.master.bind(
             f'<{f"{cmdkey}"}-g>', lambda _: self.show_simtable('g'))
 
-        # OS-specific right-click bindings for edit functions
-        #   used with info Entry() widgets.
-        right_click = ''
-        if MY_OS in 'lin, win':
-            right_click = '<Button-3>'
-        elif MY_OS == 'dar':
-            right_click = '<Button-2>'
-        self.bg_info.bind(
-            f'{right_click}', lambda _: Utils.click(self.bg_info, 'right'))
-        self.fg_info.bind(
-            f'{right_click}', lambda _: Utils.click(self.fg_info, 'right'))
+        Utils.click('right', self.bg_info)
+        Utils.click('right', self.fg_info)
 
         if MY_OS in 'lin, win':
             self.use_info.configure(font=('TkTooltipFont', 9))
