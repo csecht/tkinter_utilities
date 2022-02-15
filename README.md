@@ -1,5 +1,6 @@
 # tkinter_utilities
 ## tk-color-helper
+![tkinter-colors](images/helper_icon256.png)
 
 A Python utility to help choose colors and their color blind equivalents
 for tkinter GUIs. Draws an interactive color table for 760 color names
