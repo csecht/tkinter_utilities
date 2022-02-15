@@ -26,7 +26,7 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 __author__ = 'Craig Echt'
 __copyright__ = 'Copyright (C) 2021 C.S. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.5.1'
+__version__ = '0.5.2'
 __program_name__ = 'tk-color-helper'
 __project_url__ = 'https://github.com/csecht/tkinter_utilities'
 __docformat__ = 'markdown'
@@ -393,7 +393,7 @@ class ColorChart(tk.Frame):
         # Note: bg and fg of info Entry() widgets will change with click
         #    bindings, but start with a default bg.
         self.bg_info.configure(justify='center', bg='gray90', relief='sunken',
-                               bd=2, textvariable=self.bg_text)
+                               textvariable=self.bg_text)
         self.fg_info.configure(justify='center', bg='gray90', relief='sunken',
                                textvariable=self.fg_text)
 
@@ -405,10 +405,12 @@ class ColorChart(tk.Frame):
 
         # NOTE: fg_info col width needs to be enough to handle the longest
         #   color name plus hex and RGB; depends on font size.
-        self.use_info.grid(row=0, column=0, columnspan=20, sticky=tk.EW)
+        # Need to use sticky=tk.NSEW to expand Entry to fill the grid 'cell'
+        #   whatever the font size may be.
+        self.use_info.grid(row=0, column=0, columnspan=20, sticky=tk.NSEW)
         self.bg_info.grid(row=1, column=0, sticky=tk.EW,
                           columnspan=self.info_width - 10)
-        self.fg_info.grid(row=1, column=self.info_width - 10, sticky=tk.EW,
+        self.fg_info.grid(row=1, column=self.info_width - 10, sticky=tk.NSEW,
                           columnspan=10)
 
         # Need 'nosim' as default start value.
