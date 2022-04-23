@@ -238,8 +238,8 @@ class ColorChart(tk.Frame):
     contrasts to use either default black or white foregrounds.
     """
 
-    def __init__(self, master):
-        tk.Frame.__init__(self, master)
+    def __init__(self):
+        super().__init__()
 
         self.use_info = tk.Label(self)
         self.bg_info = tk.Entry(self)
@@ -269,8 +269,8 @@ class ColorChart(tk.Frame):
         """
         # row 0 reserved for standing usage instructions, row 1 reserved for
         #   color information Entry() fields; both gridded in config_master().
-        _row = 2
         _col = 0
+        _row = 2
 
         for color_name in X11_RGB_NAMES:
             label = tk.Label(self, text=color_name, bg=color_name,
@@ -705,7 +705,7 @@ if __name__ == "__main__":
         img = tk.PhotoImage(file=Utils.valid_path_to('images/helper_icon512.png'))
         root.iconphoto(True, img)
         print(f'{Utils.valid_path_to(str(Path(__file__))).name} now running...')
-        app = ColorChart(root)
+        app = ColorChart()
         root.mainloop()
     except KeyboardInterrupt:
         print(' *** Quit program on keyboard interrupt by user ***\n')
