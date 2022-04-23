@@ -41,20 +41,20 @@ class WidgetTable(tk.Frame):
 
         # Prevent window over-shrinkage with errant click-drag &
         #   provide space for full header text.
-        self.master.minsize(200, 100)
+        self.master.minsize(250, 200)
 
         # Allow the frame to fill the window and resize with it.
         self.master.rowconfigure(0, weight=1)
         self.master.columnconfigure(0, weight=1)
 
         # Put a near-white border around the Frame;
-        #   bd changes to darker shade for click-drag and loss of focus.
+        #   bd changes to darker shade for and loss of focus.
         self.master.config(
             bg='khaki3',  # Color of Frame; is border color with kw border.
             border=5,  # Thickness of Frame border. Lies inside highlight border.
             highlightthickness=5,  # The outer Frame border focus highlighting.
-            highlightcolor='grey90',  # Replace default black border with near-white.
-            highlightbackground='grey55',  # Change to mid-gray when window looses focus.
+            highlightcolor='grey90',
+            highlightbackground='grey55',
             )
 
         # Widgets' background colors.
@@ -88,8 +88,8 @@ class WidgetTable(tk.Frame):
             label.grid(column=col_indx, row=row_indx, sticky=tk.NSEW)
             row_indx += 1
             label.bind('<Button-1>', lambda event, l=label: self.color_widget(l))
-            label.bind("<Enter>", lambda event, l=label: self.enter(l))
-            label.bind("<Leave>", lambda event, l=label: self.leave(l))
+            label.bind("<Enter>", lambda event, l=label: self.on_enter(l))
+            label.bind("<Leave>", lambda event, l=label: self.on_leave(l))
 
             # Bind a right-click event to "erase" cell color.
             #   MacOS uses different button-ID than Linux and Windows.
@@ -116,7 +116,7 @@ class WidgetTable(tk.Frame):
                           bg='firebrick')
         header.grid(column=0, row=0, columnspan=self.columns, sticky=tk.NSEW)
 
-    def enter(self, cell: tk):
+    def on_enter(self, cell: tk):
         """
         Indicate mouseover cells with a color() change
         (if different from default bg).
@@ -137,7 +137,7 @@ class WidgetTable(tk.Frame):
         else:
             cell['bg'] = self.mouseover
 
-    def leave(self, cell: tk):
+    def on_leave(self, cell: tk):
         """
         On mouse leave, cell returns to entry color.
 
