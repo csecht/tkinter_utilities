@@ -1,8 +1,26 @@
+"""
+A template for laying out contiguous widgets in a column-row format.
+"""
 # modified from:
 # https://stackoverflow.com/questions/10865116/
 #    tkinter-creating-buttons-in-for-loop-passing-command-arguments
-import tkinter as tk
-from sys import platform
+import sys
+
+if sys.version_info < (3, 7):
+    print(f'Sorry, but this program requires Python 3.7 or later.\n'
+          'Current Python version:'
+          f' {sys.version_info.major}.{sys.version_info.minor}\n'
+          'Python downloads are available from https://docs.python.org/')
+    sys.exit(0)
+
+try:
+    import tkinter as tk
+except (ImportError, ModuleNotFoundError):
+    print('This program requires tkinter, which is included with \n'
+          'Python 3.7+ distributions.\n'
+          'Install the most recent version or re-install Python and include Tk/Tcl.\n'
+          '\nOn Linux, you may also need: $ sudo apt-get install python3-tk\n'
+          'See also: https://tkdocs.com/tutorial/install.html\n')
 
 
 class WidgetTable(tk.Frame):
@@ -19,30 +37,38 @@ class WidgetTable(tk.Frame):
         self.columns = columns
         self.rows = rows
 
-        # Note: self.master is inherited from tk.Frame().
+        # Note: self.master is inherited from the tk.Frame class.
 
         # Prevent window over-shrinkage with errant click-drag &
         #   provide space for full header text.
-        self.master.minsize(200, 200)
+        self.master.minsize(200, 100)
+
+        # Allow the frame to fill the window and resize with it.
+        self.master.rowconfigure(0, weight=1)
+        self.master.columnconfigure(0, weight=1)
 
         # Put a near-white border around the Frame;
         #   bd changes to darker shade for click-drag and loss of focus.
         self.master.config(
-            bg='khaki3', # Color of Frame; is border color with kw border.
-            border=5, # Thickness of Frame border. Lies inside highlight border.
-            highlightthickness=5, # The outer Frame border focus highlighting.
-            highlightcolor='grey95',  # Replace default highlight black border with near-white.
-            highlightbackground='grey55',  # Change to mid-gray when window looses focus (unclicked or dragged).
+            bg='khaki3',  # Color of Frame; is border color with kw border.
+            border=5,  # Thickness of Frame border. Lies inside highlight border.
+            highlightthickness=5,  # The outer Frame border focus highlighting.
+            highlightcolor='grey90',  # Replace default black border with near-white.
+            highlightbackground='grey55',  # Change to mid-gray when window looses focus.
             )
 
         # Widgets' background colors.
+        # When mouseover color matches default, widget color will not change on mouse over.
         self.color1 = "blue2"
         self.color2 = "goldenrod"
-        # If mouseover color matches default, then widgets don't change on mouseover.
         self.mouseover = 'khaki'
-        # self.mouseover = 'gray86'  # Use this to not change widget color on mouse over.
-        # The default tkinter widget background color.
-        self.default = 'gray86'
+        # self.mouseover = 'gray86'  # or 'white' if MacOS (darwin).
+
+        # The default tkinter widget background color varies with operating system.
+        if sys.platform in 'linux, windows':
+            self.default = 'gray86'
+        else:
+            self.default = 'white'
 
         self.draw_table()
 
@@ -62,12 +88,12 @@ class WidgetTable(tk.Frame):
             label.grid(column=col_indx, row=row_indx, sticky=tk.NSEW)
             row_indx += 1
             label.bind('<Button-1>', lambda event, l=label: self.color_widget(l))
-            label.bind("<Enter>", lambda event, l=label: self.on_enter(l))
-            label.bind("<Leave>", lambda event, l=label: self.on_leave(l))
+            label.bind("<Enter>", lambda event, l=label: self.enter(l))
+            label.bind("<Leave>", lambda event, l=label: self.leave(l))
 
             # Bind a right-click event to "erase" cell color.
             #   MacOS uses different button-ID than Linux and Windows.
-            if platform == 'darwin':
+            if sys.platform == 'darwin':
                 label.bind('<Button-2>', lambda event, l=label: self.decolor(l))
             else:
                 label.bind('<Button-3>', lambda event, l=label: self.decolor(l))
@@ -77,7 +103,7 @@ class WidgetTable(tk.Frame):
                 col_indx += 1
                 row_indx = 1
 
-        # Need to allow proportional resizing of Frame widgets with window resize.
+        # Need to allow proportional resizing of Frame contents with window resize.
         for _col in range(self.columns):
             self.master.columnconfigure(_col, weight=1)
 
@@ -90,7 +116,7 @@ class WidgetTable(tk.Frame):
                           bg='firebrick')
         header.grid(column=0, row=0, columnspan=self.columns, sticky=tk.NSEW)
 
-    def on_enter(self, cell: tk):
+    def enter(self, cell: tk):
         """
         Indicate mouseover cells with a color() change
         (if different from default bg).
@@ -98,8 +124,7 @@ class WidgetTable(tk.Frame):
         :param cell: The active tkinter widget.
         """
 
-        # Use this to not have mouseover change color;
-        #   same as if mouseover == default bg.
+        # Use this to not have mouseover change color (mouseover = default bg).
         # entered_color = cell['bg']
         # if cell['bg'] == entered_color:
         #     cell['bg'] = entered_color
@@ -112,7 +137,7 @@ class WidgetTable(tk.Frame):
         else:
             cell['bg'] = self.mouseover
 
-    def on_leave(self, cell: tk):
+    def leave(self, cell: tk):
         """
         On mouse leave, cell returns to entry color.
 
@@ -154,6 +179,6 @@ class WidgetTable(tk.Frame):
 if __name__ == "__main__":
     root = tk.Tk()
     root.title('Widget Table')
-    # Set table dimensions (# cells: W, H) in Class parameters.
+    # Set table dimensions (# cells: W, H) in Class call.
     WidgetTable(15, 10)
     root.mainloop()
