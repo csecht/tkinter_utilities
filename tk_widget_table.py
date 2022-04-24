@@ -1,17 +1,13 @@
 """
-A template for laying out contiguous widgets in a column-row format.
+A template for positioning contiguous widgets in a column-row format.
 """
 # modified from:
 # https://stackoverflow.com/questions/10865116/
 #    tkinter-creating-buttons-in-for-loop-passing-command-arguments
 import sys
+from tkutils_modules import vcheck
 
-if sys.version_info < (3, 7):
-    print(f'Sorry, but this program requires Python 3.7 or later.\n'
-          'Current Python version:'
-          f' {sys.version_info.major}.{sys.version_info.minor}\n'
-          'Python downloads are available from https://docs.python.org/')
-    sys.exit(0)
+vcheck.minversion('3.7')
 
 try:
     import tkinter as tk
@@ -37,30 +33,16 @@ class WidgetTable(tk.Frame):
         self.columns = columns
         self.rows = rows
 
-        # Note: self.master is inherited from the tk.Frame class.
-
-        # Prevent over-shrinkage of tk window with errant click-drag and
-        #   provide minimum area for a readable header text.
-        self.master.minsize(250, 200)
-
-        # Allow the frame to fill the window and resize with it.
-        self.master.rowconfigure(0, weight=1)
-        self.master.columnconfigure(0, weight=1)
-
-        self.master.config(
-            bg='khaki3',  # Fill color of Frame; is border color when kw border is used.
-            border=5,  # Thickness of inner Frame border. Lies inside highlight border.
-            highlightthickness=5,  # The outer Frame border; for window focus highlighting.
-            highlightcolor='khaki', # Lighter color of outer border with focus.
-            highlightbackground='khaki4',  # Darker color of outer border w/o focus.
-        )
+        # Note: self.master refers to the tk.Frame.
 
         # Widgets' background colors.
-        # When mouseover color matches default, widget color will not change on mouse over.
-        self.color1 = "blue2"
-        self.color2 = "goldenrod"
-        self.mouseover = 'khaki'
-        # self.mouseover = 'gray86'  # or 'white' if MacOS (darwin).
+        # Theme color is used for mouseover, outer frame border, header fg.
+        self.theme = 'khaki'  # Used for mouseover, outer frame border, header fg.
+        self.header_bg = 'firebrick'
+        self.frame_bg = 'khaki3'
+        self.hilite_bg = 'khaki4'
+        self.color1 = 'blue2'
+        self.color2 = 'goldenrod'
 
         # The default tkinter widget background color varies with operating system.
         if sys.platform == 'darwin':
@@ -78,8 +60,24 @@ class WidgetTable(tk.Frame):
         Labels are used, but can use Button(); just need to modify for
         kw activebackground and command functions.
         """
+        # Prevent over-shrinkage of tk window with errant click-drag and
+        #   provide minimum area for a readable table header text.
+        self.master.minsize(250, 200)
+
+        # Allow the frame to fill the window and resize with it.
+        self.master.rowconfigure(0, weight=1)
+        self.master.columnconfigure(0, weight=1)
+
+        self.master.config(
+            bg=self.frame_bg,  # Fill color of Frame; is border color when kw border is used.
+            border=5,  # Thickness of Frame border. Lies inside highlight border.
+            highlightthickness=5,  # Outer Frame border used for window focus highlighting.
+            highlightcolor=self.theme, # Lighter color of outer border on focus.
+            highlightbackground=self.hilite_bg,  # Darker color of outer border off focus.
+        )
+
         col_indx = 0
-        row_indx = 1  # row[0] reserved for table header.
+        row_indx = 1  # row[0] is reserved for table header.
         num_cells = self.columns * self.rows
         for i in range(num_cells):
             # label = tk.Label(text='•', fg='MediumPurple2') # Bullets (dots)
@@ -99,12 +97,12 @@ class WidgetTable(tk.Frame):
             else:
                 label.bind('<Button-3>', lambda event, l=label: self.decolor(l))
 
-            # When a column has all table rows gridded, move to next column.
+            # Once a column has all rows gridded, move to next column.
             if row_indx > self.rows:
                 col_indx += 1
                 row_indx = 1
 
-        # Need to allow proportional resizing of Frame contents with window resize.
+        # Needed for proportional resizing of Frame contents with window resize.
         for _col in range(self.columns):
             self.master.columnconfigure(_col, weight=1)
 
@@ -113,8 +111,8 @@ class WidgetTable(tk.Frame):
 
         header = tk.Label(text='Click to color widget, again for 2nd color, right-click to erase.',
                           font='TkTooltipFont',
-                          fg='khaki',
-                          bg='firebrick')
+                          fg=self.theme,
+                          bg=self.header_bg)
         header.grid(column=0, row=0, columnspan=self.columns, sticky=tk.NSEW)
 
     def on_enter(self, cell: tk):
@@ -136,7 +134,7 @@ class WidgetTable(tk.Frame):
         elif cell['bg'] == self.color2:
             cell['bg'] = self.color2
         else:
-            cell['bg'] = self.mouseover
+            cell['bg'] = self.theme
 
     def on_leave(self, cell: tk):
         """
@@ -145,7 +143,7 @@ class WidgetTable(tk.Frame):
         :param cell: The active tkinter widget.
         """
         entered_color = cell['bg']
-        if cell['bg'] == self.mouseover:
+        if cell['bg'] == self.theme:
             cell['bg'] = self.default
         else:
             cell['bg'] = entered_color
@@ -180,6 +178,6 @@ class WidgetTable(tk.Frame):
 if __name__ == "__main__":
     root = tk.Tk()
     root.title('Widget Table')
-    # Set table dimensions (# cells: col, row) in Class call.
+    # Set table dimensions (# cells: col, row) in Class parameters.
     WidgetTable(15, 10)
     root.mainloop()
