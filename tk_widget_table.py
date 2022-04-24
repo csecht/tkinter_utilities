@@ -30,7 +30,7 @@ class WidgetTable(tk.Frame):
     of widgets. Table cells can grid to any number of columns and rows.
     Frame contents are proportionally resizable with window.
     """
-    def __init__(self, columns, rows):
+    def __init__(self, columns: int, rows: int):
         super().__init__()
 
         # Set table dimensions: horizontal and vertical cell numbers (W x H).
@@ -39,23 +39,21 @@ class WidgetTable(tk.Frame):
 
         # Note: self.master is inherited from the tk.Frame class.
 
-        # Prevent window over-shrinkage with errant click-drag &
-        #   provide space for full header text.
+        # Prevent over-shrinkage of tk window with errant click-drag and
+        #   provide minimum area for a readable header text.
         self.master.minsize(250, 200)
 
         # Allow the frame to fill the window and resize with it.
         self.master.rowconfigure(0, weight=1)
         self.master.columnconfigure(0, weight=1)
 
-        # Put a near-white border around the Frame;
-        #   bd changes to darker shade for and loss of focus.
         self.master.config(
-            bg='khaki3',  # Color of Frame; is border color with kw border.
-            border=5,  # Thickness of Frame border. Lies inside highlight border.
-            highlightthickness=5,  # The outer Frame border focus highlighting.
-            highlightcolor='grey90',
-            highlightbackground='grey55',
-            )
+            bg='khaki3',  # Fill color of Frame; is border color when kw border is used.
+            border=5,  # Thickness of inner Frame border. Lies inside highlight border.
+            highlightthickness=5,  # The outer Frame border; for window focus highlighting.
+            highlightcolor='khaki2', # Lighter color of outer border with focus.
+            highlightbackground='khaki4',  # Darker color of outer border w/o focus.
+        )
 
         # Widgets' background colors.
         # When mouseover color matches default, widget color will not change on mouse over.
@@ -84,7 +82,7 @@ class WidgetTable(tk.Frame):
         row_indx = 1  # row[0] reserved for table header.
         num_cells = self.columns * self.rows
         for _ in range(num_cells):
-            label = tk.Label()
+            label = tk.Label() # self.master is implied.
             label.grid(column=col_indx, row=row_indx, sticky=tk.NSEW)
             row_indx += 1
             label.bind('<Button-1>', lambda event, l=label: self.color_widget(l))
