@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 A template for positioning contiguous widgets in a column-row format.
 """
