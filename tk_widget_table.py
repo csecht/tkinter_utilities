@@ -41,8 +41,9 @@ class WidgetTable(tk.Frame):
         self.header_bg = 'firebrick'
         self.frame_bg = 'khaki3'
         self.hilite_bg = 'khaki4'
-        self.color1 = 'blue2'
-        self.color2 = 'goldenrod'
+        self.label_fg = 'MediumPurple2'
+        self.label_color1 = 'blue2'
+        self.label_color2 = 'goldenrod'
 
         # The default tkinter widget background color varies with operating system.
         if sys.platform == 'darwin':
@@ -72,7 +73,7 @@ class WidgetTable(tk.Frame):
             bg=self.frame_bg,  # Fill color of Frame; is border color when kw border is used.
             border=5,  # Thickness of Frame border. Lies inside highlight border.
             highlightthickness=5,  # Outer Frame border used for window focus highlighting.
-            highlightcolor=self.theme, # Lighter color of outer border on focus.
+            highlightcolor=self.theme,  # Lighter color of outer border on focus.
             highlightbackground=self.hilite_bg,  # Darker color of outer border off focus.
         )
 
@@ -80,10 +81,10 @@ class WidgetTable(tk.Frame):
         row_indx = 1  # row[0] is reserved for table header.
         num_cells = self.columns * self.rows
         for i in range(num_cells):
-            # label = tk.Label(text='•', fg='MediumPurple2') # Bullets (dots)
-            label_text = i + 1
-            label = tk.Label(text=label_text, fg='MediumPurple2',
-                             font='TkTooltipFont')
+            label_text = str(i + 1).rjust(3)  # Space-padded justification works best with a monospace font.
+            label = tk.Label(text=label_text,
+                             fg=self.label_fg,
+                             font='TkFixedFont',)
             label.grid(column=col_indx, row=row_indx, sticky=tk.NSEW)
             row_indx += 1
             label.bind('<Button-1>', lambda event, l=label: self.color_widget(l))
@@ -109,7 +110,7 @@ class WidgetTable(tk.Frame):
         for _row in range(self.rows + 1):
             self.master.rowconfigure(_row, weight=1)
 
-        header = tk.Label(text='Click to color widget, again for 2nd color, right-click to erase.',
+        header = tk.Label(text='Click colors a widget, 2nd click recolors, right-click decolors.',
                           font='TkTooltipFont',
                           fg=self.theme,
                           bg=self.header_bg)
@@ -129,10 +130,10 @@ class WidgetTable(tk.Frame):
         #     cell['bg'] = entered_color
 
         # Use this to change cell color with mouseover.
-        if cell['bg'] == self.color1:
-            cell['bg'] = self.color1
-        elif cell['bg'] == self.color2:
-            cell['bg'] = self.color2
+        if cell['bg'] == self.label_color1:
+            cell['bg'] = self.label_color1
+        elif cell['bg'] == self.label_color2:
+            cell['bg'] = self.label_color2
         else:
             cell['bg'] = self.theme
 
@@ -160,10 +161,10 @@ class WidgetTable(tk.Frame):
 
         :param cell: The active tkinter widget.
         """
-        if cell['bg'] == self.color1:
-            cell['bg'] = self.color2
+        if cell['bg'] == self.label_color1:
+            cell['bg'] = self.label_color2
         else:
-            cell['bg'] = self.color1
+            cell['bg'] = self.label_color1
 
     def decolor(self, cell: tk):
         """
@@ -171,7 +172,7 @@ class WidgetTable(tk.Frame):
 
         :param cell: The active tkinter widget.
         """
-        if cell['bg'] in (self.color1, self.color2):
+        if cell['bg'] in (self.label_color1, self.label_color2):
             cell['bg'] = self.default
 
 
