@@ -63,10 +63,10 @@ class WidgetTable(tk.Frame):
         # self.mouseover = 'gray86'  # or 'white' if MacOS (darwin).
 
         # The default tkinter widget background color varies with operating system.
-        if sys.platform in 'linux, windows':
-            self.default = 'gray86'
-        else:
+        if sys.platform == 'darwin':
             self.default = 'white'
+        else:
+            self.default = 'gray86'  # Linux and Windows
 
         self.draw_table()
 
@@ -170,13 +170,13 @@ class WidgetTable(tk.Frame):
 
         :param cell: The active tkinter widget.
         """
-        if cell['bg'] == self.color1 or cell['bg'] == self.color2:
+        if cell['bg'] in (self.color1, self.color2):
             cell['bg'] = self.default
 
 
 if __name__ == "__main__":
     root = tk.Tk()
     root.title('Widget Table')
-    # Set table dimensions (# cells: W, H) in Class call.
+    # Set table dimensions (# cells: col, row) in Class call.
     WidgetTable(15, 10)
     root.mainloop()
