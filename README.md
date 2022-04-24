@@ -67,7 +67,7 @@ Use Ctrl-G (or Command-G on MacOS), to pop up a non-interactive grayscale simula
 ## tk-mvc-template.py
 A template for setting up a tkinter application with an MVC architecture. Plenty of comments are provided to explain what is going on.
 ## tk_widget_table.py
-A template for positioning contiguous widgets in a table format where each Label is bound to various functions. This is the approach used in the tk-color-helper program. The table drawing method can easily be modified to use Buttons instead of Labels.
+A template for positioning contiguous widgets in a table format where each Label is bound to various functions. This is the approach used in the tk-color-helper program. While buttons can also be used with this approach, be aware that Button() configurations on MacOS are limited in tkinter.
 
 Example: 15 x 10 table of labels. Colors of several labels were changed by mouse clicks. Texts of labels were defined as serial digits during table construction in a for-loop.
 
