@@ -40,26 +40,26 @@ Color table construction based on code from
       -h, --<span class="hljs-keyword">help</span>      show this <span class="hljs-keyword">help</span> message <span class="hljs-built_in">and</span> <span class="hljs-keyword">exit</span>
       --about         Provide description, <span class="hljs-keyword">version</span>, GNU license
 </code></pre>
-<p>Table at startup:
+<p>Table at startup:</p>
 <img src="images/full_color_start.png" alt="tkinter-colors"></p>
-<p>Example usage: Click on LightSeaGreen to select a background...
-<img src="images/select-bg.png" alt="select-background"></p>
-<p>...next, right-click MediumVioletRed to change the foreground...
-<img src="images/select-fg.png" alt="select-foreground"></p>
-<p>..next, Shift-click on LightSeaGreen. The background and foreground switch to the simulated colors for deuteranopia. Right-clicking on other colors will display those foreground selections with deuteranopia simulation. Shift-click on different colors to change the simulated background.
-<img src="images/select-deuteranopia.png" alt="change-simulation"></p>
-<p>Use Ctrl-D (or Command-D on MacOS), to pop up a non-interactive deuteranopia simulation of the color_widget table.
-<img src="images/deuteranopia_colortable.png" alt="deuteranopeia-simulated-colors"></p>
-<p>Use Ctrl-P (or Command-P on MacOS), to pop up a non-interactive protanopia simulation of the color_widget table.
-<img src="images/protanopia_colortable.png" alt="protanopeia-simulated-colors"></p>
-<p>Use Ctrl-T (or Command-T on MacOS), to pop up a non-interactive tritanopia simulation of the color_widget table.
-<img src="images/tritanopia_colortable.png" alt="tritanopia-simulated-colors"></p>
-<p>Use Ctrl-G (or Command-G on MacOS), to pop up a non-interactive grayscale simulation of the color_widget table.
-<img src="images/grayscale_colortable.png" alt="grayscale-simulated-colors"></p>
+<p>Example usage: Click on LightSeaGreen to select a background...</p>
+<p><img src="images/select-bg.png" alt="select-background"></p>
+<p>...next, right-click MediumVioletRed to change the foreground...</p>
+<p><img src="images/select-fg.png" alt="select-foreground"></p>
+<p>..next, Shift-click on LightSeaGreen. The background and foreground switch to the simulated colors for deuteranopia. Right-clicking on other colors will display those foreground selections with deuteranopia simulation. Shift-click on different colors to change the simulated background.</p>
+<p><img src="images/select-deuteranopia.png" alt="change-simulation"></p>
+<p>Use Ctrl-D (or Command-D on MacOS), to pop up a non-interactive deuteranopia simulation of the color_widget table.</p>
+<p><img src="images/deuteranopia_colortable.png" alt="deuteranopeia-simulated-colors"></p>
+<p>Use Ctrl-P (or Command-P on MacOS), to pop up a non-interactive protanopia simulation of the color_widget table.</p>
+<p><img src="images/protanopia_colortable.png" alt="protanopeia-simulated-colors"></p>
+<p>Use Ctrl-T (or Command-T on MacOS), to pop up a non-interactive tritanopia simulation of the color_widget table.</p>
+<p><img src="images/tritanopia_colortable.png" alt="tritanopia-simulated-colors"></p>
+<p>Use Ctrl-G (or Command-G on MacOS), to pop up a non-interactive grayscale simulation of the color_widget table.</p>
+<p><img src="images/grayscale_colortable.png" alt="grayscale-simulated-colors"></p>
 <h2 id="tk-mvc-template-py">tk-mvc-template.py</h2>
 <p>A template for setting up a tkinter application with an MVC architecture. Plenty of comments are provided to explain what is going on.</p>
 <h2 id="tk_widget_table-py">tk_widget_table.py</h2>
-<p>A template for positioning contiguous widgets in a table format where each Label is bound to various functions for changing its background color. The table drawing method can easily be modified to use Buttons instead of Labels.</p>
+<p>A template for positioning contiguous widgets in a table format where each Label is bound to various functions for changing its background color. This is the approach used in the tk-color-helper program. The table drawing method can easily be modified to use Buttons instead of Labels.</p>
 <p>Example: 15 x 10 table of labels. Colors of one column and row were changed by mouse clicks. Text of labels was defined as serial digits during the table for-loop construction.</p>
 <p><img src="images/widget_table.png" alt="widget-table"></p>
 </html>
