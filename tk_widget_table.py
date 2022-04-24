@@ -51,7 +51,7 @@ class WidgetTable(tk.Frame):
             bg='khaki3',  # Fill color of Frame; is border color when kw border is used.
             border=5,  # Thickness of inner Frame border. Lies inside highlight border.
             highlightthickness=5,  # The outer Frame border; for window focus highlighting.
-            highlightcolor='khaki2', # Lighter color of outer border with focus.
+            highlightcolor='khaki', # Lighter color of outer border with focus.
             highlightbackground='khaki4',  # Darker color of outer border w/o focus.
         )
 
@@ -81,15 +81,18 @@ class WidgetTable(tk.Frame):
         col_indx = 0
         row_indx = 1  # row[0] reserved for table header.
         num_cells = self.columns * self.rows
-        for _ in range(num_cells):
-            label = tk.Label() # self.master is implied.
+        for i in range(num_cells):
+            # label = tk.Label(text='•', fg='MediumPurple2') # Bullets (dots)
+            label_text = i + 1
+            label = tk.Label(text=label_text, fg='MediumPurple2',
+                             font='TkTooltipFont')
             label.grid(column=col_indx, row=row_indx, sticky=tk.NSEW)
             row_indx += 1
             label.bind('<Button-1>', lambda event, l=label: self.color_widget(l))
             label.bind("<Enter>", lambda event, l=label: self.on_enter(l))
             label.bind("<Leave>", lambda event, l=label: self.on_leave(l))
 
-            # Bind a right-click event to "erase" cell color.
+            # Bind a right-click event to "erase" cell color (change to default).
             #   MacOS uses different button-ID than Linux and Windows.
             if sys.platform == 'darwin':
                 label.bind('<Button-2>', lambda event, l=label: self.decolor(l))
