@@ -26,7 +26,7 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 __author__ = 'Craig Echt'
 __copyright__ = 'Copyright (C) 2021 C.S. Echt'
 __license__ = 'GNU General Public License'
-__version__ = '0.5.2'
+__version__ = '0.5.3'
 __program_name__ = 'tk-color-helper'
 __project_url__ = 'https://github.com/csecht/tkinter_utilities'
 __docformat__ = 'markdown'
@@ -36,7 +36,6 @@ __dev__ = ('Development environment: '
 
 import argparse
 import sys
-from math import sqrt
 from pathlib import Path
 
 from tkutils_modules import utils, vcheck
@@ -628,7 +627,8 @@ class ColorChart(tk.Frame):
         #   Calculating-the-Perceived-Brightness-of-a-Color.aspx
         # Brightness limit of 130 has grayscale cutoff at gray51
         # Range of 128-145 will give acceptable results, says author @NirDobovizki
-        _pb = sqrt((.241 * _R ** 2) + (.691 * _G ** 2) + (.068 * _B ** 2))
+        _pb = ((.241 * _R ** 2) + (.691 * _G ** 2) + (.068 * _B ** 2)) ** 0.5
+
         if _pb > CUTOFF_PB:
             return 'black'
         return 'white'
