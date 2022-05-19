@@ -53,13 +53,14 @@ class WidgetTable(tk.Frame):
         self.label_bg2 = 'goldenrod'
         self.default_bg = 'gray86'  # Linux and Windows default widget bg.
         self.label_fg1 = 'MediumPurple2'
-        self.label_fg2 = self.default_bg
-
-        self.double_click_flag = False
 
         # The default_bg tkinter widget background color varies with operating system.
         if sys.platform == 'darwin':
             self.default_bg = 'white'
+        # Have the alternate fg match the bg so it "disappears", except on mouseover.
+        self.label_fg2 = self.default_bg
+
+        self.double_click_flag = False
 
         self.draw_table()
 
