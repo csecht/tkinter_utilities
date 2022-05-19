@@ -38,20 +38,19 @@ class WidgetTable(tk.Frame):
         # Note: self.master refers to the tk.Frame.
 
         # Widgets' background colors.
-        # Theme color is used for mouseover, outer frame border, header fg.
-        self.theme = 'khaki'  # Used for mouseover, outer frame border, header fg.
+        self.theme = 'khaki'  # Used for outer frame border and header fg.
         self.header_bg = 'firebrick'
-        self.frame_bg = 'khaki3'
+        self.frame_bg = 'khaki3'  # Used for inner frame border and mouseover.
         self.hilite_bg = 'khaki4'
-        self.label_fg = 'MediumPurple2'
-        self.label_color1 = 'blue2'
-        self.label_color2 = 'goldenrod'
+        self.label_bg1 = 'blue2'
+        self.label_bg2 = 'goldenrod'
+        self.default_bg = 'gray86'  # Linux and Windows default widget bg.
+        self.label_fg1 = 'MediumPurple2'
+        self.label_fg2 = self.default_bg
 
-        # The default tkinter widget background color varies with operating system.
+        # The default_bg tkinter widget background color varies with operating system.
         if sys.platform == 'darwin':
-            self.default = 'white'
-        else:
-            self.default = 'gray86'  # Linux and Windows
+            self.default_bg = 'white'
 
         self.draw_table()
 
@@ -83,17 +82,18 @@ class WidgetTable(tk.Frame):
         row_indx = 1  # row[0] is reserved for table header.
         num_cells = self.columns * self.rows
         for i in range(num_cells):
-            label_text = str(i + 1).rjust(3)  # Space-padded justification works best with a monospace font.
+            label_text = str(i + 1).rjust(3)
             label = tk.Label(text=label_text,
-                             fg=self.label_fg,
-                             font='TkFixedFont',)
+                             fg=self.label_fg1,
+                             font='TkFixedFont', )
             label.grid(column=col_indx, row=row_indx, sticky=tk.NSEW)
             row_indx += 1
-            label.bind('<Button-1>', lambda event, l=label: self.color_widget(l))
+            label.bind('<Button-1>', lambda event, l=label: self.color_widget_bg(l))
+            label.bind('<Double-Button-1>', lambda event, l=label: self.color_widget_fg(l))
             label.bind("<Enter>", lambda event, l=label: self.on_enter(l))
             label.bind("<Leave>", lambda event, l=label: self.on_leave(l))
 
-            # Bind a right-click event to "erase" cell color (change to default).
+            # Bind a right-click event to "erase" cell color (change to default_bg).
             #   MacOS uses different button-ID than Linux and Windows.
             if sys.platform == 'darwin':
                 label.bind('<Button-2>', lambda event, l=label: self.decolor(l))
@@ -112,7 +112,8 @@ class WidgetTable(tk.Frame):
         for _row in range(self.rows + 1):
             self.master.rowconfigure(_row, weight=1)
 
-        header = tk.Label(text='Click colors a widget, 2nd click recolors, right-click decolors.',
+        header = tk.Label(text='Click colors a widget, 2nd click recolors,'
+                               ' rt-click decolors,\ndbl-click changes text color.',
                           font='TkTooltipFont',
                           fg=self.theme,
                           bg=self.header_bg)
@@ -121,7 +122,7 @@ class WidgetTable(tk.Frame):
     def on_enter(self, cell: tk):
         """
         Indicate mouseover cells with a color() change
-        (if different from default bg).
+        (if different from default_bg bg).
 
         :param cell: The active tkinter widget.
         """
@@ -132,12 +133,12 @@ class WidgetTable(tk.Frame):
         #     cell['bg'] = entered_color
 
         # Use this to change cell color with mouseover.
-        if cell['bg'] == self.label_color1:
-            cell['bg'] = self.label_color1
-        elif cell['bg'] == self.label_color2:
-            cell['bg'] = self.label_color2
+        if cell['bg'] == self.label_bg1:
+            cell['bg'] = self.label_bg1
+        elif cell['bg'] == self.label_bg2:
+            cell['bg'] = self.label_bg2
         else:
-            cell['bg'] = self.theme
+            cell['bg'] = self.frame_bg
 
     def on_leave(self, cell: tk):
         """
@@ -146,27 +147,40 @@ class WidgetTable(tk.Frame):
         :param cell: The active tkinter widget.
         """
         entered_color = cell['bg']
-        if cell['bg'] == self.theme:
-            cell['bg'] = self.default
+        if cell['bg'] == self.frame_bg:
+            cell['bg'] = self.default_bg
         else:
             cell['bg'] = entered_color
 
         # Use this statement instead to color in cursor path with the
-        #   mouseover color (when mouseover color is different from default bg).
+        #   mouseover color (when mouseover color is different from default_bg bg).
         # if cell['bg'] == entered_color:
         #     cell['bg'] = entered_color
 
-    def color_widget(self, cell: tk):
+    def color_widget_bg(self, cell: tk):
         """
         Click on a table cell (widget) to color it; click it
-        again or double click to change color.
+        again to change background color.
 
         :param cell: The active tkinter widget.
         """
-        if cell['bg'] == self.label_color1:
-            cell['bg'] = self.label_color2
+        if cell['bg'] == self.label_bg1:
+            cell['bg'] = self.label_bg2
         else:
-            cell['bg'] = self.label_color1
+            cell['bg'] = self.label_bg1
+
+    def color_widget_fg(self, cell: tk):
+        """
+        Double click on a table cell (widget) to change foreground color.
+        When label fg is set to the default_bg color, the label text
+        will blend into the default bg on alternate double-clicks.
+
+        :param cell: The active tkinter widget.
+        """
+        if cell['fg'] == self.label_fg1:
+            cell['fg'] = self.label_fg2
+        else:
+            cell['fg'] = self.label_fg1
 
     def decolor(self, cell: tk):
         """
@@ -174,13 +188,13 @@ class WidgetTable(tk.Frame):
 
         :param cell: The active tkinter widget.
         """
-        if cell['bg'] in (self.label_color1, self.label_color2):
-            cell['bg'] = self.default
+        if cell['bg'] in (self.label_bg1, self.label_bg2):
+            cell['bg'] = self.default_bg
 
 
 if __name__ == "__main__":
     root = tk.Tk()
     root.title('Widget Table')
-    # Set table dimensions (# cells: col, row) in Class parameters.
+    # Set table dimensions (# cells: col, row) as Class parameters.
     WidgetTable(15, 10)
     root.mainloop()
