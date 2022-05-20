@@ -2,7 +2,7 @@
 
 """
 A template for positioning contiguous widgets in a column-row format and
-binding mouse button actions to each widget.
+binding multiple mouse button actions to each widget.
 
 Table construction is modified from:
 https://stackoverflow.com/questions/10865116/
@@ -74,7 +74,7 @@ class WidgetTable(tk.Frame):
         """
         # Prevent over-shrinkage of tk window with errant click-drag and
         #   provide minimum area for a readable table header text.
-        self.master.minsize(250, 200)
+        self.master.minsize(350, 200)
 
         # Allow the frame to fill the window and resize with it.
         self.master.rowconfigure(0, weight=1)
