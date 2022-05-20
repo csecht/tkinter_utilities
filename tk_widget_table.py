@@ -55,7 +55,7 @@ class WidgetTable(tk.Frame):
         self.label_fg1 = 'MediumPurple2'
 
         # The default_bg tkinter widget background color varies with operating system.
-        if sys.platform == 'darwin':
+        if sys.platform == 'darwin':  # macOS
             self.default_bg = 'white'
         # Have the alternate fg match the bg so it "disappears", except on mouseover.
         self.label_fg2 = self.default_bg
@@ -64,7 +64,7 @@ class WidgetTable(tk.Frame):
 
         self.draw_table()
 
-    def draw_table(self):
+    def draw_table(self) -> None:
         """
         Fill in the frame with contiguous Labels and bind background
         color change functions to each. Number of columns and rows
@@ -100,7 +100,7 @@ class WidgetTable(tk.Frame):
             row_indx += 1
             label.bind('<Button-1>', lambda event, l=label: self.single_click(l))
             label.bind('<Double-1>', lambda event, l=label: self.double_click(l))
-            label.bind('<Shift-1>', lambda event, l=label: self.double_click(l))
+            label.bind('<Shift-1>', lambda event, l=label: self.shift_click(l))
             label.bind("<Enter>", lambda event, l=label: self.on_enter(l))
             label.bind("<Leave>", lambda event, l=label: self.on_leave(l))
 
@@ -125,14 +125,13 @@ class WidgetTable(tk.Frame):
 
         header = tk.Label(text='Click colors a cell, again recolors,'
                                ' rt-click removes color,\n'
-                               'shift-click changes text color,'
-                               ' dbl-click recolors text and cell.',
+                               'shift-click or double-click changes text color',
                           font='TkTooltipFont',
                           fg=self.theme,
                           bg=self.header_bg)
         header.grid(column=0, row=0, columnspan=self.columns, sticky=tk.NSEW)
 
-    def on_enter(self, cell: tk):
+    def on_enter(self, cell: tk) -> None:
         """
         Indicate mouseover cells with a color() change
         (if different from default_bg bg).
@@ -154,7 +153,7 @@ class WidgetTable(tk.Frame):
         else:
             cell['bg'] = self.frame_bg
 
-    def on_leave(self, cell: tk):
+    def on_leave(self, cell: tk) -> None:
         """
         On mouse leave, cell returns to entry color.
 
@@ -172,37 +171,36 @@ class WidgetTable(tk.Frame):
         # if cell['bg'] == entered_color:
         #     cell['bg'] = entered_color
 
-    def single_click(self, cell: tk):
+    def single_click(self, cell: tk) -> None:
         """
         Delay a single click on the cell to allow double_click action.
         Called from a mouse click binding.
 
-        :param cell: The active tkinter widget.
+        :param cell: The active tkinter widget, a passthrough parameter.
         :return: None
         """
         self.double_click_flag = False
-        root.after(300, self.click_control(cell))
+        self.after(300, self.click_control, cell)
 
-    def double_click(self, cell: tk):
+    def double_click(self, event) -> None:
         """
         Set flag to permit a double click event to change foreground in
         click_control().
         Called from a mouse double-click binding.
 
-        :param cell: The active tkinter widget as a pass-through.
+        :param event: Any general mouse event.
         :return: None
         """
         self.double_click_flag = True
-        self.click_control(cell)
+        return event
 
-    def click_control(self, cell: tk):
+    def click_control(self, cell: tk) -> None:
         """
-        Control mouse button events.
+        Control single and double mouse button events.
         Click a table cell (widget) to color it; click it again to
         change the cell's background color.
         Double click a table cell to change its foreground color.
-        Double click again to change it back. Cell bg also changes with
-        each double click.
+        Double click again to change it back.
         When the cell's fg is set to the default_bg color, the cell's
         text will blend into the default bg on alternate double-clicks.
 
@@ -210,21 +208,35 @@ class WidgetTable(tk.Frame):
         :return: None
         """
         if self.double_click_flag:
-            # self.double_click_flag = False
             if cell['fg'] == self.label_fg1:
                 cell['fg'] = self.label_fg2
             else:
                 cell['fg'] = self.label_fg1
+            self.double_click_flag = False
+
         else:  # Is single click.
             if cell['bg'] == self.label_bg1:
                 cell['bg'] = self.label_bg2
             else:
                 cell['bg'] = self.label_bg1
-        self.double_click_flag = False
 
-    def decolor(self, cell: tk):
+    def shift_click(self, cell: tk) -> None:
         """
-        Used with a right-click binding to remove cell color.
+        Toggles foreground color of *cell*;
+        binding to a shift-click event.
+
+        :param cell: The active tkinter widget.
+        :return: None
+        """
+        if cell['fg'] == self.label_fg1:
+            cell['fg'] = self.label_fg2
+        else:
+            cell['fg'] = self.label_fg1
+
+    def decolor(self, cell: tk) -> None:
+        """
+        Removes background color of *cell*;
+        binding to right-click event.
 
         :param cell: The active tkinter widget.
         :return: None
