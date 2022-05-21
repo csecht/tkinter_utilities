@@ -44,7 +44,7 @@ class WidgetTable(tk.Frame):
 
         # Note: self.master refers to the tk.Frame.
 
-        # Widgets' background colors.
+        # Widgets' colors.
         self.theme = 'khaki'  # Used for outer frame border and header fg.
         self.header_bg = 'firebrick'
         self.frame_bg = 'khaki3'  # Used for inner frame border and mouseover.
@@ -53,7 +53,6 @@ class WidgetTable(tk.Frame):
         self.label_bg2 = 'goldenrod'
         self.default_bg = 'gray86'  # Linux and Windows default widget bg.
         self.label_fg1 = 'MediumPurple2'
-
         # The default_bg tkinter widget background color varies with operating system.
         if sys.platform == 'darwin':  # macOS
             self.default_bg = 'white'
@@ -95,9 +94,9 @@ class WidgetTable(tk.Frame):
             label_text = str(i + 1).rjust(3)
             label = tk.Label(text=label_text,
                              fg=self.label_fg1,
-                             font='TkFixedFont', )
+                             font='TkFixedFont',
+                             )
             label.grid(column=col_indx, row=row_indx, sticky=tk.NSEW)
-            row_indx += 1
             label.bind('<Button-1>', lambda event, l=label: self.single_click(l))
             label.bind('<Double-1>', lambda event, l=label: self.double_click(l))
             label.bind('<Shift-1>', lambda event, l=label: self.shift_click(l))
@@ -111,10 +110,19 @@ class WidgetTable(tk.Frame):
             else:
                 label.bind('<Button-3>', lambda event, l=label: self.decolor(l))
 
-            # Once a column has all rows gridded, move to next column.
-            if row_indx > self.rows:
-                col_indx += 1
-                row_indx = 1
+            # Use this to sort cell numbers (text) vertically, by column.
+            #   Once a column has all rows gridded, move left to next column.
+            # row_indx += 1
+            # if row_indx > self.rows:
+            #     col_indx += 1
+            #     row_indx = 1
+
+            # Use this to sort cell numbers horizontally, by row.
+            #   Once a row has all columns gridded, move down to next row.
+            col_indx += 1
+            if col_indx > self.columns - 1:
+                row_indx += 1
+                col_indx = 0
 
         # Needed for proportional resizing of Frame contents with window resize.
         for _col in range(self.columns):
