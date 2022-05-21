@@ -42,20 +42,18 @@ class WidgetTable(tk.Frame):
         self.columns = columns
         self.rows = rows
 
-        # Note: self.master refers to the tk.Frame.
-
         # Widgets' colors.
         self.theme = 'khaki'  # Used for outer frame border and header fg.
-        self.header_bg = 'firebrick'
         self.frame_bg = 'khaki3'  # Used for inner frame border and mouseover.
-        self.hilite_bg = 'khaki4'
+        self.header_bg = 'firebrick'
+        self.hilite_bg = 'khaki4' # Darker off-focus color of outer border.
         self.label_bg1 = 'blue2'
         self.label_bg2 = 'goldenrod'
-        self.default_bg = 'gray86'  # Linux and Windows default widget bg.
-        self.label_fg1 = 'MediumPurple2'
         # The default_bg tkinter widget background color varies with operating system.
+        self.default_bg = 'gray86'  # Linux and Windows default widget bg.
         if sys.platform == 'darwin':  # macOS
             self.default_bg = 'white'
+        self.label_fg1 = 'MediumPurple2'
         # Have the alternate fg match the bg so it "disappears", except on mouseover.
         self.label_fg2 = self.default_bg
 
@@ -65,17 +63,14 @@ class WidgetTable(tk.Frame):
 
     def draw_table(self) -> None:
         """
-        Fill in the frame with contiguous Labels and bind background
-        color change functions to each. Number of columns and rows
-        of labels are specified in WidgetTable() call parameters. Here
-        Labels are used, but can use Button(); just need to modify for
+        Fill in the frame with contiguous Labels and bind fg and bg
+        color change functions to each. Number of columns and rows of
+        widgets are specified in WidgetTable() call parameters. Labels
+        are used here, but can also use Buttons; just need to modify for
         kw activebackground and command functions.
         """
-        # Prevent over-shrinkage of tk window with errant click-drag and
-        #   provide minimum area for a readable table header text.
-        self.master.minsize(350, 200)
-
-        # Allow the frame to fill the window and resize with it.
+        # Note: self.master refers to the tk.Frame.
+        # Allow the frame to fill the root window and resize with it.
         self.master.rowconfigure(0, weight=1)
         self.master.columnconfigure(0, weight=1)
 
@@ -124,7 +119,7 @@ class WidgetTable(tk.Frame):
                 row_indx += 1
                 col_indx = 0
 
-        # Needed for proportional resizing of Frame contents with window resize.
+        # Needed for proportional resizing of Frame contents upon window resize.
         for _col in range(self.columns):
             self.master.columnconfigure(_col, weight=1)
 
@@ -204,11 +199,12 @@ class WidgetTable(tk.Frame):
 
     def click_control(self, cell: tk) -> None:
         """
-        Control single and double mouse button events.
+        Separate single and double mouse button events such that a
+        double-click will not call a single-click function.
         Click a table cell (widget) to color it; click it again to
         change the cell's background color.
-        Double click a table cell to change its foreground color.
-        Double click again to change it back.
+        Double-click a table cell to change its foreground color.
+        Double-click again to change it back.
         When the cell's fg is set to the default_bg color, the cell's
         text will blend into the default bg on alternate double-clicks.
 
@@ -256,6 +252,11 @@ class WidgetTable(tk.Frame):
 if __name__ == "__main__":
     root = tk.Tk()
     root.title('Widget Table')
+
+    # Prevent over-shrinkage of tk window with errant click-drag and
+    #   provide a minimum area for all of the table header text.
+    root.minsize(350, 200)
+
     # Set table dimensions (# columns, # rows) as Class parameters.
     WidgetTable(15, 10)
     root.mainloop()
