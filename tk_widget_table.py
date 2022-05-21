@@ -33,7 +33,7 @@ class WidgetTable(tk.Frame):
     rows. Mouseovers, clicks, and right-clicks change background color
     of widgets. Double-clicks change foreground. Table cells can grid to
     any number of columns and rows. Frame contents are proportionally
-    resizable with window.
+    resizable with window; self.master is the implicit parent.
     """
     def __init__(self, columns: int, rows: int):
         super().__init__()
@@ -182,7 +182,7 @@ class WidgetTable(tk.Frame):
     def single_click(self, cell: tk) -> None:
         """
         Delay a single click on the cell to allow double_click action.
-        Called from a mouse click binding.
+        Binding to a mouse click event.
 
         :param cell: The active tkinter widget, a passthrough parameter.
         :return: None
@@ -194,7 +194,7 @@ class WidgetTable(tk.Frame):
         """
         Set flag to permit a double click event to change foreground in
         click_control().
-        Called from a mouse double-click binding.
+        Binding to a mouse double-click event.
 
         :param event: Any general mouse event.
         :return: None
@@ -230,8 +230,8 @@ class WidgetTable(tk.Frame):
 
     def shift_click(self, cell: tk) -> None:
         """
-        Toggles foreground color of *cell*;
-        binding to a shift-click event.
+        Toggles foreground color of *cell*.
+        Binding to a shift-click event.
 
         :param cell: The active tkinter widget.
         :return: None
@@ -243,8 +243,8 @@ class WidgetTable(tk.Frame):
 
     def decolor(self, cell: tk) -> None:
         """
-        Removes background color of *cell*;
-        binding to right-click event.
+        Removes background color of *cell*.
+        Binding to right-click event.
 
         :param cell: The active tkinter widget.
         :return: None
@@ -256,6 +256,6 @@ class WidgetTable(tk.Frame):
 if __name__ == "__main__":
     root = tk.Tk()
     root.title('Widget Table')
-    # Set table dimensions (# cells: col, row) as Class parameters.
+    # Set table dimensions (# columns, # rows) as Class parameters.
     WidgetTable(15, 10)
     root.mainloop()
