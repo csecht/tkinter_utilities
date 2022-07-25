@@ -20,16 +20,7 @@ Functions:
     You should have received a copy of the GNU General Public License
     along with this program. If not, see https://www.gnu.org/licenses/.
 """
-__author__ = 'Craig Echt'
-__copyright__ = 'Copyright (C) 2020-2021 C. Echt'
-__license__ = 'GNU General Public License'
-__module_name__ = 'utils.py'
-__module_ver__ = '0.1.0'
-__project_url__ = 'https://github.com/csecht/tkinter_utilities'
-__docformat__ = 'markdown'
-__status__ = 'Development Status :: 2 - Beta'
-__dev__ = ('Development environment: '
-           'Python 3.8, tkinter 8.6; Linux 5.4, macOS 10.13, Windows 10')
+# 'Copyright (C) 2021- 2022 C.S. Echt, under GNU General Public License'
 
 import sys
 from pathlib import Path
@@ -140,7 +131,7 @@ def click(click_type, click_obj) -> None:
     """
     Mouse button bindings for the named object.
     Creates pop-up menu of commands for the clicked object.
-    Example: from tkutils_modules import utils
+    Example: from tk_utils import utils
              utils.click(myentryobject, 'right')
 
     :param click_type: Example mouse button or button modifiers;
@@ -235,23 +226,3 @@ def valid_path_to(relative_path: str) -> Path:
         base_path = getattr(sys, '_MEIPASS', Path(Path(__file__).resolve()).parent)
         return Path(base_path) / relative_path
     return Path(relative_path).resolve()
-
-
-def about() -> None:
-    """
-    Print basic information about this module.
-    """
-    print(__doc__)
-    print(f'{"Author:".ljust(11)}', __author__)
-    print(f'{"Copyright:".ljust(11)}', __copyright__)
-    print(f'{"License:".ljust(11)}', __license__)
-    print(f'{"Module:".ljust(11)}', __module_name__)
-    print(f'{"Module ver.:".ljust(11)}', __module_ver__)
-    print(f'{"Dev Env:".ljust(11)}', __dev__)
-    print(f'{"URL:".ljust(11)}', __project_url__)
-    print(f'{"Status:".ljust(11)}', __status__)
-    sys.exit(0)
-
-
-if __name__ == '__main__':
-    about()

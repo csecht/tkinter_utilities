@@ -13,7 +13,7 @@ https://stackoverflow.com/questions/27262580/tkinter-binding-mouse-double-click
 """
 
 import sys
-from tkutils_modules import vcheck
+from tk_utils import vcheck
 
 vcheck.minversion('3.7')
 
@@ -254,7 +254,7 @@ if __name__ == "__main__":
     root.title('Widget Table')
 
     # Prevent over-shrinkage of tk window with errant click-drag and
-    #   provide a minimum area for all of the table header text.
+    #   provide a minimum area for all the table header text.
     root.minsize(350, 200)
 
     # Set table dimensions (# columns, # rows) as Class parameters.
