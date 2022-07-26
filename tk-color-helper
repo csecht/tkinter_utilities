@@ -53,14 +53,34 @@ class ColorChart(tk.Frame):
     # https://stackoverflow.com/questions/472000/usage-of-slots
     # https://towardsdatascience.com/understand-slots-in-python-e3081ef5196d
     __slots__ = (
-        # function attributes
-        'manage_args',
-        # tk_utils local module attributes
+        # inherited attributes:
+        'config',
+        'master',
+        'widgetName',
+        'anchor',
+        'bbox',
+        'children',
+        # 'columnconfigure',
+        'focus',
+        'lift',
+        'propagate',
+        # 'rowconfigure',
+        'size',
+        'slaves',
+        'tk',
+        'waitvar',
+        'forget',
+        # 'pack',
+        'info',
+        'place',
+        'grid',
+        'location',
+        # tk_utils local module attributes:
         '__dev_status__', '__copyright__', 'URL', 'LICENSE',
         'MAX_ROWS', 'LABEL_FONT_SIZE', 'X11_RGB_NAMES', 'MY_OS',
-        # __main__ attributes
+        # __main__ attributes:
         'root', 'icon_img', 'app',
-        # instance attributes
+        # instance attributes:
         'use_info', 'bg_info', 'fg_info', 'bg_text', 'fg_text', 'bg_hex',
         'fg_color', 'fg_hex', 'fg_rgb', 'sim_type', 'info_width', 'img',
     )
@@ -540,6 +560,7 @@ if __name__ == "__main__":
         root.iconphoto(True, icon_img)
         print(f'{utils.valid_path_to(str(Path(__file__))).name} now running...')
         app = ColorChart()
+        print(app.__dict__)
         root.mainloop()
     except KeyboardInterrupt:
         print(' *** Quit program on keyboard interrupt by user ***\n')
