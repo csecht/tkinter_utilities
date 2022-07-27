@@ -75,11 +75,7 @@ class ColorChart(tk.Frame):
         'place',
         'grid',
         'location',
-        # tk_utils local module attributes:
-        '__dev_status__', '__copyright__', 'URL', 'LICENSE',
-        'MAX_ROWS', 'LABEL_FONT_SIZE', 'X11_RGB_NAMES', 'MY_OS',
-        # __main__ attributes:
-        'root', 'icon_img', 'app',
+
         # instance attributes:
         'use_info', 'bg_info', 'fg_info', 'bg_text', 'fg_text', 'bg_hex',
         'fg_color', 'fg_hex', 'fg_rgb', 'sim_type', 'info_width', 'img',
