@@ -1,32 +1,47 @@
 #!/usr/bin/env python3
 """
-Functions to set tkinter mouse click and keyboard bindings.
+General housekeeping and mouse binding functions.
 Functions:
-    click() - Mouse button bindings for a named object.
-    keyboard() - Bind a key to a function for the specified toplevel.
-
-    Copyright (C) 2020-2021  C. Echt
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program. If not, see https://www.gnu.org/licenses/.
+    manage_args - Handle of common command line arguments.
+    quit_gui - Error-free and informative exit from the program.
+    position_wrt_window - Get screen position of a window; apply offsets.
+    click - Mouse button bindings for a named object.
+    get_toplevel - Identify a parent tk window when it, or its child,
+                    has focus.
+    keyboard - Bind a key to a function for the specified toplevel.
+    valid_path_to - Get absolute path to files and directories.
 """
 # 'Copyright (C) 2021- 2022 C.S. Echt, under GNU General Public License'
 
+import argparse
 import sys
 from pathlib import Path
 from tkinter import constants, Menu
 
+import tk_utils
+
 MY_OS = sys.platform[:3]
+
+
+def manage_args() -> None:
+    """Allow handling of common command line arguments.
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--about',
+                        help='Provides description, version, GNU license',
+                        action='store_true',
+                        default=False)
+    args = parser.parse_args()
+    if args.about:
+        print(__doc__)
+        print(f'{"Author:".ljust(13)}', tk_utils.__author__)
+        print(f'{"Version:".ljust(13)}', tk_utils.__version__)
+        print(f'{"Status:".ljust(13)}', tk_utils.__dev_status__)
+        print(f'{"URL:".ljust(13)}', tk_utils.URL)
+        print(tk_utils.__copyright__)
+        print(tk_utils.LICENSE)
+        print()
+        sys.exit(0)
 
 
 def quit_gui(mainwin):
@@ -70,12 +85,62 @@ def position_wrt_window(window, offset_x=0, offset_y=0) -> str:
     return f'+{coord_x}+{coord_y}'
 
 
+def click(click_type: str, click_obj) -> None:
+    """
+    Mouse button bindings for the named object.
+    Creates pop-up menu of commands for the clicked object.
+    Example: utils.click('right', my_tk_object)
+
+    :param click_type: Example mouse button or button modifiers;
+                     'left', 'right', 'shift', 'ctrl', 'shiftctrl', etc.
+    :param click_obj: Name of the tk object in which click command is to
+                      be active.
+    """
+
+    def on_click(event, command):
+        """
+        Sets menu command to the selected predefined virtual event.
+        Event is a unifying binding across multiple platforms.
+        https://www.tcl.tk/man/tcl8.6/TkCmd/event.htm#M7
+        """
+        # Need to set possible Text widgets to be editable in case
+        #   they are set to be readonly, tk.DISABLED.
+        click_obj.configure(state=constants.NORMAL)
+        event.widget.event_generate(f'<<{command}>>')
+
+    # Based on: https://stackoverflow.com/questions/57701023/
+    def popup_menu(event):
+        right_click_menu = Menu(None, tearoff=0, takefocus=0)
+
+        right_click_menu.add_command(
+            label='Select all',
+            command=lambda: on_click(event, 'SelectAll'))
+        right_click_menu.add_command(
+            label='Copy',
+            command=lambda: on_click(event, 'Copy'))
+        right_click_menu.add_command(
+            label='Paste',
+            command=lambda: on_click(event, 'Paste'))
+        right_click_menu.add_command(
+            label='Cut',
+            command=lambda: on_click(event, 'Cut'))
+
+        right_click_menu.tk_popup(event.x_root + 10, event.y_root + 15)
+
+    if click_type == 'right':
+        if MY_OS in 'lin, win':
+            click_obj.bind('<Button-3>', popup_menu)
+        elif MY_OS == 'dar':
+            click_obj.bind('<Button-2>', popup_menu)
+
+
 def get_toplevel(action: str, mainwin):
     """
     Identify the parent tkinter.Toplevel() window when it, or its
     child widget, has focus.
     Works as intended when Button widgets in parent toplevel or
     *mainwin* do not retain focus, i.e., 'takefocus=False'.
+    Called only from utils.keyboard().
 
     :param action: The action needed for the parent; e.g.,
                    'position', 'winpath'.
@@ -124,57 +189,7 @@ def get_toplevel(action: str, mainwin):
             elif str(child.focus_get()) == '.':
                 relative_path = mainwin
         return relative_path
-    return None
-
-
-def click(click_type, click_obj) -> None:
-    """
-    Mouse button bindings for the named object.
-    Creates pop-up menu of commands for the clicked object.
-    Example: from tk_utils import utils
-             utils.click(myentryobject, 'right')
-
-    :param click_type: Example mouse button or button modifiers;
-                     'left', 'right', 'shift', 'ctrl', 'shiftctrl', etc.
-    :param click_obj: Name of the object in which click commands are
-                      to be active.
-    """
-
-    def on_click(event, command):
-        """
-        Sets menu command to the selected predefined virtual event.
-        Event is a unifying binding across multiple platforms.
-        https://www.tcl.tk/man/tcl8.6/TkCmd/event.htm#M7
-        """
-        # Need to set possible Text widgets to be editable in case
-        #   they are set to be readonly, tk.DISABLED.
-        click_obj.configure(state=constants.NORMAL)
-        event.widget.event_generate(f'<<{command}>>')
-
-    # Based on: https://stackoverflow.com/questions/57701023/
-    def popup_menu(event):
-        right_click_menu = Menu(None, tearoff=0, takefocus=0)
-
-        right_click_menu.add_command(
-            label='Select all',
-            command=lambda: on_click(event, 'SelectAll'))
-        right_click_menu.add_command(
-            label='Copy',
-            command=lambda: on_click(event, 'Copy'))
-        right_click_menu.add_command(
-            label='Paste',
-            command=lambda: on_click(event, 'Paste'))
-        right_click_menu.add_command(
-            label='Cut',
-            command=lambda: on_click(event, 'Cut'))
-
-        right_click_menu.tk_popup(event.x_root + 10, event.y_root + 15)
-
-    if click_type == 'right':
-        if MY_OS in 'lin, win':
-            click_obj.bind('<Button-3>', popup_menu)
-        elif MY_OS == 'dar':
-            click_obj.bind('<Button-2>', popup_menu)
+    # return None
 
 
 def keyboard(func: str, toplevel, mainwin=None) -> None:

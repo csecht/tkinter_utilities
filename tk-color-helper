@@ -24,11 +24,8 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 """
 # 'Copyright (C) 2021- 2022 C.S. Echt, under GNU General Public License'
 
-import argparse
-import sys
 from pathlib import Path
 
-import tk_utils
 from tk_utils import configurations as cfg, platform_check as chk, utils
 
 try:
@@ -49,37 +46,6 @@ class ColorChart(tk.Frame):
     different types of color blindness. Apply perceived brightness
     contrasts to use either default black or white foregrounds.
     """
-
-    # https://stackoverflow.com/questions/472000/usage-of-slots
-    # https://towardsdatascience.com/understand-slots-in-python-e3081ef5196d
-    __slots__ = (
-        # inherited attributes:
-        'config',
-        'master',
-        'widgetName',
-        'anchor',
-        'bbox',
-        'children',
-        # 'columnconfigure',
-        'focus',
-        'lift',
-        'propagate',
-        # 'rowconfigure',
-        'size',
-        'slaves',
-        'tk',
-        'waitvar',
-        'forget',
-        # 'pack',
-        'info',
-        'place',
-        'grid',
-        'location',
-
-        # instance attributes:
-        'use_info', 'bg_info', 'fg_info', 'bg_text', 'fg_text', 'bg_hex',
-        'fg_color', 'fg_hex', 'fg_rgb', 'sim_type', 'info_width', 'img',
-    )
 
     def __init__(self):
         super().__init__()
@@ -259,8 +225,10 @@ class ColorChart(tk.Frame):
         # Need 'nosim' as default start value.
         self.sim_type.set('nosim')
 
-    def simulate_color(
-            self, color: str, rgb: tuple, sim_type: str, fg_do=None) -> tuple:
+    def simulate_color(self, color: str,
+                       rgb: tuple,
+                       sim_type: str,
+                       fg_do=None) -> tuple:
         """
         Convert listed named color RGB values to values that simulate the
         specified type of color blindness or grayscale. RGB is defined in
@@ -344,7 +312,9 @@ class ColorChart(tk.Frame):
 
         return sim_hex, sim_rgb
 
-    def display_colors(self, color, rgb, sim_type) -> None:
+    def display_colors(self, color: str,
+                       rgb: tuple,
+                       sim_type: str) -> None:
         """
         Displays click-selected color and its data in main display field.
         Preserves prior foreground color.
@@ -487,8 +457,8 @@ class ColorChart(tk.Frame):
 
     def show_simtable(self, image: str) -> None:
         """
-        Show in new toplevel window the full color table in specified
-        color blind simulated colors.  Called only as keybindings.
+        Show in new toplevel window the full color table PNG in specified
+        color-blind simulated colors.  Called only as keybindings.
 
         :param image: Descriptor of color simulation image file to
                       retrieve: 'd', 'p', 't', 'g'.
@@ -520,43 +490,24 @@ class ColorChart(tk.Frame):
         colortable.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
 
 
-def manage_args() -> None:
-    """Allow handling of common command line arguments.
-    """
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--about',
-                        help='Provides description, version, GNU license',
-                        action='store_true',
-                        default=False)
-    args = parser.parse_args()
-    if args.about:
-        print(__doc__)
-        print(f'{"Author:".ljust(13)}', tk_utils.__author__)
-        print(f'{"Version:".ljust(13)}', tk_utils.__version__)
-        print(f'{"Status:".ljust(13)}', tk_utils.__dev_status__)
-        print(f'{"URL:".ljust(13)}', tk_utils.URL)
-        print(tk_utils.__copyright__)
-        print(tk_utils.LICENSE)
-        print()
-        sys.exit(0)
-
-
 if __name__ == "__main__":
 
     # System platform and version checks are run in tk_utils __init__.py
     #   Program exits if checks fail.
 
-    manage_args()
+    utils.manage_args()
+
+    root = tk.Tk()
+    root.title("tkinter Named Colors")
+
+    # Need valid_path_to() to make onefile or windowed (macOS) with PyInstaller.
+    icon_img = tk.PhotoImage(file=utils.valid_path_to('images/helper_icon512.png'))
+    root.iconphoto(True, icon_img)
+
+    print(f'{utils.valid_path_to(str(Path(__file__))).name} now running...')
+    app = ColorChart()
 
     try:
-        root = tk.Tk()
-        root.title("tkinter Named Colors")
-        # Need valid_path_to() to make onefile or windowed (macOS) with PyInstaller.
-        icon_img = tk.PhotoImage(file=utils.valid_path_to('images/helper_icon512.png'))
-        root.iconphoto(True, icon_img)
-        print(f'{utils.valid_path_to(str(Path(__file__))).name} now running...')
-        app = ColorChart()
-        print(app.__dict__)
         root.mainloop()
     except KeyboardInterrupt:
         print(' *** Quit program on keyboard interrupt by user ***\n')
