@@ -18,6 +18,8 @@ import sys
 from pathlib import Path
 from tkinter import constants, Menu
 
+import __main__
+
 import tk_utils
 
 MY_OS = sys.platform[:3]
@@ -33,7 +35,7 @@ def manage_args() -> None:
                         default=False)
     args = parser.parse_args()
     if args.about:
-        print(__doc__)
+        print(__main__.__doc__)
         print(f'{"Author:".ljust(13)}', tk_utils.__author__)
         print(f'{"Version:".ljust(13)}', tk_utils.__version__)
         print(f'{"Status:".ljust(13)}', tk_utils.__dev_status__)
