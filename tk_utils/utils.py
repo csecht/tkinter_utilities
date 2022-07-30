@@ -13,12 +13,11 @@ Functions:
 """
 # 'Copyright (C) 2021- 2022 C.S. Echt, under GNU General Public License'
 
+import __main__
 import argparse
 import sys
 from pathlib import Path
 from tkinter import constants, Menu
-
-import __main__
 
 import tk_utils
 
