@@ -24,9 +24,13 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 """
 # 'Copyright (C) 2021- 2022 C.S. Echt, under GNU General Public License'
 
+# Standard library import:
 from pathlib import Path
 
-from tk_utils import configurations as cfg, platform_check as chk, utils
+# Local program import:
+from tk_utils import (configurations as cfg,
+                      platform_check as chk,
+                      utils)
 
 try:
     import tkinter as tk
@@ -41,7 +45,7 @@ except (ImportError, ModuleNotFoundError):
 
 class ColorChart(tk.Frame):
     """
-    Set up main frame and fill with interactive widgets for all valid
+    Set up main frame and fill it with interactive widgets for all valid
     named colors that can be used in tkinter. Generate simulations for
     different types of color blindness. Apply perceived brightness
     contrasts to use either default black or white foregrounds.

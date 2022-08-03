@@ -13,12 +13,16 @@ Functions:
 """
 # 'Copyright (C) 2021- 2022 C.S. Echt, under GNU General Public License'
 
+# Main script import:
 import __main__
+
+# Standard library imports:
 import argparse
 import sys
 from pathlib import Path
 from tkinter import constants, Menu
 
+# Local program import:
 import tk_utils
 
 MY_OS = sys.platform[:3]
