@@ -173,7 +173,7 @@ class ColorChart(tk.Frame):
         elif chk.MY_OS == 'dar':
             cmdkey = 'Command'
 
-        utils.keyboard('quit', self.master, root)
+        utils.keyboard(func='quit', toplevel=self.master, mainwin=root)
 
         # Keybindings to show the simulated color table images in Toplevel windows.
         self.master.bind(
@@ -260,17 +260,17 @@ class ColorChart(tk.Frame):
         def clip(_c):
             return max(min(255, _c), 0)
 
-        # Calculate color blind simulation using T matrix RGB conversion.
+        # Calculate color-blind simulation using T matrix RGB conversion.
         # All T matrix values from http://mkweb.bcgsc.ca/colorblind/math.mhtml
         #   and are conversion summaries with the LMSD65 XYZ-LMS conversion matrix.
         #   Author: Martin Krzywinski
         if sim_type == 'deuteranopia':
-            # Simulate deuteranopia- greens are greatly reduced (1% men)
+            # Simulate deuteranopia - greens are greatly reduced (1% men)
             _R = clip(round((0.33066007 * _r) + (0.66933993 * _g) + (0 * _b)))
             _G = clip(round((0.33066007 * _r) + (0.66933993 * _g) + (0 * _b)))
             _B = clip(round((-0.02785538 * _r) + (0.02785538 * _g) + (1 * _b)))
         elif sim_type == 'protanopia':
-            # Simulate protanopia- reds are greatly reduced (1% men)
+            # Simulate protanopia - reds are greatly reduced (1% men)
             _R = clip(round((0.170556992 * _r) + (0.829443014 * _g) + (0 * _b)))
             _G = clip(round((0.170556991 * _r) + (0.829443008 * _g) + (0 * _b)))
             _B = clip(round((-0.004517144 * _r) + (0.004517144 * _g) + (1 * _b)))
@@ -383,7 +383,7 @@ class ColorChart(tk.Frame):
         else:
             # To match fg to bg sim_type, fg selection calls simulated_color(),
             #   which .sets() the fg sim hex and rgb control variables.
-            sim_hex, sim_rgb = self.simulate_color(color, rgb, sim_type, 'yes')
+            sim_hex, sim_rgb = self.simulate_color(color, rgb, sim_type, fg_do='yes')
             self.fg_text.set(
                 f"{sim_type} sees '{color}' as fg='{sim_hex}'; RGB {sim_rgb}")
             self.bg_info.configure(fg=sim_hex)
@@ -448,13 +448,12 @@ class ColorChart(tk.Frame):
 
         # https://www.nbdtech.com /Blog/archive/2008/04/27/
         #   Calculating-the-Perceived-Brightness-of-a-Color.aspx
-        # Brightness limit of 130 has grayscale cutoff at gray51
-        # Range of 128-145 will give acceptable results, says author @NirDobovizki
+        # Cutoff of perceived brightness, -pb, in range(128-145) to switch from
+        #   black to white foreground will give acceptable visual contrast when
+        #   background below that PB. 130 has a cutoff of gray51.
+        # Range of 128-145 will give acceptable results, says author @NirDobovizki.
         _pb = ((.241 * _R ** 2) + (.691 * _G ** 2) + (.068 * _B ** 2)) ** 0.5
 
-        # Cutoff of perceived brightness in range(128-145) to switch from black to white
-        #  foreground will give acceptable visual contrast when background below that PB.
-        #  130 has a cutoff of gray51.
         if _pb > 138:
             return 'black'
         return 'white'
@@ -469,7 +468,7 @@ class ColorChart(tk.Frame):
         """
         colorwin = tk.Toplevel()
         colorwin.minsize(1200, 580)
-        utils.keyboard('close', colorwin, root)
+        utils.keyboard(func='close', toplevel=colorwin, mainwin=root)
 
         if image == 'd':
             self.img = tk.PhotoImage(
