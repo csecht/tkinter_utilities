@@ -37,10 +37,9 @@ try:
 except (ImportError, ModuleNotFoundError):
     print('Requires tkinter, which is included with \n'
           'Python 3.7+ distributions.\n'
-          'Install the most recent version or re-install Python and include Tk/Tcl.\n'
-          '\n'
+          'Install the most recent version or re-install Python and include Tk/Tcl.\n\n'
           'On Linux you may also need:$ sudo apt-get install python3-tk\n'
-          f'See also: https://tkdocs.com/tutorial/install.html\n')
+          'See also: https://tkdocs.com/tutorial/install.html\n')
 
 
 class ColorChart(tk.Frame):
@@ -50,6 +49,11 @@ class ColorChart(tk.Frame):
     different types of color blindness. Apply perceived brightness
     contrasts to use either default black or white foregrounds.
     """
+
+    __slots__ = (
+        'use_info', 'bg_info', 'fg_info', 'bg_text', 'fg_text', 'bg_hex',
+        'fg_color', 'fg_hex', 'fg_rgb', 'sim_type', 'info_width', 'img'
+    )
 
     def __init__(self):
         super().__init__()
@@ -87,8 +91,11 @@ class ColorChart(tk.Frame):
         _row = 2
 
         for color_name in cfg.X11_RGB_NAMES:
-            label = tk.Label(self, text=color_name, bg=color_name,
-                             font=('TkTooltipFont', cfg.LABEL_FONT_SIZE))
+            label = tk.Label(self,
+                             text=color_name,
+                             bg=color_name,
+                             font=('TkTooltipFont', cfg.LABEL_FONT_SIZE),
+                             )
             label.grid(row=_row, column=_col, sticky=tk.NSEW)
             _row += 1
 
@@ -103,7 +110,7 @@ class ColorChart(tk.Frame):
             rgb = (_R, _G, _B)
             color_hex = f'#{_R:02x}{_G:02x}{_B:02x}'
 
-            # Set default label text B&W color for best contrast against bg.
+            # Set default label text B&W fg for best contrast against color_name bg.
             label.config(fg=self.black_or_white(rgb))
 
             # Use clicks to bind color label to color and data display.
@@ -139,7 +146,7 @@ class ColorChart(tk.Frame):
                 _col += 1
                 _row = 2
 
-        self.pack(expand=True, fill="both")
+        self.pack(expand=True, fill=tk.BOTH)
 
         # Used in config_master()
         self.info_width = _col
@@ -164,15 +171,16 @@ class ColorChart(tk.Frame):
         for _col in range(self.info_width):
             self.columnconfigure(_col, weight=1)
 
-        self.master.bind_all('<Escape>', lambda: utils.quit_gui(root))
-        # A click on the close window icon will provide exit msg in Terminal.
-        self.master.protocol('WM_DELETE_WINDOW', lambda: utils.quit_gui(root))
+        self.master.bind_all('<Escape>', lambda: utils.quit_gui(app))
+
+        # Provide an exit msg in Terminal when click on the close window icon.
+        self.master.protocol('WM_DELETE_WINDOW', lambda: utils.quit_gui(app))
 
         # Need to specify Ctrl-a for Linux b/c in tkinter that key is
         #   bound to <<LineStart>>, not <<SelectAll>>, for some reason?
         if chk.MY_OS == 'lin':
             def select_all():
-                app.focus_get().event_generate('<<SelectAll>>')
+                Chart.focus_get().event_generate('<<SelectAll>>')
 
             self.master.bind_all('<Control-a>', lambda event: select_all())
 
@@ -182,7 +190,7 @@ class ColorChart(tk.Frame):
         elif chk.MY_OS == 'dar':
             cmdkey = 'Command'
 
-        utils.keyboard(func='quit', toplevel=self.master, mainwin=root)
+        utils.keyboard(func='quit', toplevel=self.master, mainwin=app)
 
         # Keybindings to show the simulated color table images in Toplevel windows.
         self.master.bind(
@@ -229,11 +237,18 @@ class ColorChart(tk.Frame):
         #   color name plus hex and RGB; depends on font size.
         # Need to use sticky=tk.NSEW to expand Entry to fill the grid 'cell'
         #   whatever the font size may be.
-        self.use_info.grid(row=0, column=0, columnspan=20, sticky=tk.NSEW)
-        self.bg_info.grid(row=1, column=0, sticky=tk.EW,
-                          columnspan=self.info_width - 10)
-        self.fg_info.grid(row=1, column=self.info_width - 10, sticky=tk.NSEW,
-                          columnspan=10)
+        self.use_info.grid(row=0, column=0,
+                           columnspan=20,
+                           sticky=tk.NSEW,
+                           )
+        self.bg_info.grid(row=1, column=0,
+                          columnspan=self.info_width - 10,
+                          sticky=tk.EW,
+                          )
+        self.fg_info.grid(row=1, column=self.info_width - 10,
+                          columnspan=10,
+                          sticky=tk.NSEW,
+                          )
 
         # Need 'nosim' as default start value.
         self.sim_type.set('nosim')
@@ -477,7 +492,7 @@ class ColorChart(tk.Frame):
         """
         colorwin = tk.Toplevel()
         colorwin.minsize(1200, 580)
-        utils.keyboard(func='close', toplevel=colorwin, mainwin=root)
+        utils.keyboard(func='close', toplevel=colorwin, mainwin=app)
 
         if image == 'd':
             self.img = tk.PhotoImage(
@@ -509,17 +524,17 @@ if __name__ == "__main__":
 
     utils.manage_args()
 
-    root = tk.Tk()
-    root.title("tkinter Named Colors")
+    app = tk.Tk()
+    app.title("tkinter Named Colors")
 
     # Need valid_path_to() to make onefile or windowed (macOS) with PyInstaller.
     icon_img = tk.PhotoImage(file=utils.valid_path_to('images/helper_icon512.png'))
-    root.iconphoto(True, icon_img)
+    app.iconphoto(True, icon_img)
 
     print(f'{utils.valid_path_to(str(Path(__file__))).name} now running...')
-    app = ColorChart()
+    Chart = ColorChart()
 
     try:
-        root.mainloop()
+        app.mainloop()
     except KeyboardInterrupt:
         print(' *** Quit program on keyboard interrupt by user ***\n')

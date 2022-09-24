@@ -8,7 +8,7 @@ from tk_utils import platform_check, vcheck
 # Development status standards: https://pypi.org/classifiers/
 
 __author__ = 'Craig S. Echt'
-__version__ = '0.6.1'
+__version__ = '0.6.2'
 __dev_status__ = 'Development Status :: 4 - Beta'
 __copyright__ = 'Copyright (C) 2021- 2022 C.S. Echt, under GNU General Public License'
 
