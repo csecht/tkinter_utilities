@@ -81,7 +81,8 @@ class ColorChart(tk.Frame):
         Call simulate_color(), black_or_white(), foreground_info.
         """
         # row 0 reserved for standing usage instructions, row 1 reserved for
-        #   color information Entry() fields; both gridded in config_master().
+        #   color information Entry() fields; Entry widgets are gridded
+        #   in config_master().
         _col = 0
         _row = 2
 
@@ -133,9 +134,10 @@ class ColorChart(tk.Frame):
                            lambda event, c=color_name, h=color_hex, r_b=rgb:
                            self.foregrnd_info(c, r_b))
 
-            if _row > cfg.MAX_ROWS:
-                _row = 2
+            # Fill Labels by rows in columns, reset to top row when a column is filled.
+            if _row >= cfg.MAX_ROWS:
                 _col += 1
+                _row = 2
 
         self.pack(expand=True, fill="both")
 
@@ -157,7 +159,7 @@ class ColorChart(tk.Frame):
                            highlightcolor='gray95',
                            highlightbackground='gray')
 
-        for _row in range(cfg.MAX_ROWS + 1):
+        for _row in range(cfg.MAX_ROWS):
             self.rowconfigure(_row, weight=1)
         for _col in range(self.info_width):
             self.columnconfigure(_col, weight=1)

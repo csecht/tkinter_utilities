@@ -1,7 +1,8 @@
 from tk_utils import platform_check as chk
 
-# 39 rows provide nice spatial organization for 760 color names; add 2 for info rows.
-MAX_ROWS = 41
+# 40 rows (19 columns) provide nice spatial organization for 760 color names;
+#   add 2 for info rows at top of the table.
+MAX_ROWS = 42
 
 # OS-specific font sizes for color names in table.
 if chk.MY_OS in 'lin, win':
@@ -15,6 +16,7 @@ elif chk.MY_OS == 'dar':
 #   The retained names are valid for tkinter 8.6 on Linux, MacOS, and Windows.
 # NOTE: Many Tcl/Tk color names from https://www.tcl.tk/man/tcl8.4/TkCmd/colors.html
 #   are invalid in tkinter 8.6.
+# 760 name Labels fit precisely into a 19 x 40 table.
 X11_RGB_NAMES = ('white', 'black', 'snow', 'ghost white', 'GhostWhite', 'white smoke',
                  'WhiteSmoke', 'gainsboro', 'floral white', 'FloralWhite', 'old lace',
                  'OldLace', 'linen', 'antique white', 'AntiqueWhite', 'papaya whip',
