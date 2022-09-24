@@ -95,8 +95,9 @@ class ColorChart(tk.Frame):
             #  to 8-bit values for 256 RGB color (256^2 = 65536).
             # source: https://stackoverflow.com/questions/58758439/
             #   how-can-i-get-hex-or-rgb-color-code-of-the-window-background-color
-            #   The operator >> is used for Right circular rotation of a
-            #       BitVector through N positions: operator.__rshift__().
+            #   The operator >> is used for Right circular rotation of a BitVector
+            #     through N positions: operator.__rshift__().
+            #   Equivalent to: _R, _G, _B = [x // 256 for x in label.winfo_rgb(color_name)]
             _R, _G, _B = [x >> 8 for x in label.winfo_rgb(color_name)]
             rgb = (_R, _G, _B)
             color_hex = f'#{_R:02x}{_G:02x}{_B:02x}'
