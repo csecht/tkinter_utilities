@@ -90,14 +90,20 @@ class ColorChart(tk.Frame):
                              font=('TkTooltipFont', cfg.LABEL_FONT_SIZE))
             label.grid(row=_row, column=_col, sticky=tk.NSEW)
             _row += 1
-            _r, _g, _b, = label.winfo_rgb(color_name)
-            _R = _r // 256
-            _G = _g // 256
-            _B = _b // 256
+
+            # Need to convert winfo_rgb 16-bit RGB tuple (in range 0-65535)
+            #  to 8-bit values for 256 RGB color (256^2 = 65536).
+            # source: https://stackoverflow.com/questions/58758439/
+            #   how-can-i-get-hex-or-rgb-color-code-of-the-window-background-color
+            #   The operator >> is used for Right circular rotation of a
+            #       BitVector through N positions: operator.__rshift__().
+            _R, _G, _B = [x >> 8 for x in label.winfo_rgb(color_name)]
             rgb = (_R, _G, _B)
-            bw = self.black_or_white(rgb)
-            label.config(fg=bw)
-            orig_hex = f'#{_R:02x}{_G:02x}{_B:02x}'
+            color_hex = f'#{_R:02x}{_G:02x}{_B:02x}'
+
+            # Set default label text B&W color for best contrast against bg.
+            label.config(fg=self.black_or_white(rgb))
+
             # Use clicks to bind color label to color and data display.
             # Click selects background, rt-click selects foreground.
             # Rt-click Button is OS-specific.
@@ -117,13 +123,13 @@ class ColorChart(tk.Frame):
                 label.bind('<Alt-Button-1>', lambda event, c=color_name, r_b=rgb:
                            self.simulate_color(c, r_b, 'tritanopia'))
                 label.bind('<Button-3>',
-                           lambda event, c=color_name, h=orig_hex, r_b=rgb:
+                           lambda event, c=color_name, h=color_hex, r_b=rgb:
                            self.foregrnd_info(c, r_b))
             elif chk.MY_OS == 'dar':
                 label.bind('<Command-Button-1>', lambda event, c=color_name, r_b=rgb:
                            self.simulate_color(c, r_b, 'tritanopia'))
                 label.bind('<Button-2>',
-                           lambda event, c=color_name, h=orig_hex, r_b=rgb:
+                           lambda event, c=color_name, h=color_hex, r_b=rgb:
                            self.foregrnd_info(c, r_b))
 
             if _row > cfg.MAX_ROWS:
