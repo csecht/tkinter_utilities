@@ -85,8 +85,9 @@ class ColorChart(tk.Frame):
         Call simulate_color(), black_or_white(), foreground_info.
         """
         # row 0 reserved for standing usage instructions, row 1 reserved for
-        #   color information Entry() fields; Entry widgets are gridded
-        #   in config_master().
+        #   color information Entry() fields.
+        # The Frame (self) with its Entry and gridded Label widgets are
+        #    drawn with pack() in config_master().
         _col = 0
         _row = 2
 
@@ -119,34 +120,32 @@ class ColorChart(tk.Frame):
             # MacOS cannot use the Alt/option modifier, so use Command.
             # Universal bindings:
             label.bind('<Button-1>',
-                       lambda event, c=color_name, r_b=rgb:
+                       lambda _, c=color_name, r_b=rgb:
                        self.simulate_color(c, r_b, 'nosim'))
-            label.bind('<Shift-Button-1>', lambda event, c=color_name, r_b=rgb:
+            label.bind('<Shift-Button-1>', lambda _, c=color_name, r_b=rgb:
                        self.simulate_color(c, r_b, 'deuteranopia'))
-            label.bind('<Control-Button-1>', lambda event, c=color_name, r_b=rgb:
+            label.bind('<Control-Button-1>', lambda _, c=color_name, r_b=rgb:
                        self.simulate_color(c, r_b, 'protanopia'))
-            label.bind('<Shift-Control-Button-1>', lambda event, c=color_name, r_b=rgb:
+            label.bind('<Shift-Control-Button-1>', lambda _, c=color_name, r_b=rgb:
                        self.simulate_color(c, r_b, 'grayscale'))
             # OS-specific bindings:
             if chk.MY_OS in 'lin, win':
-                label.bind('<Alt-Button-1>', lambda event, c=color_name, r_b=rgb:
+                label.bind('<Alt-Button-1>', lambda _, c=color_name, r_b=rgb:
                            self.simulate_color(c, r_b, 'tritanopia'))
                 label.bind('<Button-3>',
-                           lambda event, c=color_name, h=color_hex, r_b=rgb:
+                           lambda _, c=color_name, h=color_hex, r_b=rgb:
                            self.foregrnd_info(c, r_b))
             elif chk.MY_OS == 'dar':
-                label.bind('<Command-Button-1>', lambda event, c=color_name, r_b=rgb:
+                label.bind('<Command-Button-1>', lambda _, c=color_name, r_b=rgb:
                            self.simulate_color(c, r_b, 'tritanopia'))
                 label.bind('<Button-2>',
-                           lambda event, c=color_name, h=color_hex, r_b=rgb:
+                           lambda _, c=color_name, h=color_hex, r_b=rgb:
                            self.foregrnd_info(c, r_b))
 
             # Fill Labels by rows in columns, reset to top row when a column is filled.
             if _row >= cfg.MAX_ROWS:
                 _col += 1
                 _row = 2
-
-        self.pack(expand=True, fill=tk.BOTH)
 
         # Used in config_master()
         self.info_width = _col
@@ -177,12 +176,10 @@ class ColorChart(tk.Frame):
         self.master.protocol('WM_DELETE_WINDOW', lambda: utils.quit_gui(app))
 
         # Need to specify Ctrl-a for Linux b/c in tkinter that key is
-        #   bound to <<LineStart>>, not <<SelectAll>>, for some reason?
+        #   bound to <<LineStart>>, not <<SelectAll>>.
         if chk.MY_OS == 'lin':
-            def select_all():
-                Chart.focus_get().event_generate('<<SelectAll>>')
-
-            self.master.bind_all('<Control-a>', lambda event: select_all())
+            self.master.bind_all('<Control-a>', lambda event:
+                                 Chart.focus_get().event_generate('<<SelectAll>>'))
 
         cmdkey = ''
         if chk.MY_OS in 'lin, win':
@@ -250,6 +247,9 @@ class ColorChart(tk.Frame):
                           sticky=tk.NSEW,
                           )
 
+        # It's all set up, so display all widgets in the app Tk window.
+        self.pack(expand=True, fill=tk.BOTH)
+
         # Need 'nosim' as default start value.
         self.sim_type.set('nosim')
 
@@ -278,7 +278,7 @@ class ColorChart(tk.Frame):
         _G = 0
         _B = 0
 
-        # Need to restrict RGB values to integers in range [0, 255].
+        # Need to restrict RGB values to integers in range (0 - 255).
         # source: https://stackoverflow.com/questions/5996881/
         #   how-to-limit-a-number-to-be-within-a-specified-range-python
         def clip(_c):
@@ -394,6 +394,7 @@ class ColorChart(tk.Frame):
         _r, _g, _b = rgb
         fg_hex = f'#{_r:02x}{_g:02x}{_b:02x}'
         sim_type = self.sim_type.get()
+
         # Used in sync_simtypes() to synchronize fg to bg sim_types.
         self.fg_color.set(color)
         self.fg_rgb = rgb
@@ -430,6 +431,7 @@ class ColorChart(tk.Frame):
         sim_type = self.sim_type.get()
         color = self.fg_color.get()
         fg_hex = self.fg_hex.get()
+
         # Need to set self.fg_rgb to default color fg of black or white
         #   in cases of sim color selected before a fg color is selected.
         if fg_hex == 'black':
@@ -442,6 +444,7 @@ class ColorChart(tk.Frame):
         for sim in sim_list:
             if sim in bg_text and sim in fg_text:
                 match = True
+
         # NOTE: 'sees' matches when simulations not used; works ONLY because
         #  'sees' is part of the text StringVar whenever a simulation is run.
         if 'sees' not in bg_text and 'sees' not in fg_text:
@@ -496,19 +499,19 @@ class ColorChart(tk.Frame):
 
         if image == 'd':
             self.img = tk.PhotoImage(
-                file=utils.valid_path_to("images/deuteranopia_colortable.png"))
+                file=utils.valid_path_to('images/deuteranopia_colortable.png'))
             colorwin.title('X11 named colors with deuteranopia simulation')
         elif image == 'p':
             self.img = tk.PhotoImage(
-                file=utils.valid_path_to("images/protanopia_colortable.png"))
+                file=utils.valid_path_to('images/protanopia_colortable.png'))
             colorwin.title('X11 named colors with protanopia simulation')
         elif image == 't':
             self.img = tk.PhotoImage(
-                file=utils.valid_path_to("images/tritanopia_colortable.png"))
+                file=utils.valid_path_to('images/tritanopia_colortable.png'))
             colorwin.title('X11 named colors with tritanopia simulation')
         elif image == 'g':
             self.img = tk.PhotoImage(
-                file=utils.valid_path_to("images/grayscale_colortable.png"))
+                file=utils.valid_path_to('images/grayscale_colortable.png'))
             colorwin.title('X11 named colors with grayscale simulation')
 
         colorwin.image = self.img
@@ -525,7 +528,7 @@ if __name__ == "__main__":
     utils.manage_args()
 
     app = tk.Tk()
-    app.title("tkinter Named Colors")
+    app.title('tkinter Named Colors')
 
     # Need valid_path_to() to make onefile or windowed (macOS) with PyInstaller.
     icon_img = tk.PhotoImage(file=utils.valid_path_to('images/helper_icon512.png'))
