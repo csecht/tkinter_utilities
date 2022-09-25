@@ -184,7 +184,7 @@ class ColorChart(tk.Frame):
         elif chk.MY_OS == 'dar':
             cmdkey = 'Command'
 
-        utils.keyboard(func='quit', toplevel=self.master, mainwin=app)
+        utils.keybind('quit', toplevel=self.master, mainwin=app)
 
         # Keybindings to show the simulated color table images in Toplevel windows.
         self.master.bind(
@@ -501,7 +501,7 @@ class ColorChart(tk.Frame):
         """
         simwin = tk.Toplevel()
         simwin.minsize(1200, 580)
-        utils.keyboard(func='close', toplevel=simwin, mainwin=app)
+        utils.keybind('close', toplevel=simwin, mainwin=app)
 
         img = tk.PhotoImage
 

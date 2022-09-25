@@ -197,7 +197,7 @@ def get_toplevel(action: str, mainwin):
     # return None
 
 
-def keyboard(func: str, toplevel, mainwin=None) -> None:
+def keybind(func: str, toplevel, mainwin=None) -> None:
     """
     Bind a key to a function for the specified Toplevel() window. Use to
     add standard keyboard actions or to provide keybinding equivalents
@@ -208,14 +208,15 @@ def keyboard(func: str, toplevel, mainwin=None) -> None:
     binds.keyboard(mytopwin, 'close')
     binds.keyboard(mytopwin, 'append', MYFILEPATH, txt)
 
-    :param func: Function to execute: 'close', 'append', 'saveas'.
-                 For 'close', the key is 'w' with OS-specific modifier.
-                 For 'append' and 'saveas', the key is 's' with
-                 OS-specific modifier.
+    :param func: Function to execute: 'quit', 'close', 'append', 'saveas'.
+        For 'quit', the key is 'q'.
+        For 'close', the key is 'w'.
+        For 'append' and 'saveas', the key is 's'.
+        All keys use an OS-specific modifier.
     :param toplevel: Name of tk.Toplevel() object of *func*.
     :param mainwin: The main window object of the tk() mainloop, e.g.,
-                    root', 'main', or 'app'. Used only as a pass-through
-                    parameter when calling other utils functions.
+        root', 'main', or 'app'. Used only as a pass-through parameter
+        when calling other utils functions.
     """
     cmd_key = ''
     if MY_OS in 'lin, win':
