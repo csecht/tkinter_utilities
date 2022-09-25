@@ -52,7 +52,7 @@ class ColorChart(tk.Frame):
 
     __slots__ = (
         'use_info', 'bg_info', 'fg_info', 'bg_text', 'fg_text', 'bg_hex',
-        'fg_color', 'fg_hex', 'fg_rgb', 'sim_type', 'info_width', 'img'
+        'fg_color', 'fg_hex', 'fg_rgb', 'sim_type', 'info_width'
     )
 
     def __init__(self):
@@ -69,28 +69,25 @@ class ColorChart(tk.Frame):
         self.fg_rgb = ('None',)
         self.sim_type = tk.StringVar()
 
-        # Width of row1; total number of columns gridded in draw_table().
+        # Width of row1; total number of columns gridded in make_colortable().
         self.info_width = 0
 
-        self.img = tk.PhotoImage
+        self.make_colortable()
 
-        self.draw_table()
-        # config_master() needs to run after draw_table() to define the
+        # config_master() needs to run after make_colortable() to define the
         #   number of columns needed for self.info_width.
         self.config_master()
 
-    def draw_table(self) -> None:
+    def make_colortable(self) -> None:
         """
         Make the tkinter color table.
         Call simulate_color(), black_or_white(), foreground_info.
         """
+
         # row 0 reserved for standing usage instructions, row 1 reserved for
         #   color information Entry() fields.
-        # The Frame (self) with its Entry and gridded Label widgets are
-        #    drawn with pack() in config_master().
         _col = 0
         _row = 2
-
         for color_name in cfg.X11_RGB_NAMES:
             label = tk.Label(self,
                              text=color_name,
@@ -142,7 +139,7 @@ class ColorChart(tk.Frame):
                            lambda _, c=color_name, h=color_hex, r_b=rgb:
                            self.foregrnd_info(c, r_b))
 
-            # Fill Labels by rows in columns, reset to top row when a column is filled.
+            # Grid Labels col x row, reset to top row once a column is filled.
             if _row >= cfg.MAX_ROWS:
                 _col += 1
                 _row = 2
@@ -159,7 +156,7 @@ class ColorChart(tk.Frame):
 
         self.master.minsize(600, 300)
 
-        # Need to color in all master Frame to create near-white border;
+        # Need to color in all the top Tk window to create near-white border;
         #    border changes to grey for click-drag and not focus.
         self.master.config(highlightthickness=3,
                            highlightcolor='gray95',
@@ -217,12 +214,20 @@ class ColorChart(tk.Frame):
                  ' Ctrl:protanopia, Alt(Command on Mac):tritanopia,'
                  ' Shift-Crtl:grayscale.')
         self.use_info.configure(text=usage, bg='gray25', fg='gray90')
+
         # Note: bg and fg of info Entry() widgets will change with click
-        #    bindings, but start with a default bg.
-        self.bg_info.configure(justify='center', bg='gray90', relief='sunken',
-                               textvariable=self.bg_text)
-        self.fg_info.configure(justify='center', bg='gray90', relief='sunken',
-                               textvariable=self.fg_text)
+        #   bindings, but start with a default bg.
+        self.bg_info.configure(textvariable=self.bg_text,
+                               justify='center',
+                               bg='gray90',
+                               relief='sunken',
+                               )
+
+        self.fg_info.configure(textvariable=self.fg_text,
+                               justify='center',
+                               bg='gray90',
+                               relief='sunken',
+                               )
 
         # Startup text for the two Entry widgets.
         self.bg_text.set('Background color name, hex code, '
@@ -247,11 +252,11 @@ class ColorChart(tk.Frame):
                           sticky=tk.NSEW,
                           )
 
-        # It's all set up, so display all widgets in the app Tk window.
-        self.pack(expand=True, fill=tk.BOTH)
-
         # Need 'nosim' as default start value.
         self.sim_type.set('nosim')
+
+        # It's all set up, so now display all widgets in the app Tk window.
+        self.pack(expand=True, fill=tk.BOTH)
 
     def simulate_color(self, color: str,
                        rgb: tuple,
@@ -260,7 +265,7 @@ class ColorChart(tk.Frame):
         """
         Convert listed named color RGB values to values that simulate the
         specified type of color blindness or grayscale. RGB is defined in
-        self.draw_table() from label.winfo_rgb(color_name).
+        self.make_colortable() from label.winfo_rgb(color_name).
         Source: http://mkweb.bcgsc.ca/colorblind/math.mhtml
 
         :param color: A color name from cfg.X11_RGB_NAMES
@@ -385,7 +390,7 @@ class ColorChart(tk.Frame):
         """
         Assign foreground color to Entry() fields. Provide fg data.
         Convert selected color to current background simulation type.
-        Called from draw_table() in a keybinding lambda function.
+        Called from make_colortable() in a keybinding lambda function.
 
         :param color: The color name
         :param rgb: (R,G,B) of either the named color or its displayed
@@ -485,7 +490,8 @@ class ColorChart(tk.Frame):
             return 'black'
         return 'white'
 
-    def show_simtable(self, image: str) -> None:
+    @staticmethod
+    def show_simtable(image: str) -> None:
         """
         Show in new toplevel window the full color table PNG in specified
         color-blind simulated colors.  Called only as keybindings.
@@ -493,31 +499,33 @@ class ColorChart(tk.Frame):
         :param image: Descriptor of color simulation image file to
                       retrieve: 'd', 'p', 't', 'g'.
         """
-        colorwin = tk.Toplevel()
-        colorwin.minsize(1200, 580)
-        utils.keyboard(func='close', toplevel=colorwin, mainwin=app)
+        simwin = tk.Toplevel()
+        simwin.minsize(1200, 580)
+        utils.keyboard(func='close', toplevel=simwin, mainwin=app)
+
+        img = tk.PhotoImage
 
         if image == 'd':
-            self.img = tk.PhotoImage(
+            img = tk.PhotoImage(
                 file=utils.valid_path_to('images/deuteranopia_colortable.png'))
-            colorwin.title('X11 named colors with deuteranopia simulation')
+            simwin.title('X11 named colors with deuteranopia simulation')
         elif image == 'p':
-            self.img = tk.PhotoImage(
+            img = tk.PhotoImage(
                 file=utils.valid_path_to('images/protanopia_colortable.png'))
-            colorwin.title('X11 named colors with protanopia simulation')
+            simwin.title('X11 named colors with protanopia simulation')
         elif image == 't':
-            self.img = tk.PhotoImage(
+            img = tk.PhotoImage(
                 file=utils.valid_path_to('images/tritanopia_colortable.png'))
-            colorwin.title('X11 named colors with tritanopia simulation')
+            simwin.title('X11 named colors with tritanopia simulation')
         elif image == 'g':
-            self.img = tk.PhotoImage(
+            img = tk.PhotoImage(
                 file=utils.valid_path_to('images/grayscale_colortable.png'))
-            colorwin.title('X11 named colors with grayscale simulation')
+            simwin.title('X11 named colors with grayscale simulation')
 
-        colorwin.image = self.img
-        colortable = tk.Text(colorwin)
-        colortable.image_create(tk.END, image=self.img)
-        colortable.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
+        simwin.image = img
+        simtable = tk.Text(simwin)
+        simtable.image_create(tk.END, image=img)
+        simtable.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
 
 
 if __name__ == "__main__":
