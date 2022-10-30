@@ -28,9 +28,9 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 from pathlib import Path
 
 # Local program import:
-from tk_utils import (configurations as cfg,
-                      platform_check as chk,
-                      utils)
+from tk_utils import (constants as const,
+                      utils,
+                      vcheck)
 
 try:
     import tkinter as tk
@@ -88,11 +88,11 @@ class ColorChart(tk.Frame):
         #   color information Entry() fields.
         _col = 0
         _row = 2
-        for color_name in cfg.X11_RGB_NAMES:
+        for color_name in const.X11_RGB_NAMES:
             label = tk.Label(self,
                              text=color_name,
                              bg=color_name,
-                             font=('TkTooltipFont', cfg.LABEL_FONT_SIZE),
+                             font=('TkTooltipFont', const.LABEL_FONT_SIZE),
                              )
             label.grid(row=_row, column=_col, sticky=tk.NSEW)
             _row += 1
@@ -126,13 +126,13 @@ class ColorChart(tk.Frame):
             label.bind('<Shift-Control-Button-1>', lambda _, c=color_name, r_b=rgb:
                        self.simulate_color(c, r_b, 'grayscale'))
             # OS-specific bindings:
-            if chk.MY_OS in 'lin, win':
+            if utils.MY_OS in 'lin, win':
                 label.bind('<Alt-Button-1>', lambda _, c=color_name, r_b=rgb:
                            self.simulate_color(c, r_b, 'tritanopia'))
                 label.bind('<Button-3>',
                            lambda _, c=color_name, h=color_hex, r_b=rgb:
                            self.foregrnd_info(c, r_b))
-            elif chk.MY_OS == 'dar':
+            elif utils.MY_OS == 'dar':
                 label.bind('<Command-Button-1>', lambda _, c=color_name, r_b=rgb:
                            self.simulate_color(c, r_b, 'tritanopia'))
                 label.bind('<Button-2>',
@@ -140,7 +140,7 @@ class ColorChart(tk.Frame):
                            self.foregrnd_info(c, r_b))
 
             # Grid Labels col x row, reset to top row once a column is filled.
-            if _row >= cfg.MAX_ROWS:
+            if _row >= const.MAX_ROWS:
                 _col += 1
                 _row = 2
 
@@ -162,7 +162,7 @@ class ColorChart(tk.Frame):
                            highlightcolor='gray95',
                            highlightbackground='gray')
 
-        for _row in range(cfg.MAX_ROWS):
+        for _row in range(const.MAX_ROWS):
             self.rowconfigure(_row, weight=1)
         for _col in range(self.info_width):
             self.columnconfigure(_col, weight=1)
@@ -174,14 +174,14 @@ class ColorChart(tk.Frame):
 
         # Need to specify Ctrl-a for Linux b/c in tkinter that key is
         #   bound to <<LineStart>>, not <<SelectAll>>.
-        if chk.MY_OS == 'lin':
+        if utils.MY_OS == 'lin':
             self.master.bind_all('<Control-a>', lambda event:
                                  Chart.focus_get().event_generate('<<SelectAll>>'))
 
         cmdkey = ''
-        if chk.MY_OS in 'lin, win':
+        if utils.MY_OS in 'lin, win':
             cmdkey = 'Control'
-        elif chk.MY_OS == 'dar':
+        elif utils.MY_OS == 'dar':
             cmdkey = 'Command'
 
         utils.keybind('quit', toplevel=self.master, mainwin=app)
@@ -199,11 +199,11 @@ class ColorChart(tk.Frame):
         utils.click('right', self.bg_info)
         utils.click('right', self.fg_info)
 
-        if chk.MY_OS in 'lin, win':
+        if utils.MY_OS in 'lin, win':
             self.use_info.configure(font=('TkTooltipFont', 9))
             self.bg_info.config(font=('TkTooltipFont', 12))
             self.fg_info.config(font=('TkTooltipFont', 9))
-        elif chk.MY_OS == 'dar':
+        elif utils.MY_OS == 'dar':
             self.use_info.configure(font=('TkTooltipFont', 12))
             self.bg_info.config(font=('TkTooltipFont', 16))
             self.fg_info.config(font=('TkTooltipFont', 12))
@@ -268,7 +268,7 @@ class ColorChart(tk.Frame):
         self.make_colortable() from label.winfo_rgb(color_name).
         Source: http://mkweb.bcgsc.ca/colorblind/math.mhtml
 
-        :param color: A color name from cfg.X11_RGB_NAMES
+        :param color: A color name from const.X11_RGB_NAMES
         :param rgb: (R, G, B) tuple of integers in range(0-255)
         :param sim_type: 'deuteranopia', 'protanopia',
                          'tritanopia', 'grayscale', 'nosim'
@@ -532,6 +532,9 @@ if __name__ == "__main__":
 
     # System platform and version checks are run in tk_utils __init__.py
     #   Program exits if checks fail.
+
+    utils.check_platform()
+    vcheck.minversion('3.7')
 
     utils.manage_args()
 

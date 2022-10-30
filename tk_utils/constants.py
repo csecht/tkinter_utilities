@@ -1,13 +1,20 @@
-from tk_utils import platform_check as chk
+"""
+Constants used in main script and in other tk_utils modules.
+"""
+# Standard library import:
+from sys import platform
+
+#  Supported OS platforms: 'win', 'lin', 'dar'.
+MY_OS = platform[:3]
 
 # 40 rows (19 columns) provide nice spatial organization for 760 color names;
 #   add 2 for info rows at top of the table.
 MAX_ROWS = 42
 
 # OS-specific font sizes for color names in table.
-if chk.MY_OS in 'lin, win':
+if MY_OS in 'lin, win':
     LABEL_FONT_SIZE = 6
-elif chk.MY_OS == 'dar':
+elif MY_OS == 'dar':
     LABEL_FONT_SIZE = 9
 
 # X11_RGB_NAMES: 760 color names from the intersection of the rbg.txt files in

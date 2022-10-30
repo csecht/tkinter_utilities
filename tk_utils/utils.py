@@ -2,6 +2,7 @@
 """
 General housekeeping and mouse binding functions.
 Functions:
+    check_platform - Get current OS platform, exit if not supported.
     manage_args - Handle of common command line arguments.
     quit_gui - Error-free and informative exit from the program.
     position_wrt_window - Get screen position of a window; apply offsets.
@@ -13,19 +14,38 @@ Functions:
 """
 # 'Copyright (C) 2021- 2022 C.S. Echt, under GNU General Public License'
 
-# Main script import:
-import __main__
-
 # Standard library imports:
 import argparse
+import platform
 import sys
+import tkinter as tk
+from __main__ import __doc__
 from pathlib import Path
-from tkinter import constants, Menu
 
 # Local program import:
-import tk_utils
+from tk_utils import (__author__,
+                      __version__,
+                      __dev_status__,
+                      __copyright__,
+                      URL,
+                      LICENSE)
+from tk_utils.constants import MY_OS
 
-MY_OS = sys.platform[:3]
+
+def check_platform():
+    if MY_OS not in 'lin, win, dar':
+        print(f'Platform <{sys.platform}> is not supported.\n'
+              'Windows, Linux, and MacOS (darwin) are supported.')
+        sys.exit(1)
+
+    # Need to account for scaling in Windows10 and earlier releases.
+    if MY_OS == 'win':
+        from ctypes import windll
+
+        if platform.release() < '10':
+            windll.user32.SetProcessDPIAware()
+        else:
+            windll.shcore.SetProcessDpiAwareness(1)
 
 
 def manage_args() -> None:
@@ -38,13 +58,13 @@ def manage_args() -> None:
                         default=False)
     args = parser.parse_args()
     if args.about:
-        print(__main__.__doc__)
-        print(f'{"Author:".ljust(13)}', tk_utils.__author__)
-        print(f'{"Version:".ljust(13)}', tk_utils.__version__)
-        print(f'{"Status:".ljust(13)}', tk_utils.__dev_status__)
-        print(f'{"URL:".ljust(13)}', tk_utils.URL)
-        print(tk_utils.__copyright__)
-        print(tk_utils.LICENSE)
+        print(__doc__)
+        print(f'{"Author:".ljust(13)}', __author__)
+        print(f'{"Version:".ljust(13)}', __version__)
+        print(f'{"Status:".ljust(13)}', __dev_status__)
+        print(f'{"URL:".ljust(13)}', URL)
+        print(__copyright__)
+        print(LICENSE)
         print()
         sys.exit(0)
 
@@ -110,12 +130,12 @@ def click(click_type: str, click_obj) -> None:
         """
         # Need to set possible Text widgets to be editable in case
         #   they are set to be readonly, tk.DISABLED.
-        click_obj.configure(state=constants.NORMAL)
+        click_obj.configure(state=tk.NORMAL)
         event.widget.event_generate(f'<<{command}>>')
 
     # Based on: https://stackoverflow.com/questions/57701023/
     def popup_menu(event):
-        right_click_menu = Menu(None, tearoff=0, takefocus=0)
+        right_click_menu = tk.Menu(None, tearoff=0, takefocus=0)
 
         right_click_menu.add_command(
             label='Select all',
@@ -218,11 +238,7 @@ def keybind(func: str, toplevel, mainwin=None) -> None:
         root', 'main', or 'app'. Used only as a pass-through parameter
         when calling other utils functions.
     """
-    cmd_key = ''
-    if MY_OS in 'lin, win':
-        cmd_key = 'Control'
-    elif MY_OS == 'dar':
-        cmd_key = 'Command'
+    cmd_key = 'Command' if MY_OS == 'dar' else 'Control'  # is 'lin' or 'win'
 
     if func == 'close':
         toplevel.bind(
