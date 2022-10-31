@@ -12,10 +12,7 @@ MY_OS = platform[:3]
 MAX_ROWS = 42
 
 # OS-specific font sizes for color names in table.
-if MY_OS in 'lin, win':
-    LABEL_FONT_SIZE = 6
-elif MY_OS == 'dar':
-    LABEL_FONT_SIZE = 9
+LABEL_FONT_SIZE = 9 if MY_OS == 'dar' else 6  # is 'lin' or 'win'
 
 # X11_RGB_NAMES: 760 color names from the intersection of the rbg.txt files in
 #   Linux /usr/share/X11/rgb.txt and MacOS /opt/X11/share/X11/rgb.txt.
