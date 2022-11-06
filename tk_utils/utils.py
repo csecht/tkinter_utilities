@@ -252,8 +252,8 @@ def valid_path_to(relative_path: str) -> Path:
     """
     Get correct path to program's directory/file structure
     depending on whether program invocation is a standalone app or
-    the command line. Works with symlinks. Permits cmd line invocation
-    using any path.
+    the command line. Works with symlinks. Allows command line
+    using any path; does not need to be from parent directory.
     _MEIPASS var is used by distribution programs from
     PyInstaller --onefile; e.g. for images dir.
 
