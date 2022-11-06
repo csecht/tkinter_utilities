@@ -541,11 +541,16 @@ if __name__ == "__main__":
     app = tk.Tk()
     app.title('tkinter Named Colors')
 
-    # Need valid_path_to() to make onefile or windowed (macOS) with PyInstaller.
-    icon_img = tk.PhotoImage(file=utils.valid_path_to('images/helper_icon512.png'))
-    app.iconphoto(True, icon_img)
+    # Need to set correct relative path for icon image file.
+    try:
+        icon_img = tk.PhotoImage(
+            file=utils.valid_path_to('images/helper_icon512.png'))
+        app.iconphoto(True, icon_img)
+    except tk.TclError as msg:
+        print('Cannot display program icon, so it will be left blank or tk default.')
+        print(f'tk error message: {msg}')
 
-    print(f'{utils.valid_path_to(str(Path(__file__))).name} now running...')
+    print(f'{Path(__file__).name} is now running...')
     Chart = ColorChart()
 
     try:
