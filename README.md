@@ -28,16 +28,16 @@ From the green Code button above, download and unzip the ZIP file. From within t
 ### Usage:
 From within the program's folder, use one of these Terminal or Command Prompt commands, depending on your system:
 
-            python3 -m tk-color-helper (recommended for all systems)
-            py tk-color-helper.py (Windows)
-            python3 tk-color-helper.py (Linux, Mac)
-            ./tk-color-helper.py (Linux, Mac)
+            python3 -m tk_color_helper (recommended for all systems)
+            py tk_color_helper.py (Windows)
+            python3 tk_color_helper.py (Linux, Mac)
+            ./tk_color_helper.py (Linux, Mac)
 
 
 Command line arguments `--help` and `--about` are available, e.g.,
 ```
-$ python3 -m tk-color-helper --help
-usage: tk-color-helper.py [-h] [--about]
+$ python3 -m tk_color_helper --help
+usage: tk_color_helper.py [-h] [--about]
 
 optional arguments:
   -h, --help      show this help message and exit
@@ -68,10 +68,10 @@ Use Ctrl-T (or Command-T on MacOS), to pop up a non-interactive tritanopia simul
 Use Ctrl-G (or Command-G on MacOS), to pop up a non-interactive grayscale simulation of the color_widget table.
 ![grayscale-simulated-colors](images/grayscale_colortable.png)
 
-## tk-mvc-template.py
+## tk_mvc_template.py
 A template for setting up a tkinter application with an MVC architecture. Plenty of comments are provided to explain what is going on.
 ## tk_widget_table.py
-A template for positioning contiguous widgets in a table format where each Label is bound to various functions. This is the approach used in the tk-color-helper program. While buttons can also be used with this approach, be aware that Button() configurations on MacOS are limited in tkinter.
+A template for positioning contiguous widgets in a table format where each Label is bound to various functions. This is the approach used in the tk_color_helper program. While buttons can also be used with this approach, be aware that Button() configurations on MacOS are limited in tkinter.
 
 Example: 15 x 10 table of labels. Colors of several labels were changed by mouse clicks. Texts of labels were defined as serial digits during table construction in a for-loop.
 

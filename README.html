@@ -3,7 +3,7 @@
 <!--markdown .md to HTML conversion courtesy of https://markdowntohtml.com/ -->
 <html lang="en">
 <h1 id="tkinter_utilities">tkinter_utilities</h1>
-<h2 id="tk-color_widget-helper">tk-color-helper</h2>
+<h2 id="tk-color_widget-helper">tk_color_helper</h2>
 <p><img src="images/helper_icon256.png" alt="tkinter-colors"></p>
 <p>A Python utility to help choose colors and their color_widget blind equivalents
 for tkinter GUIs. Draws an interactive color_widget table for 760 color_widget names
@@ -29,13 +29,13 @@ Color table construction based on code from
 <p>From the green Code button above, download and unzip the ZIP file. From within the resulting tkinter_utilities-main folder, open a Terminal or Command Prompt.</p>
 <h3 id="usage-">Usage:</h3>
 <p>From within the program&#39;s folder, use one of these Terminal or Command Prompt commands, depending on your system:</p>
-<pre><code>        <span class="hljs-keyword">python3</span> -<span class="hljs-keyword">m</span> tk-color-helper (recommended <span class="hljs-keyword">for</span> <span class="hljs-keyword">all</span> systems)
-        <span class="hljs-keyword">py</span> tk-color-helper.<span class="hljs-keyword">py</span> (Windows)
-        <span class="hljs-keyword">python3</span> tk-color-helper.<span class="hljs-keyword">py</span> (Linux, Mac)
-        ./tk-color-helper.<span class="hljs-keyword">py</span> (Linux, Mac)
+<pre><code>        <span class="hljs-keyword">python3</span> -<span class="hljs-keyword">m</span> tk_color_helper (recommended <span class="hljs-keyword">for</span> <span class="hljs-keyword">all</span> systems)
+        <span class="hljs-keyword">py</span> tk_color_helper.<span class="hljs-keyword">py</span> (Windows)
+        <span class="hljs-keyword">python3</span> tk_color_helper.<span class="hljs-keyword">py</span> (Linux, Mac)
+        ./tk_color_helper.<span class="hljs-keyword">py</span> (Linux, Mac)
 </code></pre><p>Command line arguments <code>--help</code> and <code>--about</code> are available, e.g.,</p>
-<pre><code>$ python3 -m tk-color-helper --help
-usage: tk-color-helper.py [-h] [--about]
+<pre><code>$ python3 -m tk_color_helper --help
+usage: tk_color_helper.py [-h] [--about]
 
 optional arguments:
   -h, --help      show this help message and <span class="hljs-keyword">exit</span>
@@ -56,10 +56,10 @@ optional arguments:
 <img src="images/tritanopia_colortable.png" alt="tritanopia-simulated-colors"></p>
 <p>Use Ctrl-G (or Command-G on MacOS), to pop up a non-interactive grayscale simulation of the color_widget table.
 <img src="images/grayscale_colortable.png" alt="grayscale-simulated-colors"></p>
-<h2 id="tk-mvc-template-py">tk-mvc-template.py</h2>
+<h2 id="tk_mvc_template-py">tk_mvc_template.py</h2>
 <p>A template for setting up a tkinter application with an MVC architecture. Plenty of comments are provided to explain what is going on.</p>
 <h2 id="tk_widget_table-py">tk_widget_table.py</h2>
-<p>A template for positioning contiguous widgets in a table format where each Label is bound to various functions. This is the approach used in the tk-color-helper program. While buttons can also be used with this approach, be aware that Button() configurations on MacOS are limited in tkinter.</p>
+<p>A template for positioning contiguous widgets in a table format where each Label is bound to various functions. This is the approach used in the tk_color_helper program. While buttons can also be used with this approach, be aware that Button() configurations on MacOS are limited in tkinter.</p>
 <p>Example: 15 x 10 table of labels. Colors of several labels were changed by mouse clicks. Texts of labels were defined as serial digits during table construction in a for-loop.</p>
 <p><img src="images/widget_table.png" alt="widget-table"></p>
 
