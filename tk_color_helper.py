@@ -346,7 +346,8 @@ class ColorChart(tk.Frame):
 
         return sim_hex, sim_rgb
 
-    def display_colors(self, color: str,
+    def display_colors(self,
+                       color: str,
                        rgb: tuple,
                        sim_type: str) -> None:
         """
@@ -354,11 +355,14 @@ class ColorChart(tk.Frame):
         Preserves prior foreground color.
         Called from simulate_color().
 
-        :param color: The color name, string
-        :param rgb: (R, G, B) of either the named color or its displayed
-                    simulated color, tuple
-        :param sim_type: 'deuteranopia', 'protanopia', 'tritanopia',
-                         'grayscale', 'nosim'
+        Args:
+            color: The color name, as string
+            rgb: (R, G, B) of either the named color or its displayed
+                 simulated color, as tuple
+            sim_type: Use 'deuteranopia', 'protanopia', 'tritanopia',
+                      'grayscale', or 'nosim'.
+
+        Returns: None
         """
 
         _r, _g, _b = rgb
@@ -414,7 +418,10 @@ class ColorChart(tk.Frame):
         else:
             # To match fg to bg sim_type, fg selection calls simulated_color(),
             #   which .sets() the fg sim hex and rgb control variables.
-            sim_hex, sim_rgb = self.simulate_color(color, rgb, sim_type, fg_do='yes')
+            sim_hex, sim_rgb = self.simulate_color(color=color,
+                                                   rgb=rgb,
+                                                   sim_type=sim_type,
+                                                   fg_do='yes')
             self.fg_text.set(
                 f"{sim_type} sees '{color}' as fg='{sim_hex}'; RGB {sim_rgb}")
             self.bg_info.configure(fg=sim_hex)

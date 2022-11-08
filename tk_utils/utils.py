@@ -220,7 +220,9 @@ def get_toplevel(action: str, mainwin):
         coordinates = None
         for child in reversed(mainwin.winfo_children()):
             if child == child.focus_get():
-                coordinates = position_wrt_window(window=child, offset_x=30, offset_y=20)
+                coordinates = position_wrt_window(window=child,
+                                                  offset_x=30,
+                                                  offset_y=20)
             elif '.!text' in str(child.focus_get()):
                 parent = str(child.focus_get())[:-6]
                 if parent in str(child):
@@ -230,7 +232,7 @@ def get_toplevel(action: str, mainwin):
                 if parent in str(child):
                     coordinates = position_wrt_window(child, 30, 20)
             elif str(child.focus_get()) == '.':
-                coordinates =  position_wrt_window(mainwin, 30, 20)
+                coordinates = position_wrt_window(mainwin, 30, 20)
         return coordinates
     if action == 'winpath':
         relative_path = mainwin.winfo_children()[-1]
