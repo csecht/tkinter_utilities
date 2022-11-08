@@ -4,6 +4,7 @@ General housekeeping and mouse binding functions.
 Functions:
     check_platform - Get current OS platform, exit if not supported.
     manage_args - Handle of common command line arguments.
+    handle_exceptions - Catches uncaught system and tkinter exceptions.
     quit_gui - Error-free and informative exit from the program.
     position_wrt_window - Get screen position of a window; apply offsets.
     click - Mouse button bindings for a named object.
@@ -16,6 +17,7 @@ Functions:
 
 # Standard library imports:
 import argparse
+import logging
 import platform
 import sys
 import tkinter as tk
@@ -30,6 +32,42 @@ from tk_utils import (__author__,
                       URL,
                       LICENSE)
 from tk_utils.constants import MY_OS
+
+logger = logging.getLogger(__name__)
+handler = logging.StreamHandler(stream=sys.stdout)
+logger.addHandler(handler)
+
+
+def handle_exception(exc_type, exc_value, exc_traceback) -> None:
+    """
+    Changes an unhandled exception to go to stdout rather than
+    stderr. Ignores KeyboardInterrupt so a console program can exit
+    with Ctrl + C. Relies entirely on python's logging module for
+    formatting the exception. Sources:
+    https://stackoverflow.com/questions/6234405/
+    logging-uncaught-exceptions-in-python/16993115#16993115
+    https://stackoverflow.com/questions/43941276/
+    python-tkinter-and-imported-classes-logging-uncaught-exceptions/
+    44004413#44004413
+
+    Usage: in mainloop,
+     - sys.excepthook = utils.handle_exception
+     - app.report_callback_exception = utils.handle_exception
+
+    Args:
+        exc_type: The type of the BaseException class.
+        exc_value: The value of the BaseException instance.
+        exc_traceback: The traceback object.
+
+    Returns: None
+
+    """
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+
+    logger.error("Uncaught exception",
+                 exc_info=(exc_type, exc_value, exc_traceback))
 
 
 def check_platform():
@@ -69,7 +107,7 @@ def manage_args() -> None:
         sys.exit(0)
 
 
-def quit_gui(mainwin):
+def quit_gui(mainwin: tk.Tk) -> None:
     """
     Error-free and informative exit from the program.
     Called from widgets or keybindings.
@@ -77,14 +115,10 @@ def quit_gui(mainwin):
     :param mainwin: The tk mainloop object, e.g. root, app, etc.
     """
     print('\n  *** User has quit the program. Exiting...\n')
-    # noinspection PyBroadException
-    # pylint: disable=broad-except
-    try:
-        mainwin.update_idletasks()
-        mainwin.after(200)
-        mainwin.destroy()
-    except Exception:
-        sys.exit(0)
+
+    mainwin.update_idletasks()
+    mainwin.after(200)
+    mainwin.destroy()
 
 
 def position_wrt_window(window, offset_x=0, offset_y=0) -> str:

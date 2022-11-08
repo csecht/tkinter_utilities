@@ -25,6 +25,7 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 # 'Copyright (C) 2021- 2022 C.S. Echt, under GNU General Public License'
 
 # Standard library import:
+import sys
 from pathlib import Path
 
 # Local program import:
@@ -444,7 +445,8 @@ class ColorChart(tk.Frame):
         elif fg_hex == 'white':
             self.fg_rgb = (255, 255, 255)
 
-        sim_list = ['deuteranopia', 'protanopia', 'tritanopia', 'grayscale', 'nosim']
+        sim_list = ['deuteranopia', 'protanopia', 'tritanopia',
+                    'grayscale', 'nosim']
         match = False
         for sim in sim_list:
             if sim in bg_text and sim in fg_text:
@@ -541,17 +543,22 @@ if __name__ == "__main__":
     app = tk.Tk()
     app.title('tkinter Named Colors')
 
+    # Run custom handlers for uncaught system and tkinter exceptions.
+    sys.excepthook = utils.handle_exception
+    app.report_callback_exception = utils.handle_exception
+
     # Need to set correct relative path for icon image file.
     try:
         icon_img = tk.PhotoImage(
             file=utils.valid_path_to('images/helper_icon512.png'))
         app.iconphoto(True, icon_img)
-    except tk.TclError as msg:
-        print('Cannot display program icon, so it will be left blank or tk default.')
-        print(f'tk error message: {msg}')
+    except tk.TclError as err:
+        print('Cannot display program icon,'
+              ' so it will be left blank or tk default.')
+        print(f'tk error message: {err}')
 
-    print(f'{Path(__file__).name} is now running...')
     Chart = ColorChart()
+    print(f'{Path(__file__).name} is now running...')
 
     try:
         app.mainloop()
