@@ -550,9 +550,9 @@ if __name__ == "__main__":
     app = tk.Tk()
     app.title('tkinter Named Colors')
 
-    # Run custom handlers for uncaught system and tkinter exceptions.
-    sys.excepthook = utils.handle_exception
-    app.report_callback_exception = utils.handle_exception
+    # Developer: Custom handlers for unexpected system and tkinter exceptions.
+    # sys.excepthook = utils.handle_exception
+    # canvas_window.report_callback_exception = utils.handle_exception
 
     # Need to set correct relative path for icon image file.
     try:
