@@ -202,12 +202,12 @@ class ColorChart(tk.Frame):
 
         if utils.MY_OS in 'lin, win':
             self.use_info.configure(font=('TkTooltipFont', 9))
-            self.bg_info.config(font=('TkTooltipFont', 12))
-            self.fg_info.config(font=('TkTooltipFont', 9))
+            self.bg_info.config(font=('TkTooltipFont', 10))
+            self.fg_info.config(font=('TkTooltipFont', 10))
         elif utils.MY_OS == 'dar':
             self.use_info.configure(font=('TkTooltipFont', 12))
-            self.bg_info.config(font=('TkTooltipFont', 16))
-            self.fg_info.config(font=('TkTooltipFont', 12))
+            self.bg_info.config(font=('TkTooltipFont', 14))
+            self.fg_info.config(font=('TkTooltipFont', 14))
 
         # This usage information goes on the top row and is always visible.
         usage = ('Click changes background, right-click changes foreground.'
@@ -245,11 +245,11 @@ class ColorChart(tk.Frame):
                            sticky=tk.NSEW,
                            )
         self.bg_info.grid(row=1, column=0,
-                          columnspan=self.info_width - 10,
+                          columnspan=self.info_width - 11,
                           sticky=tk.EW,
                           )
-        self.fg_info.grid(row=1, column=self.info_width - 10,
-                          columnspan=10,
+        self.fg_info.grid(row=1, column=self.info_width - 11,
+                          columnspan=11,
                           sticky=tk.NSEW,
                           )
 
@@ -464,7 +464,8 @@ class ColorChart(tk.Frame):
         if 'sees' not in bg_text and 'sees' not in fg_text:
             match = True
         if not match:
-            sim_hex, sim_rgb = self.simulate_color(color, self.fg_rgb, sim_type, 'yes')
+            sim_hex, sim_rgb = self.simulate_color(color, self.fg_rgb,
+                                                   sim_type, 'yes')
             if sim_type == 'nosim':
                 self.fg_text.set(
                     f"fg='{color}' or fg='{sim_hex}'; RGB {sim_rgb}")
