@@ -25,7 +25,6 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 # 'Copyright (C) 2021- 2022 C.S. Echt, under GNU General Public License'
 
 # Standard library import:
-import sys
 from pathlib import Path
 
 # Local program import:
@@ -168,7 +167,7 @@ class ColorChart(tk.Frame):
         for _col in range(self.info_width):
             self.columnconfigure(_col, weight=1)
 
-        self.master.bind_all('<Escape>', lambda: utils.quit_gui(app))
+        self.master.bind_all('<Escape>', lambda _: utils.quit_gui(app))
 
         # Provide an exit msg in Terminal when click on the close window icon.
         self.master.protocol('WM_DELETE_WINDOW', lambda: utils.quit_gui(app))
@@ -549,7 +548,7 @@ if __name__ == "__main__":
     utils.manage_args()
 
     app = tk.Tk()
-    app.title('tkinter Named Colors')
+    app.title('tkinter (X11) Named Colors')
 
     # Developer: Custom handlers for unexpected system and tkinter exceptions.
     # sys.excepthook = utils.handle_exception
