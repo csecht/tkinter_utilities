@@ -176,7 +176,7 @@ class ColorChart(tk.Frame):
         #   bound to <<LineStart>>, not <<SelectAll>>.
         if utils.MY_OS == 'lin':
             self.master.bind_all('<Control-a>', lambda event:
-                                 Chart.focus_get().event_generate('<<SelectAll>>'))
+                                 self.focus_get().event_generate('<<SelectAll>>'))
 
         cmdkey = ''
         if utils.MY_OS in 'lin, win':
@@ -536,25 +536,21 @@ class ColorChart(tk.Frame):
         simtable.image_create(tk.END, image=img)
         simtable.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
 
-
-if __name__ == "__main__":
-
-    # System platform and version checks are run in tk_utils __init__.py
-    #   Program exits if checks fail.
-
+def run_checks():
+    """
+    Run system platform and version checks.  Exit program if checks fail.
+    """
     utils.check_platform()
     vcheck.minversion('3.7')
-
+    vcheck.maxversion('3.11')
     utils.manage_args()
 
-    app = tk.Tk()
-    app.title('tkinter (X11) Named Colors')
 
-    # Developer: Custom handlers for unexpected system and tkinter exceptions.
-    # sys.excepthook = utils.handle_exception
-    # canvas_window.report_callback_exception = utils.handle_exception
-
-    # Need to set correct relative path for icon image file.
+def set_icon():
+    """
+    Set the program icon image file.  If the icon cannot be displayed,
+    print a message to the console.
+    """
     try:
         icon_img = tk.PhotoImage(
             file=utils.valid_path_to('images/helper_icon512.png'))
@@ -563,11 +559,34 @@ if __name__ == "__main__":
         print('Cannot display program icon,'
               ' so it will be left blank or tk default.')
         print(f'tk error message: {err}')
+    except FileNotFoundError as fnf:
+        print(f'Cannot find program icon file: {fnf}.\n'
+              'The program will run without an icon image.')
 
-    Chart = ColorChart()
+
+def main():
+    """
+    Main function to run the program.  Create the main Tkinter window
+    and set the title.  Call the ColorChart class to create the color
+    table and display it.  Run the main loop.  Catch a KeyboardInterrupt.
+    """
+
+    # Developer: Custom handlers for unexpected system and tkinter exceptions.
+    # sys.excepthook = utils.handle_exception
+    # canvas_window.report_callback_exception = utils.handle_exception
+
+    # Comment out the run_checks and set_icon to run PyInstaller.
+    run_checks()
+    set_icon()
+
+    ColorChart()
     print(f'{Path(__file__).name} is now running...')
 
-    try:
-        app.mainloop()
-    except KeyboardInterrupt:
-        print(' *** Quit program on keyboard interrupt by user ***\n')
+    app.mainloop()
+
+
+if __name__ == "__main__":
+
+    app = tk.Tk()
+    app.title('tkinter (X11) Named Colors')
+    main()
