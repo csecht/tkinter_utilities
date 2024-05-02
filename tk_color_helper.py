@@ -131,13 +131,13 @@ class ColorChart(tk.Frame):
                            self.simulate_color(c, r_b, 'tritanopia'))
                 label.bind('<Button-3>',
                            lambda _, c=color_name, h=color_hex, r_b=rgb:
-                           self.foregrnd_info(c, r_b))
+                           self.foreground_info(c, r_b))
             elif utils.MY_OS == 'dar':
                 label.bind('<Command-Button-1>', lambda _, c=color_name, r_b=rgb:
                            self.simulate_color(c, r_b, 'tritanopia'))
                 label.bind('<Button-2>',
                            lambda _, c=color_name, h=color_hex, r_b=rgb:
-                           self.foregrnd_info(c, r_b))
+                           self.foreground_info(c, r_b))
 
             # Grid Labels col x row, reset to top row once a column is filled.
             if _row >= const.MAX_ROWS:
@@ -212,7 +212,7 @@ class ColorChart(tk.Frame):
         usage = ('Click changes background, right-click changes foreground.'
                  ' Click modifiers simulate color blindness; Shift:deuteranopia,'
                  ' Ctrl:protanopia, Alt(Command on Mac):tritanopia,'
-                 ' Shift-Crtl:grayscale.')
+                 ' Shift-Ctrl:grayscale.')
         self.use_info.configure(text=usage, bg='gray25', fg='gray90')
 
         # Note: bg and fg of info Entry() widgets will change with click
@@ -272,7 +272,7 @@ class ColorChart(tk.Frame):
         :param rgb: (R, G, B) tuple of integers in range(0-255)
         :param sim_type: 'deuteranopia', 'protanopia',
                          'tritanopia', 'grayscale', 'nosim'
-        :param fg_do: Flags a call from foregrnd_info() as 'yes'
+        :param fg_do: Flags a call from foreground_info() as 'yes'
 
         :returns: (sim_hex: str, sim_rgb: tuple)
         """
@@ -293,55 +293,46 @@ class ColorChart(tk.Frame):
         # All T matrix values from http://mkweb.bcgsc.ca/colorblind/math.mhtml
         #   and are conversion summaries with the LMSD65 XYZ-LMS conversion matrix.
         #   Author: Martin Krzywinski
-        if sim_type == 'deuteranopia':
-            # Simulate deuteranopia - greens are greatly reduced (1% men)
-            _R = clip(round((0.33066007 * _r) + (0.66933993 * _g) + (0 * _b)))
-            _G = clip(round((0.33066007 * _r) + (0.66933993 * _g) + (0 * _b)))
-            _B = clip(round((-0.02785538 * _r) + (0.02785538 * _g) + (1 * _b)))
-        elif sim_type == 'protanopia':
-            # Simulate protanopia - reds are greatly reduced (1% men)
-            _R = clip(round((0.170556992 * _r) + (0.829443014 * _g) + (0 * _b)))
-            _G = clip(round((0.170556991 * _r) + (0.829443008 * _g) + (0 * _b)))
-            _B = clip(round((-0.004517144 * _r) + (0.004517144 * _g) + (1 * _b)))
-        elif sim_type == 'tritanopia':
-            # Simulate tritanopia - blues are greatly reduced (0.003% population)
-            _R = clip(round((1 * _r) + (0.1273989 * _g) + (-0.1273989 * _b)))
-            _G = clip(round((0 * _r) + (0.8739093 * _g) + (0.1260907 * _b)))
-            _B = clip(round((0 * _r) + (0.8739093 * _g) + (0.1260907 * _b)))
-        elif sim_type == 'grayscale':
-            # Simulate grayscale - standard color luminance
-            _R = _G = _B = int(round((.2126 * _r) + (.7152 * _g) + (.0722 * _b), 0))
-        elif sim_type == 'nosim':
-            _R = _r
-            _G = _g
-            _B = _b
+        sim_types = {
+            'deuteranopia': (clip(round((0.33066007 * _r) + (0.66933993 * _g))),
+                             clip(round((0.33066007 * _r) + (0.66933993 * _g))),
+                             clip(round((-0.02785538 * _r) + (0.02785538 * _g) + (1 * _b)))),
+            'protanopia': (clip(round((0.170556992 * _r) + (0.829443014 * _g))),
+                           clip(round((0.170556991 * _r) + (0.829443008 * _g))),
+                           clip(round((-0.004517144 * _r) + (0.004517144 * _g) + (1 * _b)))),
+            'tritanopia': (clip(round((1 * _r) + (0.1273989 * _g) + (-0.1273989 * _b))),
+                           clip(round((0 * _r) + (0.8739093 * _g) + (0.1260907 * _b))),
+                           clip(round((0 * _r) + (0.8739093 * _g) + (0.1260907 * _b)))),
+            'grayscale': (int(round((.2126 * _r) + (.7152 * _g) + (.0722 * _b), 0)),
+                          int(round((.2126 * _r) + (.7152 * _g) + (.0722 * _b), 0)),
+                          int(round((.2126 * _r) + (.7152 * _g) + (.0722 * _b), 0))),
+            'nosim': (_r, _g, _b)
+        }
 
+        _R, _G, _B = sim_types.get(sim_type, (_r, _g, _b))
         sim_hex = f'#{_R:02x}{_G:02x}{_B:02x}'
         sim_rgb = (_R, _G, _B)
 
         # Need to distinguish whether sim is for default fg, new bg, or new fg.
         prior_fg = self.fg_hex.get()
-        # 'fg_click is None' is true when call is from button1 click.
+        fg_hex = self.black_or_white(sim_rgb)
+
+        # 'fg_do is None' is true when call is from button1 click.
         #  Note: Once sync_simtypes() is called, fg no longer defaults to the
         #     color label's black or white.
         if sim_type == 'nosim' and fg_do is None:
             # Note: here, fg_hex is the color name, not the hexcode.
-            fg_hex = self.black_or_white(sim_rgb)
-            self.fg_hex.set(fg_hex)
-            if prior_fg not in 'black, white':
-                self.fg_hex.set(prior_fg)
-            else:
-                self.fg_hex.set(fg_hex)
-            self.display_colors(color, sim_rgb, sim_type)
+            self.fg_hex.set(prior_fg if prior_fg not in 'black, white' else fg_hex)
         elif sim_type != 'nosim' and fg_do is None:
-            fg_hex = self.black_or_white(sim_rgb)
             if prior_fg in 'black, white':
                 self.fg_hex.set(fg_hex)
                 self.fg_color.set(fg_hex)
-            self.display_colors(color, sim_rgb, sim_type)
-        # 'fg_click is yes' when call is from button2 or 3, via foregrnd_info().
+
+        # 'fg_do is yes' when call is from button2 or 3, via foreground_info().
         if fg_do == 'yes':
             self.fg_hex.set(sim_hex)
+        else:  # is None by default
+            self.display_colors(color, sim_rgb, sim_type)
 
         return sim_hex, sim_rgb
 
@@ -390,7 +381,7 @@ class ColorChart(tk.Frame):
         self.fg_info.select_clear()
         self.update_idletasks()
 
-    def foregrnd_info(self, color: str, rgb: tuple) -> None:
+    def foreground_info(self, color: str, rgb: tuple) -> None:
         """
         Assign foreground color to Entry() fields. Provide fg data.
         Convert selected color to current background simulation type.
@@ -415,8 +406,8 @@ class ColorChart(tk.Frame):
             self.bg_info.configure(fg=fg_hex)
             self.fg_info.configure(fg=fg_hex)
         else:
-            # To match fg to bg sim_type, fg selection calls simulated_color(),
-            #   which .sets() the fg sim hex and rgb control variables.
+            # To match fg to bg sim_type, fg selection calls simulate_color(),
+            #   which sets the fg sim hex and rgb control variables.
             sim_hex, sim_rgb = self.simulate_color(color=color,
                                                    rgb=rgb,
                                                    sim_type=sim_type,
@@ -451,20 +442,21 @@ class ColorChart(tk.Frame):
         elif fg_hex == 'white':
             self.fg_rgb = (255, 255, 255)
 
-        sim_list = ['deuteranopia', 'protanopia', 'tritanopia',
-                    'grayscale', 'nosim']
         match = False
-        for sim in sim_list:
+        for sim in ('deuteranopia', 'protanopia', 'tritanopia', 'grayscale', 'nosim'):
             if sim in bg_text and sim in fg_text:
                 match = True
 
         # NOTE: 'sees' matches when simulations not used; works ONLY because
-        #  'sees' is part of the text StringVar whenever a simulation is run.
+        #  whenever a simulation is run,'sees' is part of the text StringVar
+        #  in display_colors(), foreground_info(), and below.
         if 'sees' not in bg_text and 'sees' not in fg_text:
             match = True
         if not match:
-            sim_hex, sim_rgb = self.simulate_color(color, self.fg_rgb,
-                                                   sim_type, 'yes')
+            sim_hex, sim_rgb = self.simulate_color(color=color,
+                                                   rgb=self.fg_rgb,
+                                                   sim_type=sim_type,
+                                                   fg_do='yes')
             if sim_type == 'nosim':
                 self.fg_text.set(
                     f"fg='{color}' or fg='{sim_hex}'; RGB {sim_rgb}")
@@ -512,24 +504,21 @@ class ColorChart(tk.Frame):
         simwin.minsize(1200, 580)
         utils.keybind('close', toplevel=simwin, mainwin=app)
 
-        img = tk.PhotoImage
+        image_types = {
+            'd': ('images/deuteranopia_colortable.png',
+                  'X11 named colors with deuteranopia simulation'),
+            'p': ('images/protanopia_colortable.png',
+                  'X11 named colors with protanopia simulation'),
+            't': ('images/tritanopia_colortable.png',
+                  'X11 named colors with tritanopia simulation'),
+            'g': ('images/grayscale_colortable.png',
+                  'X11 named colors with grayscale simulation')
+        }
 
-        if image == 'd':
-            img = tk.PhotoImage(
-                file=utils.valid_path_to('images/deuteranopia_colortable.png'))
-            simwin.title('X11 named colors with deuteranopia simulation')
-        elif image == 'p':
-            img = tk.PhotoImage(
-                file=utils.valid_path_to('images/protanopia_colortable.png'))
-            simwin.title('X11 named colors with protanopia simulation')
-        elif image == 't':
-            img = tk.PhotoImage(
-                file=utils.valid_path_to('images/tritanopia_colortable.png'))
-            simwin.title('X11 named colors with tritanopia simulation')
-        elif image == 'g':
-            img = tk.PhotoImage(
-                file=utils.valid_path_to('images/grayscale_colortable.png'))
-            simwin.title('X11 named colors with grayscale simulation')
+        file_path, title = image_types.get(image, ('', ''))
+        img = (tk.PhotoImage(file=utils.valid_path_to(file_path))
+               if file_path else tk.PhotoImage())
+        simwin.title(title)
 
         simwin.image = img
         simtable = tk.Text(simwin)
