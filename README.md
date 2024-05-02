@@ -56,16 +56,17 @@ Example usage: Click on LightSeaGreen to select a background...
 ..next, Shift-click on LightSeaGreen. The background and foreground switch to the simulated colors for deuteranopia. Right-clicking on other colors will display those foreground selections with deuteranopia simulation. Shift-click on different colors to change the simulated background. 
 ![change-simulation](images/select-deuteranopia.png)
 
-Use Ctrl-D (or Command-D on MacOS), to pop up a non-interactive deuteranopia simulation of the color_widget table.
+To display non-interactive pop-up windows of the full color table as seen with  deuteranopia, protanopia, tritanopia, and grayscale, use the Ctrl key (or Command key on macOS) with any of the following keys: D, P, T, or G.
+Deuteranopia:
 ![deuteranopeia-simulated-colors](images/deuteranopia_colortable.png)
 
-Use Ctrl-P (or Command-P on MacOS), to pop up a non-interactive protanopia simulation of the color_widget table.
+Protanopia:
 ![protanopeia-simulated-colors](images/protanopia_colortable.png)
 
-Use Ctrl-T (or Command-T on MacOS), to pop up a non-interactive tritanopia simulation of the color_widget table.
+Tritanopia:
 ![tritanopia-simulated-colors](images/tritanopia_colortable.png)
 
-Use Ctrl-G (or Command-G on MacOS), to pop up a non-interactive grayscale simulation of the color_widget table.
+Grayscale:
 ![grayscale-simulated-colors](images/grayscale_colortable.png)
 
 ## tk_mvc_template.py
