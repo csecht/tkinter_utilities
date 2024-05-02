@@ -66,7 +66,7 @@ class ColorChart(tk.Frame):
         self.bg_hex = tk.StringVar()
         self.fg_color = tk.StringVar()
         self.fg_hex = tk.StringVar()
-        self.fg_rgb = ('None',)
+        self.fg_rgb: tuple = ()
         self.sim_type = tk.StringVar()
 
         # Width of row1; total number of columns gridded in make_colortable().
@@ -186,15 +186,11 @@ class ColorChart(tk.Frame):
 
         utils.keybind('quit', toplevel=self.master, mainwin=app)
 
-        # Keybindings to show the simulated color table images in Toplevel windows.
-        self.master.bind(
-            f'<{f"{cmdkey}"}-d>', lambda _: self.show_simtable('d'))
-        self.master.bind(
-            f'<{f"{cmdkey}"}-p>', lambda _: self.show_simtable('p'))
-        self.master.bind(
-            f'<{f"{cmdkey}"}-t>', lambda _: self.show_simtable('t'))
-        self.master.bind(
-            f'<{f"{cmdkey}"}-g>', lambda _: self.show_simtable('g'))
+        # Keybindings to show the simulated color table images in Toplevel
+        #  windows for deuteranopia, protanopia, tritanopia, & grayscale.
+        simulation_color_tables = ['d', 'p', 't', 'g']
+        for sim in simulation_color_tables:
+            self.master.bind(f'<{cmdkey}-{sim}>', lambda _: self.show_simtable())
 
         utils.click('right', self.bg_info)
         utils.click('right', self.fg_info)
@@ -492,18 +488,16 @@ class ColorChart(tk.Frame):
         return 'white'
 
     @staticmethod
-    def show_simtable(image: str) -> None:
+    def show_simtable() -> None:
         """
-        Show in new toplevel window the full color table PNG in specified
-        color-blind simulated colors.  Called only as keybindings.
-
-        :param image: Descriptor of color simulation image file to
-                      retrieve: 'd', 'p', 't', 'g'.
+        Create toplevel windows the full color table PNG images with
+        color-blind simulated colors for deuteranopia, protanopia,
+        tritanopia, grayscale.
+        Called as keybindings set in config_master().
+        Any one of these keys, 'd', 'p', 't', 'g', with the Ctrl key,
+        will display all four images.
+        :return: None
         """
-        simwin = tk.Toplevel()
-        simwin.minsize(1200, 580)
-        utils.keybind('close', toplevel=simwin, mainwin=app)
-
         image_types = {
             'd': ('images/deuteranopia_colortable.png',
                   'X11 named colors with deuteranopia simulation'),
@@ -514,16 +508,19 @@ class ColorChart(tk.Frame):
             'g': ('images/grayscale_colortable.png',
                   'X11 named colors with grayscale simulation')
         }
+        for image, (file_path, title) in image_types.items():
+            simwin = tk.Toplevel()
+            simwin.minsize(1200, 580)
+            simwin.title(title)
+            utils.keybind('close', toplevel=simwin, mainwin=app)
 
-        file_path, title = image_types.get(image, ('', ''))
-        img = (tk.PhotoImage(file=utils.valid_path_to(file_path))
-               if file_path else tk.PhotoImage())
-        simwin.title(title)
+            img = (tk.PhotoImage(file=utils.valid_path_to(file_path))
+                   if file_path else tk.PhotoImage())
 
-        simwin.image = img
-        simtable = tk.Text(simwin)
-        simtable.image_create(tk.END, image=img)
-        simtable.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
+            simwin.image = img
+            simtable = tk.Text(simwin)
+            simtable.image_create(tk.END, image=img)
+            simtable.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
 
 def run_checks():
     """
