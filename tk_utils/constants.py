@@ -12,12 +12,26 @@ MY_OS = platform[:3]
 MAX_ROWS = 42
 
 # OS-specific font sizes for color names in table.
-LABEL_FONT_SIZE = 9 if MY_OS == 'dar' else 6  # is 'lin' or 'win'
+LABEL_FONT_MAP = {
+    'dar': ('SF Pro', 9),  # macOS
+    'lin': ('DejaVu Sans', 6),  # Linux (Ubuntu)
+    'win': ('Segoe UI', 11)  # Windows (10, 11)
+}
+
+# Defaults to generic font if OS is not recognized
+LABEL_FONT = LABEL_FONT_MAP.get(MY_OS, ('Arial', 10))
+
+INFO_FONT_MAP =  {
+    'dar': ('SF Pro', 12),  # macOS
+    'lin': ('DejaVu Sans', 10),  # Linux (Ubuntu)
+    'win': ('Segoe UI', 16)  # Windows (10, 11)
+}
+INFO_FONT = INFO_FONT_MAP.get(MY_OS, ('Arial', 12))
 
 # X11_RGB_NAMES: 760 color names from the intersection of the rbg.txt files in
-#   Linux /usr/share/X11/rgb.txt and MacOS /opt/X11/share/X11/rgb.txt.
-#   Names containing 'X11' and 'Debian were removed, as well as a few others.
-#   The retained names are valid for tkinter 8.6 on Linux, MacOS, and Windows.
+#   Linux /usr/share/X11/rgb.txt and macOS /opt/X11/share/X11/rgb.txt.
+#   Names containing 'X11' and 'Debian' were removed, as well as a few others.
+#   The retained names are valid for tkinter 8.6 on Linux, macOS, and Windows.
 # NOTE: Many Tcl/Tk color names from https://www.tcl.tk/man/tcl8.4/TkCmd/colors.html
 #   are invalid in tkinter 8.6.
 # 760 name Labels fit precisely into a 19 x 40 table.

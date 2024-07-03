@@ -92,7 +92,7 @@ class ColorChart(tk.Frame):
             label = tk.Label(self,
                              text=color_name,
                              bg=color_name,
-                             font=('TkTooltipFont', const.LABEL_FONT_SIZE),
+                             font=const.LABEL_FONT,
                              )
             label.grid(row=_row, column=_col, sticky=tk.NSEW)
             _row += 1
@@ -195,14 +195,9 @@ class ColorChart(tk.Frame):
         utils.click('right', self.bg_info)
         utils.click('right', self.fg_info)
 
-        if utils.MY_OS in 'lin, win':
-            self.use_info.configure(font=('TkTooltipFont', 9))
-            self.bg_info.config(font=('TkTooltipFont', 10))
-            self.fg_info.config(font=('TkTooltipFont', 10))
-        elif utils.MY_OS == 'dar':
-            self.use_info.configure(font=('TkTooltipFont', 12))
-            self.bg_info.config(font=('TkTooltipFont', 14))
-            self.fg_info.config(font=('TkTooltipFont', 14))
+        self.use_info.configure(font=const.INFO_FONT)
+        self.bg_info.config(font=const.INFO_FONT)
+        self.fg_info.config(font=const.INFO_FONT)
 
         # This usage information goes on the top row and is always visible.
         usage = ('Click changes background, right-click changes foreground.'
