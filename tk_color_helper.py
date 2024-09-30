@@ -3,18 +3,18 @@
 A Python utility to help choose colors and their color blind equivalents
 for tkinter GUIs. Draws an interactive color table for 760 color names
 found in X11 rgb.txt that are recognized by tkinter 8.6. Works with
-Linux, Windows, and MacOS.
+Linux, Windows, and macOS.
    Usage: Click on a color name to show its hex code and RGB
 value and display that color as background. Right-click a different color
 to change the text foreground. Clicking on another color will retain
 that selected foreground. Click with a modifier key to show the
-color blind simulation of the selected color: Shift = deuteranopia,
+color-blind simulation of the selected color: Shift = deuteranopia,
 Ctrl = protanopia, Alt(Command) = tritanopia, Shift-Ctrl = grayscale;
 the displayed foreground color will automatically match the simulation
 type. Simulated color hex codes and RGB values may not correspond to any
 named color but the hex string will be recognized by tkinter.
     Using the Ctrl key (or Command in macOS) while pressing D, P, T, or
-G will pop-up a non-interactive color table simulated for deuteranopia,
+G will pop up a non-interactive color table simulated for deuteranopia,
 protanopia, tritanopia, or grayscale, respectively.
     Text in the color display and data fields can be cut, copied, pasted,
 or edited with standard keyboard and click commands. Runs with Python 3.6
@@ -24,14 +24,7 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 """
 # 'Copyright (C) 2021- 2024 C.S. Echt, under GNU General Public License'
 
-# Standard library import:
-from pathlib import Path
-
-# Local program import:
-from tk_utils import (constants as const,
-                      utils,
-                      vcheck)
-
+# Standard imports
 try:
     import tkinter as tk
 except (ImportError, ModuleNotFoundError):
@@ -41,10 +34,14 @@ except (ImportError, ModuleNotFoundError):
           'On Linux you may also need:$ sudo apt-get install python3-tk\n'
           'See also: https://tkdocs.com/tutorial/install.html\n')
 
+# Local program import
+from tk_utils import (constants as const,
+                      utils,
+                      vcheck)
 PROGRAM_NAME = utils.program_name()
 
 
-class ColorChart(tk.Frame):
+class ColorChart(tk.Tk):
     """
     Set up main frame and fill it with interactive widgets for all valid
     named colors that can be used in tkinter. Generate simulations for
@@ -142,6 +139,7 @@ class ColorChart(tk.Frame):
                            self.foreground_info(c, r_b))
 
             # Grid Labels col x row, reset to top row once a column is filled.
+            # Columns are filled right to left, bottom to top.
             if _row >= const.MAX_ROWS:
                 _col += 1
                 _row = 2
@@ -156,43 +154,40 @@ class ColorChart(tk.Frame):
         grid info widgets. Define font type and OS-specific sizes.
         """
 
-        self.master.minsize(600, 300)
+        self.minsize(600, 300)
 
         # Need to color in all the top Tk window to create near-white border;
         #    border changes to grey for click-drag and not focus.
-        self.master.config(highlightthickness=3,
-                           highlightcolor='gray95',
-                           highlightbackground='gray')
+        self.config(highlightthickness=3,
+                    highlightcolor='gray95',
+                    highlightbackground='gray'
+                    )
 
+        # Set up grid weights for resizing with the main window.
         for _row in range(const.MAX_ROWS):
             self.rowconfigure(_row, weight=1)
         for _col in range(self.info_width):
             self.columnconfigure(_col, weight=1)
 
-        self.master.bind_all('<Escape>', lambda _: utils.quit_gui(app))
-
         # Provide an exit msg in Terminal when click on the close window icon.
-        self.master.protocol('WM_DELETE_WINDOW', lambda: utils.quit_gui(app))
+        self.protocol('WM_DELETE_WINDOW', lambda: utils.quit_gui(self))
+
+        self.bind_all('<Escape>', lambda _: utils.quit_gui(self))
+        utils.keybind('quit', toplevel=self, mainwin=self)
+        utils.click('right', self.bg_info)
+        utils.click('right', self.fg_info)
 
         # Need to specify Ctrl-a for Linux b/c in tkinter that key is
         #   bound to <<LineStart>>, not <<SelectAll>>.
         if utils.MY_OS == 'lin':
-            self.master.bind_all('<Control-a>', lambda event:
+            self.bind_all('<Control-a>', lambda event:
                                  self.focus_get().event_generate('<<SelectAll>>'))
-
-        cmdkey = ''
-        if utils.MY_OS in 'lin, win':
-            cmdkey = 'Control'
-        elif utils.MY_OS == 'dar':
-            cmdkey = 'Command'
-
-        utils.keybind('quit', toplevel=self.master, mainwin=app)
 
         # Keybindings to show the simulated color table images in Toplevel
         #  windows for deuteranopia, protanopia, tritanopia, & grayscale.
-        simulation_color_tables = ['d', 'p', 't', 'g']
-        for sim in simulation_color_tables:
-            self.master.bind(f'<{cmdkey}-{sim}>', lambda _: self.show_simtable())
+        cmdkey = 'Control' if utils.MY_OS in ('lin', 'win') else 'Command'
+        for sim in ('d', 'p', 't', 'g'):
+            self.bind(f'<{cmdkey}-{sim}>', lambda _, s=sim: self.show_simtable(s))
 
         utils.click('right', self.bg_info)
         utils.click('right', self.fg_info)
@@ -248,8 +243,8 @@ class ColorChart(tk.Frame):
         # Need 'nosim' as default start value.
         self.sim_type.set('nosim')
 
-        # It's all set up, so now display all widgets in the app Tk window.
-        self.pack(expand=True, fill=tk.BOTH)
+        # It's all set up, so now display all widgets in the main window.
+        self.grid()
 
     def simulate_color(self, color: str,
                        rgb: tuple,
@@ -428,12 +423,9 @@ class ColorChart(tk.Frame):
         color = self.fg_color.get()
         fg_hex = self.fg_hex.get()
 
-        # Need to set self.fg_rgb to default color fg of black or white
-        #   in cases of sim color selected before a fg color is selected.
-        if fg_hex == 'black':
-            self.fg_rgb = (0, 0, 0)
-        elif fg_hex == 'white':
-            self.fg_rgb = (255, 255, 255)
+        # Set self.fg_rgb to default color fg of black or white
+        # if sim color is selected before a fg color is selected.
+        self.fg_rgb = (0, 0, 0) if fg_hex == 'black' else (255, 255, 255) if fg_hex == 'white' else self.fg_rgb
 
         match = False
         for sim in ('deuteranopia', 'protanopia', 'tritanopia', 'grayscale', 'nosim'):
@@ -484,18 +476,18 @@ class ColorChart(tk.Frame):
             return 'black'
         return 'white'
 
-    @staticmethod
-    def show_simtable() -> None:
+    def show_simtable(self, sim_type: str) -> None:
         """
-        Create toplevel windows the full color table PNG images with
-        color-blind simulated colors for deuteranopia, protanopia,
-        tritanopia, grayscale.
+        Create a toplevel window of full color table PNG image for
+        color-blind simulated colors: deuteranopia, protanopia,
+        tritanopia, and grayscale.
         Called as keybindings set in config_master().
         Any one of these keys, 'd', 'p', 't', 'g', with the Ctrl key,
-        will display all four images.
+        will the respective image.
+        :param sim_type: 'd', 'p', 't', 'g'
         :return: None
         """
-        image_types = {
+        sims = {
             'd': ('images/deuteranopia_colortable.png',
                   'X11 named colors with deuteranopia simulation'),
             'p': ('images/protanopia_colortable.png',
@@ -505,19 +497,21 @@ class ColorChart(tk.Frame):
             'g': ('images/grayscale_colortable.png',
                   'X11 named colors with grayscale simulation')
         }
-        for image, (file_path, title) in image_types.items():
-            simwin = tk.Toplevel()
-            simwin.minsize(1200, 580)
-            simwin.title(title)
-            utils.keybind('close', toplevel=simwin, mainwin=app)
 
-            img = (tk.PhotoImage(file=utils.valid_path_to(file_path))
-                   if file_path else tk.PhotoImage())
+        img = (tk.PhotoImage(file=utils.valid_path_to(sims[sim_type][0]))
+               if sims[sim_type][0] else tk.PhotoImage())
+        simwin = tk.Toplevel()
+        simwin.minsize(1200, 580)
+        simwin.title(sims[sim_type][1])
+        simwin.image = img
+        simtable = tk.Text(simwin)
+        simtable.image_create(tk.END, image=img)
+        simwin.rowconfigure(0, weight=1)
+        simwin.columnconfigure(0, weight=1)
+        simtable.grid(sticky=tk.NSEW)
 
-            simwin.image = img
-            simtable = tk.Text(simwin)
-            simtable.image_create(tk.END, image=img)
-            simtable.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
+        utils.keybind('close', toplevel=simwin, mainwin=self)
+
 
 def run_checks():
     """
@@ -538,14 +532,12 @@ def main():
 
     # Comment out the run_checks and set_icon to run PyInstaller.
     run_checks()
-    ColorChart()
+    app = ColorChart()
+    app.title('tkinter (X11) Named Colors')
+    utils.set_icon(app)
     print(f'{PROGRAM_NAME} is now running...')
     app.mainloop()
 
 
 if __name__ == "__main__":
-
-    app = tk.Tk()
-    app.title('tkinter (X11) Named Colors')
-    utils.set_icon(app)
     main()
