@@ -22,7 +22,7 @@ and tkinter 8.6 or later.
 Color table construction based on code from
 https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 """
-# 'Copyright (C) 2021- 2022 C.S. Echt, under GNU General Public License'
+# 'Copyright (C) 2021- 2024 C.S. Echt, under GNU General Public License'
 
 # Standard library import:
 from pathlib import Path
@@ -40,6 +40,8 @@ except (ImportError, ModuleNotFoundError):
           'Install the most recent version or re-install Python and include Tk/Tcl.\n\n'
           'On Linux you may also need:$ sudo apt-get install python3-tk\n'
           'See also: https://tkdocs.com/tutorial/install.html\n')
+
+PROGRAM_NAME = utils.program_name()
 
 
 class ColorChart(tk.Frame):
@@ -527,24 +529,6 @@ def run_checks():
     utils.manage_args()
 
 
-def set_icon():
-    """
-    Set the program icon image file.  If the icon cannot be displayed,
-    print a message to the console.
-    """
-    try:
-        icon_img = tk.PhotoImage(
-            file=utils.valid_path_to('images/helper_icon512.png'))
-        app.iconphoto(True, icon_img)
-    except tk.TclError as err:
-        print('Cannot display program icon,'
-              ' so it will be left blank or tk default.')
-        print(f'tk error message: {err}')
-    except FileNotFoundError as fnf:
-        print(f'Cannot find program icon file: {fnf}.\n'
-              'The program will run without an icon image.')
-
-
 def main():
     """
     Main function to run the program.  Create the main Tkinter window
@@ -552,17 +536,10 @@ def main():
     table and display it.  Run the main loop.  Catch a KeyboardInterrupt.
     """
 
-    # Developer: Custom handlers for unexpected system and tkinter exceptions.
-    # sys.excepthook = utils.handle_exception
-    # canvas_window.report_callback_exception = utils.handle_exception
-
     # Comment out the run_checks and set_icon to run PyInstaller.
     run_checks()
-    set_icon()
-
     ColorChart()
-    print(f'{Path(__file__).name} is now running...')
-
+    print(f'{PROGRAM_NAME} is now running...')
     app.mainloop()
 
 
@@ -570,4 +547,5 @@ if __name__ == "__main__":
 
     app = tk.Tk()
     app.title('tkinter (X11) Named Colors')
+    utils.set_icon(app)
     main()

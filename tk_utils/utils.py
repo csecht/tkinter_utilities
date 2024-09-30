@@ -3,6 +3,8 @@
 General housekeeping and mouse binding functions.
 Functions:
     check_platform - Get current OS platform, exit if not supported.
+    program_name - Get the script or executable name.
+    set_icon - Set the custom program icon image file.
     manage_args - Handle of common command line arguments.
     handle_exceptions - Catches uncaught system and tkinter exceptions.
     quit_gui - Error-free and informative exit from the program.
@@ -86,6 +88,38 @@ def check_platform():
             windll.shcore.SetProcessDpiAwareness(1)
 
 
+def program_name() -> str:
+    """
+    Returns the script name or, if called from a PyInstaller stand-alone,
+    the executable name. Use for setting file paths and naming windows.
+
+    :return: Context-specific name of the main program, as string.
+    """
+    if getattr(sys, 'frozen', False):  # hasattr(sys, '_MEIPASS'):
+        return Path(sys.executable).stem
+    return Path(sys.modules['__main__'].__file__).stem
+
+
+def set_icon(window) -> None:
+    """
+    Set the program icon image file.  If the icon cannot be displayed,
+    print a message to the console.
+
+    Args:  window: The main tk.Tk() window running the mainloop or a
+        tk.Toplevel window.
+    """
+    # The custom app icon is expected to be in the program's images folder.
+    try:
+        icon = tk.PhotoImage(file=valid_path_to('images/helper_icon512.png'))
+        window.wm_iconphoto(True, icon)
+    except tk.TclError as err:
+        print('Cannot display program icon, so it will be blank or the tk default.\n'
+              f'tk error message: {err}')
+    except FileNotFoundError as fnf:
+        print(f'Cannot find program icon file: {fnf}.\n'
+              'The program will run without a custom icon.')
+
+
 def manage_args() -> None:
     """Allow handling of common command line arguments.
     """
@@ -107,18 +141,23 @@ def manage_args() -> None:
         sys.exit(0)
 
 
-def quit_gui(mainwin: tk.Tk) -> None:
+def quit_gui(mainloop: tk.Tk) -> None:
     """
     Error-free and informative exit from the program.
     Called from widgets or keybindings.
 
-    :param mainwin: The tk mainloop object, e.g. root, app, etc.
+    :param mainloop: The tk mainloop object, e.g. app, self.
     """
-    print('\n  *** User has quit the program. Exiting...\n')
 
-    mainwin.update_idletasks()
-    mainwin.after(200)
-    mainwin.destroy()
+    try:
+        mainloop.update()
+        print('\n*** User has quit the program. Exiting...\n')
+        mainloop.after(200,mainloop.destroy)
+        # Need explicit exit if for some reason a tk window isn't destroyed.
+        sys.exit(0)
+    except Exception as unk:
+        print('An unknown error occurred on exit:', unk)
+        sys.exit(0)
 
 
 def position_wrt_window(window, offset_x=0, offset_y=0) -> str:
