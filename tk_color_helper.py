@@ -49,10 +49,10 @@ class ColorChart(tk.Tk):
     contrasts to use either default black or white foregrounds.
     """
 
-    __slots__ = (
-        'use_info', 'bg_info', 'fg_info', 'bg_text', 'fg_text', 'bg_hex',
-        'fg_color', 'fg_hex', 'fg_rgb', 'sim_type', 'info_width'
-    )
+    # __slots__ = (
+    #     'use_info', 'bg_info', 'fg_info', 'bg_text', 'fg_text', 'bg_hex',
+    #     'fg_color', 'fg_hex', 'fg_rgb', 'sim_type', 'info_width'
+    # )
 
     def __init__(self):
         super().__init__()
@@ -68,14 +68,8 @@ class ColorChart(tk.Tk):
         self.fg_rgb: tuple = ()
         self.sim_type = tk.StringVar()
 
-        # Width of row1; total number of columns gridded in make_colortable().
+        # Width of row1; total number of columns to be gridded in make_colortable().
         self.info_width = 0
-
-        self.make_colortable()
-
-        # config_master() needs to run after make_colortable() to define the
-        #   number of columns needed for self.info_width.
-        self.config_master()
 
     def make_colortable(self) -> None:
         """
@@ -83,8 +77,8 @@ class ColorChart(tk.Tk):
         Call simulate_color(), black_or_white(), foreground_info.
         """
 
-        # row 0 reserved for standing usage instructions, row 1 reserved for
-        #   color information Entry() fields.
+        # Row 0 reserved for standing usage instructions, row 1 reserved for
+        #  color information Entry() fields, so begin at row 2.
         _col = 0
         _row = 2
         for color_name in const.X11_RGB_NAMES:
@@ -142,7 +136,7 @@ class ColorChart(tk.Tk):
             # Columns are filled right to left, bottom to top.
             if _row >= const.MAX_ROWS:
                 _col += 1
-                _row = 2
+                _row = 2  # The row index to start the next column.
 
         # Used in config_master()
         self.info_width = _col
@@ -367,7 +361,6 @@ class ColorChart(tk.Tk):
         # Need to clear any previously selected text highlighting.
         self.bg_info.select_clear()
         self.fg_info.select_clear()
-        self.update_idletasks()
 
     def foreground_info(self, color: str, rgb: tuple) -> None:
         """
@@ -408,7 +401,6 @@ class ColorChart(tk.Tk):
         # Need to clear any previously selected text edit-highlighting.
         self.bg_info.select_clear()
         self.fg_info.select_clear()
-        self.update_idletasks()
 
     def sync_simtypes(self) -> None:
         """
@@ -481,9 +473,9 @@ class ColorChart(tk.Tk):
         Create a toplevel window of full color table PNG image for
         color-blind simulated colors: deuteranopia, protanopia,
         tritanopia, and grayscale.
-        Called as keybindings set in config_master().
         Any one of these keys, 'd', 'p', 't', 'g', with the Ctrl key,
-        will the respective image.
+        will display the respective image.
+        Called as keybindings set in config_master().
         :param sim_type: 'd', 'p', 't', 'g'
         :return: None
         """
@@ -530,12 +522,14 @@ def main():
     table and display it.  Run the main loop.  Catch a KeyboardInterrupt.
     """
 
-    # Comment out the run_checks and set_icon to run PyInstaller.
+    # Comment out run_checks() and set_icon() when running PyInstaller.
     run_checks()
     app = ColorChart()
     app.title('tkinter (X11) Named Colors')
-    utils.set_icon(app)
     print(f'{PROGRAM_NAME} is now running...')
+    utils.set_icon(app)
+    app.make_colortable()
+    app.config_master()  # run after make_colortable() to define self.info_width.
     app.mainloop()
 
 

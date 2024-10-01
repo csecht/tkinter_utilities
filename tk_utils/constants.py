@@ -7,8 +7,9 @@ from sys import platform
 #  Supported OS platforms: 'win', 'lin', 'dar'.
 MY_OS = platform[:3]
 
-# 40 rows (19 columns) provide nice spatial organization for 760 color names;
-#   add 2 for info rows at top of the table.
+# 40 rows (19 columns) provide nice spatial organization for 760 color
+#  names; add 2 for info rows at top of the table.
+#  Color names are in X11_RGB_NAMES.
 MAX_ROWS = 42
 
 # OS-specific font sizes for color names in table.
