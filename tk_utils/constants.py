@@ -16,16 +16,16 @@ MAX_ROWS = 42
 LABEL_FONT_MAP = {
     'dar': ('SF Pro', 9),  # macOS
     'lin': ('DejaVu Sans', 6),  # Linux (Ubuntu)
-    'win': ('Segoe UI', 11)  # Windows (10, 11)
+    'win': ('Segoe UI', 8)  # Windows (10, 11)
 }
 
 # Defaults to generic font if OS is not recognized
 LABEL_FONT = LABEL_FONT_MAP.get(MY_OS, ('Arial', 10))
 
-INFO_FONT_MAP =  {
+INFO_FONT_MAP = {
     'dar': ('SF Pro', 12),  # macOS
     'lin': ('DejaVu Sans', 10),  # Linux (Ubuntu)
-    'win': ('Segoe UI', 16)  # Windows (10, 11)
+    'win': ('Segoe UI', 10)  # Windows (10, 11)
 }
 INFO_FONT = INFO_FONT_MAP.get(MY_OS, ('Arial', 12))
 
