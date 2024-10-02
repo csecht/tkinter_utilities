@@ -524,13 +524,16 @@ def main():
 
     # Comment out run_checks() and set_icon() when running PyInstaller.
     run_checks()
-    app = ColorChart()
-    app.title('tkinter (X11) Named Colors')
-    print(f'{PROGRAM_NAME} is now running...')
-    utils.set_icon(app)
-    app.make_colortable()
-    app.config_master()  # run after make_colortable() to define self.info_width.
-    app.mainloop()
+    try:
+        app = ColorChart()
+        app.title('Tkinter (X11) Named Colors')
+        print(f'{PROGRAM_NAME} is now running...')
+        utils.set_icon(app)
+        app.make_colortable()  # call before config_master() to set info_width.
+        app.config_master()
+        app.mainloop()
+    except KeyboardInterrupt:
+        print("\n*** User quit the program from Terminal/Console ***\n")
 
 
 if __name__ == "__main__":
