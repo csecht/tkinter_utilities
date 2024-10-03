@@ -81,22 +81,17 @@ class ColorChart(tk.Tk):
         #  color information Entry() fields, so begin at row 2.
         _col = 0
         _row = 2
+        labels = []
         for color_name in const.X11_RGB_NAMES:
             label = tk.Label(self,
                              text=color_name,
                              bg=color_name,
                              font=const.LABEL_FONT,
                              )
-            label.grid(row=_row, column=_col, sticky=tk.NSEW)
+            labels.append((label, _row, _col))
             _row += 1
 
-            # Need to convert winfo_rgb 16-bit RGB tuple (in range 0-65535)
-            #  to 8-bit values for 256 RGB color (256^2 = 65536).
-            # source: https://stackoverflow.com/questions/58758439/
-            #   how-can-i-get-hex-or-rgb-color-code-of-the-window-background-color
-            #   The operator >> is used for Right circular rotation of a BitVector
-            #     through N positions: operator.__rshift__().
-            #   Equivalent to: _R, _G, _B = [x // 256 for x in label.winfo_rgb(color_name)]
+            # Convert winfo_rgb 16-bit RGB tuple (in range 0-65535) to 8-bit values.
             _R, _G, _B = [x >> 8 for x in label.winfo_rgb(color_name)]
             rgb = (_R, _G, _B)
             color_hex = f'#{_R:02x}{_G:02x}{_B:02x}'
@@ -105,10 +100,6 @@ class ColorChart(tk.Tk):
             label.config(fg=self.black_or_white(rgb))
 
             # Use clicks to bind color label to color and data display.
-            # Click selects background, rt-click selects foreground.
-            # Rt-click Button is OS-specific.
-            # MacOS cannot use the Alt/option modifier, so use Command.
-            # Universal bindings:
             label.bind('<Button-1>',
                        lambda _, c=color_name, r_b=rgb:
                        self.simulate_color(c, r_b, 'nosim'))
@@ -118,7 +109,6 @@ class ColorChart(tk.Tk):
                        self.simulate_color(c, r_b, 'protanopia'))
             label.bind('<Shift-Control-Button-1>', lambda _, c=color_name, r_b=rgb:
                        self.simulate_color(c, r_b, 'grayscale'))
-            # OS-specific bindings:
             if utils.MY_OS in 'lin, win':
                 label.bind('<Alt-Button-1>', lambda _, c=color_name, r_b=rgb:
                            self.simulate_color(c, r_b, 'tritanopia'))
@@ -132,11 +122,13 @@ class ColorChart(tk.Tk):
                            lambda _, c=color_name, h=color_hex, r_b=rgb:
                            self.foreground_info(c, r_b))
 
-            # Grid Labels col x row, reset to top row once a column is filled.
-            # Columns are filled right to left, bottom to top.
             if _row >= const.MAX_ROWS:
                 _col += 1
                 _row = 2  # The row index to start the next column.
+
+        # Grid all labels after the loop
+        for label, row, col in labels:
+            label.grid(row=row, column=col, sticky=tk.NSEW)
 
         # Used in config_master()
         self.info_width = _col

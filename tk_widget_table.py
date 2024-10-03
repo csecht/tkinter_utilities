@@ -85,13 +85,15 @@ class WidgetTable(tk.Frame):
         col_indx = 0
         row_indx = 1  # row[0] is reserved for table header.
         num_cells = self.columns * self.rows
+        labels = []
         for i in range(num_cells):
             label_text = str(i + 1).rjust(3)
             label = tk.Label(text=label_text,
                              fg=self.label_fg1,
                              font='TkFixedFont',
                              )
-            label.grid(column=col_indx, row=row_indx, sticky=tk.NSEW)
+            labels.append((label, row_indx, col_indx))
+
             label.bind('<Button-1>', lambda event, l=label: self.single_click(l))
             label.bind('<Double-1>', lambda event, l=label: self.double_click(l))
             label.bind('<Shift-1>', lambda event, l=label: self.shift_click(l))
@@ -133,6 +135,10 @@ class WidgetTable(tk.Frame):
                           fg=self.theme,
                           bg=self.header_bg)
         header.grid(column=0, row=0, columnspan=self.columns, sticky=tk.NSEW)
+
+        # Grid all table labels from the loop.
+        for label, row, col in labels:
+            label.grid(row=row, column=col, sticky=tk.NSEW)
 
     def on_enter(self, cell: tk) -> None:
         """
