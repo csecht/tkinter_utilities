@@ -77,11 +77,22 @@ class ColorChart(tk.Tk):
         Call simulate_color(), black_or_white(), foreground_info.
         """
 
-        # Row 0 reserved for standing usage instructions, row 1 reserved for
-        #  color information Entry() fields, so begin at row 2.
+        # Row 0 reserved for standing usage instructions, row 1 reserved
+        #  for color information Entry() fields, so begin at row 2.
         _col = 0
         _row = 2
         labels = []
+
+        # Bindings for mouse events and simulated color display.
+        event_simulations = (
+            ('<Button-1>', 'nosim'),
+            ('<Shift-Button-1>', 'deuteranopia'),
+            ('<Control-Button-1>', 'protanopia'),
+            ('<Shift-Control-Button-1>', 'grayscale'),
+            ('<Alt-Button-1>' if utils.MY_OS in 'lin, win' else '<Command-Button-1>',
+             'tritanopia')
+        )
+
         for color_name in const.X11_RGB_NAMES:
             label = tk.Label(self,
                              text=color_name,
@@ -99,28 +110,17 @@ class ColorChart(tk.Tk):
             # Set default label text B&W fg for best contrast against color_name bg.
             label.config(fg=self.black_or_white(rgb))
 
-            # Use clicks to bind color label to color and data display.
-            label.bind('<Button-1>',
-                       lambda _, c=color_name, r_b=rgb:
-                       self.simulate_color(c, r_b, 'nosim'))
-            label.bind('<Shift-Button-1>', lambda _, c=color_name, r_b=rgb:
-                       self.simulate_color(c, r_b, 'deuteranopia'))
-            label.bind('<Control-Button-1>', lambda _, c=color_name, r_b=rgb:
-                       self.simulate_color(c, r_b, 'protanopia'))
-            label.bind('<Shift-Control-Button-1>', lambda _, c=color_name, r_b=rgb:
-                       self.simulate_color(c, r_b, 'grayscale'))
-            if utils.MY_OS in 'lin, win':
-                label.bind('<Alt-Button-1>', lambda _, c=color_name, r_b=rgb:
-                           self.simulate_color(c, r_b, 'tritanopia'))
-                label.bind('<Button-3>',
-                           lambda _, c=color_name, h=color_hex, r_b=rgb:
-                           self.foreground_info(c, r_b))
-            elif utils.MY_OS == 'dar':
-                label.bind('<Command-Button-1>', lambda _, c=color_name, r_b=rgb:
-                           self.simulate_color(c, r_b, 'tritanopia'))
-                label.bind('<Button-2>',
-                           lambda _, c=color_name, h=color_hex, r_b=rgb:
-                           self.foreground_info(c, r_b))
+            for event, sim in event_simulations:
+                label.bind(event,
+                           lambda _, c=color_name, r_b=rgb, s=sim:
+                                self.simulate_color(color=c, rgb=r_b, sim_type=s),
+                           )
+
+            label.bind(
+                '<Button-3>' if utils.MY_OS in 'lin, win' else '<Button-2>',
+                lambda _, c=color_name, h=color_hex, r_b=rgb:
+                    self.foreground_info(color=c, rgb=r_b, fg_hex=h)
+            )
 
             if _row >= const.MAX_ROWS:
                 _col += 1
@@ -354,7 +354,7 @@ class ColorChart(tk.Tk):
         self.bg_info.select_clear()
         self.fg_info.select_clear()
 
-    def foreground_info(self, color: str, rgb: tuple) -> None:
+    def foreground_info(self, color: str, rgb: tuple, fg_hex: str) -> None:
         """
         Assign foreground color to Entry() fields. Provide fg data.
         Convert selected color to current background simulation type.
@@ -365,7 +365,6 @@ class ColorChart(tk.Tk):
                     simulated color.
         """
         _r, _g, _b = rgb
-        fg_hex = f'#{_r:02x}{_g:02x}{_b:02x}'
         sim_type = self.sim_type.get()
 
         # Used in sync_simtypes() to synchronize fg to bg sim_types.

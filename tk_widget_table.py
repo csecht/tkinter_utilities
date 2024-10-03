@@ -86,6 +86,15 @@ class WidgetTable(tk.Frame):
         row_indx = 1  # row[0] is reserved for table header.
         num_cells = self.columns * self.rows
         labels = []
+        event_handlers = {
+            '<Button-1>': self.single_click,
+            '<Double-1>': self.double_click,
+            '<Shift-1>': self.shift_click,
+            '<Enter>': self.on_enter,
+            '<Leave>': self.on_leave,
+            '<Button-2>' if sys.platform == 'darwin' else '<Button-3>': self.decolor
+        }
+
         for i in range(num_cells):
             label_text = str(i + 1).rjust(3)
             label = tk.Label(text=label_text,
@@ -94,18 +103,9 @@ class WidgetTable(tk.Frame):
                              )
             labels.append((label, row_indx, col_indx))
 
-            label.bind('<Button-1>', lambda event, l=label: self.single_click(l))
-            label.bind('<Double-1>', lambda event, l=label: self.double_click(l))
-            label.bind('<Shift-1>', lambda event, l=label: self.shift_click(l))
-            label.bind("<Enter>", lambda event, l=label: self.on_enter(l))
-            label.bind("<Leave>", lambda event, l=label: self.on_leave(l))
-
-            # Bind a right-click event to "erase" cell color (change to default_bg).
-            #   MacOS uses different button-ID than Linux and Windows.
-            if sys.platform == 'darwin':
-                label.bind('<Button-2>', lambda event, l=label: self.decolor(l))
-            else:
-                label.bind('<Button-3>', lambda event, l=label: self.decolor(l))
+            # Bind events to label using a dispatch dictionary of handlers.
+            for event, handler in event_handlers.items():
+                label.bind(event, lambda e, h=handler, l=label: h(l))
 
             # Use this to sort cell numbers (text) vertically, by column.
             #   Once a column has all rows gridded, move left to next column.
