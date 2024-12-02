@@ -25,6 +25,8 @@ https://stackoverflow.com/questions/4969543/colour-chart-for-tkinter-and-tix
 # 'Copyright (C) 2021- 2024 C.S. Echt, under GNU General Public License'
 
 # Standard imports
+from signal import signal, SIGINT
+
 try:
     import tkinter as tk
 except (ImportError, ModuleNotFoundError):
@@ -502,7 +504,7 @@ def run_checks():
     """
     utils.check_platform()
     vcheck.minversion('3.7')
-    vcheck.maxversion('3.11')
+    vcheck.maxversion('3.12')
     utils.manage_args()
 
 
@@ -513,18 +515,34 @@ def main():
     table and display it.  Run the main loop.  Catch a KeyboardInterrupt.
     """
 
-    # Comment out run_checks() and set_icon() when running PyInstaller.
+    # Comment out if using PyInstaller to create an executable.
+    #  PyInstaller for Windows will still need to run check_platform()
+    #  for DPI Awareness scaling issues.
     run_checks()
-    try:
-        app = ColorChart()
-        app.title('Tkinter (X11) Named Colors')
-        print(f'{PROGRAM_NAME} is now running...')
-        utils.set_icon(app)
-        app.make_colortable()  # call before config_master() to set info_width.
-        app.config_master()
-        app.mainloop()
-    except KeyboardInterrupt:
-        print("\n*** User quit the program from Terminal/Console ***\n")
+
+    app = ColorChart()
+    app.title('Tkinter (X11) Named Colors')
+    print(f'{PROGRAM_NAME} is now running...')
+    utils.set_icon(app)
+    app.make_colortable()  # call before config_master() to set info_width.
+    app.config_master()
+
+    # Allow user to quit from the Terminal command line using Ctrl-C
+    #  without the delay of waiting for tk event actions.
+    # Source: https://stackoverflow.com/questions/39840815/
+    #   exiting-a-tkinter-app-with-ctrl-c-and-catching-sigint
+    # Keep polling the mainloop to check for the SIGINT signal, Ctrl-C.
+    # Comment out the following statements before mainloop() when using PyInstaller.
+    signal(signalnum=SIGINT,
+           handler=lambda x, y: utils.quit_gui(mainloop=app))
+
+    def tk_check(msec):
+        app.after(msec, tk_check, msec)
+
+    poll_ms = 500
+    app.after(poll_ms, tk_check, poll_ms)
+
+    app.mainloop()
 
 
 if __name__ == "__main__":

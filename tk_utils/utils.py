@@ -152,7 +152,7 @@ def quit_gui(mainloop: tk.Tk) -> None:
     try:
         mainloop.update()
         print('\n*** User has quit the program. Exiting...\n')
-        mainloop.after(200,mainloop.destroy)
+        mainloop.destroy()
         # Need explicit exit if for some reason a tk window isn't destroyed.
         sys.exit(0)
     except Exception as unk:
